@@ -4,52 +4,40 @@ Modules defining data structues
 
 module Models
 
+import Base: @kwdef
 import Dates: Date
 
 export FinancialData, AssetInfo, AssetPrice, ExchangeRate, EconomicIndicator
 
 abstract type FinancialData end
 
-struct AssetInfo <: FinancialData
+@kwdef struct AssetInfo <: FinancialData
   symbol::String
   currency::String
-  name::Union{String, Missing}
-  type::Union{String, Missing}
-  exchange::Union{String, Missing}
-  country::Union{String, Missing}
-  industry::Union{String, Missing}
-  sector::Union{String, Missing}
-  timezone::Union{String, Missing}
-  employees::Union{Int64, Missing}
-end
-function AssetInfo(; symbol, currency, name=missing, type=missing, exchange=missing, country=missing,
-  industry=missing, sector=missing, timezone=missing, employees=missing)
-  AssetInfo(symbol, currency, name, type, exchange, country, industry, sector, timezone, employees)
+  name::Union{String,Missing} = missing 
+  type::Union{String,Missing} = missing
+  exchange::Union{String,Missing} = missing
+  country::Union{String,Missing} = missing
+  industry::Union{String,Missing} = missing
+  sector::Union{String,Missing} = missing
+  timezone::Union{String,Missing} = missing
+  employees::Union{Int64,Missing} = missing
 end
 
-struct AssetPrice <: FinancialData
+@kwdef struct AssetPrice <: FinancialData
   symbol::String
   date::Date
   close::Float64
-  open::Union{Float64, Missing}
-  high::Union{Float64, Missing}
-  low::Union{Float64, Missing}
-  close_adjusted::Union{Float64, Missing}
-  volume::Union{Float64, Missing}
-  function AssetPrice(symbol, date, close, open=missing, high=missing, low=missing, close_adjusted=missing, volume = missing)
-    new(symbol, date, close, open, high, low, close_adjusted, volume)
-  end
+  open::Union{Float64,Missing} = missing
+  high::Union{Float64,Missing} = missing
+  low::Union{Float64,Missing} = missing
+  close_adjusted::Union{Float64,Missing} = missing
+  volume::Union{Float64,Missing} = missing
 end
 
-function AssetPrice(; symbol, date, close,
-    open=missing, high=missing, low=missing,
-    close_adjusted=missing, volume = missing)
-  AssetPrice(symbol, date, close, open, high, low, close_adjusted, volume)
-end
-
-struct ExchangeRate <: FinancialData 
-  base::String
-  target::String
+@kwdef struct ExchangeRate <: FinancialData
+  from::String
+  to::String
   date::Date
   rate::Float64
 end
