@@ -1,0 +1,5 @@
+indent = 2
+margin = 92
+whitespace_ops_in_indices = true
+remove_extra_newlines = true
+whitespace_in_kwargs = true
