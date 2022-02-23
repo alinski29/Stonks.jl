@@ -1,12 +1,16 @@
-import Pipe: @pipe
-import Dates: Date, unix2datetime
 import JSON3
+import Chain: @chain
+import Dates: Date, unix2datetime
+
 import Stonx: JSONContent
+import Stonx.Models: AssetPrice, AssetInfo
 
-import ..Models: AssetPrice, AssetInfo
-
-function parse_yahoo_info(content::AbstractString; kwargs...)::Union{Vector{AssetInfo}, Exception}
-  maybe_js = @pipe content |> validate_content_as_json |> unpack_info_response
+function parse_yahoo_info(content::AbstractString; kwargs...)::Union{Vector{AssetInfo},Exception}
+  maybe_js = @chain begin 
+    content
+    validate_yahoo_response
+    unpack_info_response
+  end
   typeof(maybe_js) <: Exception && return maybe_js
   js = maybe_js
   [AssetInfo(
@@ -19,70 +23,109 @@ function parse_yahoo_info(content::AbstractString; kwargs...)::Union{Vector{Asse
     industry = get(js.assetProfile, "industry", missing),
     sector = get(js.assetProfile, "sector", missing),
     timezone = get(js.quoteType, "timeZoneFullName", missing),
-    employees = get(js.assetProfile, "fullTimeEmployees", missing)
-  )]
+    employees = get(js.assetProfile, "fullTimeEmployees", missing),
+    )]
 end
 
-function parse_yahoo_price(content::AbstractString; kwargs...)::Union{Vector{AssetPrice}, Exception}
-  
-  function _parse(js_value::JSONContent)::Union{Vector{AssetPrice}, Nothing}
-    _keys = [String(k) for k in keys(js_value)]
-    if !isempty(setdiff(["symbol", "timestamp", "close"], _keys)) 
-      return nothing
-    end
-    nrows = length(js_value["timestamp"])
-    nrows == 0 && return nothing
-    ticker = js_value["symbol"]
-    return [AssetPrice(
-        symbol = ticker,
-        date = Date(unix2datetime(js_value["timestamp"][i])),
-        close = Float64(js_value["close"][i])
-    ) for i in 1:nrows]
+function parse_price_record(js_value::JSONContent)::Union{Vector{AssetPrice},Nothing}
+  _keys = [String(k) for k in keys(js_value)]
+  if !isempty(setdiff(["symbol", "timestamp", "close"], _keys))
+    return nothing
   end
+  isempty(js_value["timestamp"]) && return nothing
+  nrows = length(js_value["timestamp"])
+  ticker = js_value["symbol"]
+  return [AssetPrice(
+      symbol = ticker,
+      date = Date(unix2datetime(js_value["timestamp"][i])),
+      close = Float64(js_value["close"][i]),
+    ) for i = 1:nrows
+  ]
+end
 
-  maybe_js = validate_content_as_json(content)
-  isa(maybe_js, ErrorException) && return maybe_js
+function parse_yahoo_price(content::AbstractString; kwargs...)::Union{Vector{AssetPrice},Exception}
+  maybe_js = validate_yahoo_response(content)
+  typeof(maybe_js) <: Exception && return maybe_js
   js = maybe_js
-  from = get(Dict(kwargs), :from, missing)
-  to = get(Dict(kwargs), :to, missing)
-  prices = @pipe [_parse(v) for (k, v) in js] |> 
+  args = Dict(kwargs)
+  from, to = get(args, :from, missing), get(args, :to, missing)
+  prices = @chain js begin
+    [parse_price_record(v) for (k, v) in _] 
     filter(x -> isa(x, Vector{AssetPrice}), _)
-  if length(prices) == 0
-    return ErrorException("Couldn't constrct Vector{AssetPrice} from the json object")
   end
-  if isa(from, Date)
-    prices = @pipe prices |> 
-      map(price -> filter(row -> row.date >= from, price), _)
+  if isempty(prices)
+    return ContentParserError("Couldn't constrct Vector{AssetPrice} from the json object")
   end
-  if isa(to, Date)
-    prices = @pipe prices |> 
-      map(price -> filter(row -> row.date <= to, price), _)
+  return @chain prices begin
+    isa(from, Date) ? map(price -> filter(row -> row.date >= from, price), _) : _
+    isa(to, Date) ? map(price -> filter(row -> row.date <= to, price), _) : _
+    vcat(_...)
+    unique
   end
-  return vcat(prices...) |> unique
 end
 
-function validate_content_as_json(content::AbstractString)::Union{JSONContent, Exception}
+
+function parse_exchange_record(js_value::JSONContent)::Union{Vector{ExchangeRate},Nothing}
+  _keys = [String(k) for k in keys(js_value)]
+  if !isempty(setdiff(["symbol", "timestamp", "close"], _keys))
+    return nothing
+  end
+  isempty(js_value["timestamp"]) && return nothing
+  nrows = length(js_value["timestamp"])
+  ticker = replace(js_value["symbol"], "=X" => "")
+  base, target = ticker |> x -> (x[1:3], x[4:length(ticker)])
+  return [ExchangeRate(
+      base = base,
+      target = target,
+      date = Date(unix2datetime(js_value["timestamp"][i])),
+      rate = Float64(js_value["close"][i]),
+    ) for i = 1:nrows
+  ]
+end
+
+function parse_yahoo_exchange_rate(content::AbstractString; kwargs...)::Union{Vector{ExchangeRate}, Exception}
+  maybe_js = validate_yahoo_response(content)
+  typeof(maybe_js) <: Exception && return maybe_js
+  js, args = maybe_js, Dict(kwargs)
+  from, to = get(args, :from, missing), get(args, :to, missing)
+  rates = @chain js begin
+    [parse_exchange_record(v) for (k, v) in _] 
+    filter(x -> isa(x, Vector{ExchangeRate}), _)
+  end
+  if isempty(rates)
+    return ContentParserError("Couldn't constrct Vector{ExchangeRate} from the json object")
+  end
+  return @chain rates begin
+    isa(from, Date) ? map(xrate -> filter(row -> row.date >= from, xrate), _) : _
+    isa(to, Date) ? map(xrate -> filter(row -> row.date <= to, xrate), _) : _
+    vcat(_...)
+    unique
+  end
+end
+
+function validate_yahoo_response(content::AbstractString)::Union{JSONContent,Exception}
   maybe_js = JSON3.read(content)
   maybe_js === nothing && return error("Content could not be parsed as JSON")
   js = maybe_js
-  error_idx = findfirst(x -> contains(lowercase(x), "error"), [String(k) for k in keys(js)]) 
-  error_in_response = error_idx !== nothing ? isa(js["error"], String) : false 
-  if error_in_response 
-    return KeyError("API responded with an error") 
+  error_idx = findfirst(x -> contains(lowercase(x), "error"), [String(k) for k in keys(js)])
+  error_in_response = error_idx !== nothing ? isa(js["error"], String) : false
+  if error_in_response
+    error_msg = [String(v) for (k, v) in js][error_idx]
+    return APIResponseError(error_msg)
   end
   return js
 end
 
-function unpack_info_response(js::Union{JSON3.Object, Exception})
+function unpack_info_response(js::Union{JSON3.Object,Exception})
   !isa(js, JSON3.Object) && return js
-  !in("quoteSummary", keys(js)) && return KeyError("expected key 'quoteSummary' not found in API response")
-  js["quoteSummary"]["error"] !== nothing && return ErrorException("API response contains erro")
+  !in("quoteSummary", keys(js)) && return ContentParserError("expected key 'quoteSummary' not found in API response")
+  js["quoteSummary"]["error"] !== nothing && return ContentParserError("API response contains erro")
   res = first(js["quoteSummary"]["result"])
-  ismissing(res["quoteType"]) && return KeyError("quoteType key is missing")
-  ismissing(res["price"]) && return KeyError("price key is missing")
+  ismissing(res["quoteType"]) && return ContentParserError("quoteType key is missing")
+  ismissing(res["price"]) && return ContentParserError("price key is missing")
   (
     assetProfile = get(res, "assetProfile", Dict()),
     quoteType = get(res, "quoteType", Dict()),
-    price = get(res, "price", Dict())
+    price = get(res, "price", Dict()),
   )
 end
