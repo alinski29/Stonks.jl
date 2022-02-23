@@ -7,11 +7,11 @@ module Models
 import Base: @kwdef
 import Dates: Date
 
-export FinancialData, AssetInfo, AssetPrice, ExchangeRate, EconomicIndicator
+export StonxRecord, AssetInfo, AssetPrice, ExchangeRate, EconomicIndicator
 
-abstract type FinancialData end
+abstract type StonxRecord end
 
-@kwdef struct AssetInfo <: FinancialData
+@kwdef struct AssetInfo <: StonxRecord
   symbol::String
   currency::String
   name::Union{String,Missing} = missing 
@@ -24,7 +24,7 @@ abstract type FinancialData end
   employees::Union{Int64,Missing} = missing
 end
 
-@kwdef struct AssetPrice <: FinancialData
+@kwdef struct AssetPrice <: StonxRecord
   symbol::String
   date::Date
   close::Float64
@@ -35,14 +35,14 @@ end
   volume::Union{Float64,Missing} = missing
 end
 
-@kwdef struct ExchangeRate <: FinancialData
-  from::String
-  to::String
+@kwdef struct ExchangeRate <: StonxRecord
+  base::String
+  target::String
   date::Date
   rate::Float64
 end
 
-struct EconomicIndicator <: FinancialData
+struct EconomicIndicator <: StonxRecord
   symbol::String
   name::String
   date::Date
