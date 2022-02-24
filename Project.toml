@@ -1,5 +1,6 @@
 name = "Stonx"
-authors = ["Alin Secareanu"]
+uuid  = "165769d7-5ed9-41fd-9f18-b88cfb146d0e"
+authors = ["Alin Secareanu <alinsecareanu@protonmail.com>"]
 version = "0.1.0"
 
 [deps]
