@@ -1,93 +1,154 @@
 """
-Collection of utilities for working with Requests data
+Collection of utilities for creating, validating and sending HTTP requests
 """
 module Requests
 
-import Stonx: Either, Success, Failure, JSONContent, UpdatableSymbol, split_tickers_in_batches
-import ..APIClients: APIResource, APIClient
-import ..Models: FinancialData, AssetPrice
-import ..Parsers: ContentParser, parse_content
+using Base: @kwdef
+using Chain: @chain
+using Dates: Date, Day, today, days, unix2datetime
+using HTTP: HTTP
+using JSON3: JSON3
+using Logging: @debug, @warn
 
-import JSON3, HTTP
-import Logging: @info, @debug, @warn
-import Pipe: @pipe
+using Stonx: UpdatableSymbol, Either, Success, RequestBuilderError
+using Stonx: split_tickers_in_batches, get_minimum_dates
+using Stonx.APIClients: APIResource, APIClient
+using Stonx.Models: AbstractStonxRecord, AssetInfo, AssetPrice, ExchangeRate
+using Stonx.Parsers: AbstractContentParser, parse_content
 
-using Dates
-
-struct RequestParams
+@kwdef struct RequestParams
   url::String
   tickers::Vector{UpdatableSymbol}
-  headers::Dict{String, String}
-  params::Dict{String, String}
-  query::String
-  from::Union{Date, Missing}
-  to::Union{Date, Missing}
-end
-
-function RequestParams(; url, tickers, headers = Dict(), params = Dict(), query = "", from = missing, to = missing)
-  RequestParams(url, tickers, headers, params, query, from, to)
+  headers::Dict{String,String} = Dict()
+  params::Dict{String,String} = Dict()
+  query::String = ""
+  from::Union{Date,Missing} = missing
+  to::Union{Date,Missing} = missing
 end
 
 """
-Prepares requests for a specific APIResource (endppoint). 
-Returns a Vector{RequestParams}.
+    prepare_requests(tickers, resource; kwargs...)
+
+  Decides how many requests should be created based upon `resource.max_batch_size`. 
+  After this step, for each request, the parameters with {param} are replaced by the value of the keyword argumets with the same name.
 """
-function prepare_requests(tickers::Vector{UpdatableSymbol}, resource::APIResource; kwargs...) :: Vector{RequestParams}
-  requests = @pipe tickers |>
-    split_tickers_in_batches(_, resource.max_batch_size) |>
-    map(t -> resolve_request_parameters(t, resource; kwargs... ), _)
-  @info "Prepared $(length(requests)) requests for $(resource.url)), params -> $(map(r -> r.params, requests))"
-  requests
+function prepare_requests(
+  tickers::Vector{UpdatableSymbol}, resource::APIResource; kwargs...
+)::Union{Vector{RequestParams},Exception}
+  requests = @chain begin
+    tickers
+    split_tickers_in_batches(_, resource.max_batch_size)
+    map(t -> resolve_request_parameters(t, resource; kwargs...), _)
+  end
+  valid_requests = @chain requests filter(r -> isa(r, RequestParams), _)
+  isempty(valid_requests) && return first(requests)
+  length(valid_requests) != length(requests) &&
+    return first(filter(r -> isa(r, RequestBuilderError), requests))
+  @debug "Prepared $(length(valid_requests)) requests for $(resource.url)), params -> $(map(r -> r.params, valid_requests))"
+  return valid_requests
+end
+
+#"""
+#    prepare_requests(tickers, provider; kwargs...)
+#
+#Prepares request for all all the API endpoints. It will run `prepare_requests(tickers, resource)` for each key of `provider.endpoints`. 
+#"""
+# function prepare_requests(tickers::Vector{UpdatableSymbol}, provider::APIClient; kwargs...)::Union{Dict{String,Vector{RequestParams}}, Exception}
+#   requests = Dict(k => prepare_requests(tickers, resource; kwargs...) for (k, resource) in provider.endpoints)
+#   # Requests: Dict{String, Vector{RequestParams}}
+#   valid_requests = Dict()
+#   for (k, reqs) in requests
+#     if all([r -> isa(r, RequestParams) for r in reqs]) 
+#        valid_requests[k] = reqs
+#     end
+#   end
+#   #valid_requests = Dict(k => reqs for (k, reqs) in requests if all(map(r -> isa(r, RequestParams), reqs)))
+#   println(valid_requests)
+#   if isempty(valid_requests)
+#     @warn "No valid requests"
+#   end
+#   first_failure = first([ first(reqs) for (k, reqs) in requests if any(map(r -> isa(r, RequestBuilderError), reqs))])
+#   isempty(valid_requests) && return first_failure
+#   diff = setdiff(keys(requests), keys(valid_requests))
+#   if !isempty(diff)
+#     @warn("The following resources have errors and were removed: $(join(diff, ','))")
+#   end
+#   _req_per_endpoint = [k => length(v) for (k, v) in valid_requests]
+#   _total_req = sum([v for (k, v) in _req_per_endpoint])
+#   @debug "Prepared a total of $(_total_req) requests: $(_req_per_endpoint)"
+#   return requests
+# end
+
+function materialize_request(rp::RequestParams, parser::AbstractContentParser; kwargs...)
+  @chain begin
+    rp
+    send_request
+    extract_content
+    deserialize_content(_, parser; kwargs...)
+  end
 end
 
 """
-Prepares request for all all the API endpoints. 
-Returns a Dict{String, Array{RequestParams}}, where each key is the name of an APIResource (endpoint).
+  resolve_request_parameters(tickers, resource; kwargs...)
+
+Replaces all template values from `resource.headers` and `resouurce.params` with the concrete values passed as keyword arguments.
+Puts all the resolved fields  into a RequestParams struct.
 """
-function prepare_requests(tickers::Vector{UpdatableSymbol}, provider::APIClient; kwargs...) :: Dict{String, Vector{RequestParams}}
-  requests = Dict(k => prepare_requests(tickers, resource; kwargs...) for (k, resource) in provider.endpoints)
-  _req_per_endpoint = [k => length(v) for (k, v) in requests]
-  _total_req = sum([v for (k, v) in _req_per_endpoint])
-  @info "Prepared a total of $(_total_req) requests: $(_req_per_endpoint)"
-  return requests
-end
-
-function materialize_request(rp:: RequestParams, parser::ContentParser; kwargs...)#::Either{Vector{FinancialData}, Exception}
-  @pipe send_request(rp) |> # Either{HTTP.Response, Exception}
-    extract_content(_) |> # Either{String, Exception} 
-    deserialize_content(_, parser; kwargs...) # Either{Array{FinancialData}, Exception}
-end
-
-function resolve_request_parameters(tickers::Vector{UpdatableSymbol}, resource::APIResource; kwargs...) :: RequestParams
-  symbol_value =  join(map(x -> x.ticker, tickers), ",")
-  dates_from = @pipe tickers |> map(x -> x.from, _) |> skipmissing 
-  dates_to = @pipe tickers |> map(x -> x.to, _) |> skipmissing 
+function resolve_request_parameters(
+  tickers::Vector{UpdatableSymbol}, resource::APIResource; kwargs...
+)::Union{RequestParams,Exception}
+  symbol_value = join(map(x -> x.ticker, tickers), ",")
   args = Dict(kwargs)
-  from = isempty(dates_from) ? get(args, :from, missing) : minimum(dates_from)
-  to = isempty(dates_to) ? get(args, :to, missing) : minimum(dates_to)
-  kwargs_new = @pipe merge(args, Dict(
-    Symbol(resource.symbol_key) => symbol_value,
-    :from => from,
-    :to => to
-  )) |> filter(kw -> kw[1] !== :symbol_key ,_)
+  from, to = get_minimum_dates(
+    tickers; from=get(args, :from, missing), to=get(args, :to, missing)
+  )
+  kwargs_new = @chain begin
+    merge(args, Dict(Symbol(resource.symbol_key) => symbol_value, :from => from, :to => to))
+    filter(kw -> kw[1] !== :symbol_key, _)
+  end
   url_part = resolve_url_params(resource.url; symbol_key=symbol_value, kwargs_new...)
   query_params = resolve_query_params(resource.query_params, resource.url; kwargs_new...)
-  return RequestParams(
+  validation = validate_parameter_substitution(url_part, query_params)
+  isa(validation, RequestBuilderError) && return validation
+  return RequestParams(;
     url=url_part,
-    params=query_params, 
-    tickers=tickers, 
+    params=query_params,
+    tickers=tickers,
     headers=resource.headers,
-    query= join(["$k=$v" for (k, v) in query_params], "&"),
+    query=join(["$k=$v" for (k, v) in query_params], "&"),
     from=from,
-    to=to
+    to=to,
   )
 end
 
-function send_request(req:: RequestParams, retries::Int=3) :: Either{HTTP.Response, Exception}
-  try 
-    resp = HTTP.request("GET", req.url, headers=req.headers, query=req.query, require_ssl_verification=false, retry=retries>0, retries=3)
-    if resp.status != 200 
-      return HTTP.StatusError(resp.status, "GET", req.url, resp)
+function validate_parameter_substitution(url::String, query_params::Dict{String,String})
+  pattern = r"(?<=\{).+?(?=\})"
+  url_params_unsolved = match(pattern, url)
+  if url_params_unsolved !== nothing
+    return RequestBuilderError(
+      "Couldn't substitute url parameter at $(url_params_unsolved.match)"
+    )
+  end
+  query_params_unsolved = @chain begin
+    [match(pattern, v) for (k, v) in query_params]
+    filter(!isnothing, _)
+    !isempty(_) ? map(m -> m.match, _) : []
+  end
+  if !isempty(query_params_unsolved)
+    qp = join(query_params_unsolved, ", ")
+    return RequestBuilderError("Couldn't substitute query parameters: '$qp'")
+  end
+end
+
+function send_request(
+  req::RequestParams, retries::Integer=3
+)::Either{HTTP.Response,Exception}
+  try
+    resp = HTTP.request(
+      "GET", req.url; headers=req.headers, query=req.query, retries=retries
+    )
+    if resp.status != 200
+      return HTTP.StatusError(resp.status, resp)
     end
     return resp
   catch err
@@ -95,7 +156,9 @@ function send_request(req:: RequestParams, retries::Int=3) :: Either{HTTP.Respon
   end
 end
 
-function extract_content(r::Either{HTTP.Response, Exception})::Either{AbstractString, Exception}
+function extract_content(
+  r::Either{HTTP.Response,Exception}
+)::Either{AbstractString,Exception}
   !isa(r.value, HTTP.Response) && return r.err
   try
     content = String(r.value.body)
@@ -106,54 +169,65 @@ function extract_content(r::Either{HTTP.Response, Exception})::Either{AbstractSt
   end
 end
 
-function deserialize_content(c::Either{AbstractString, Exception}, parser::ContentParser; kwargs...)#::Either{Vector{FinancialData}, Exception}
+function deserialize_content(
+  c::Either{AbstractString,Exception}, parser::AbstractContentParser; kwargs...
+)
   !isa(c.value, String) && return c.err
   content = c.value
   try
     return Success(parse_content(parser, content; kwargs...))
-  catch err 
+  catch err
     return Failure(typeof(err), err)
   end
 end
 
-function resolve_query_params(params::Dict{String, String}, url::AbstractString=""; kwargs...)::Dict{String, String} 
+function resolve_query_params(
+  params::Dict{String,String}, url::AbstractString=""; kwargs...
+)::Dict{String,String}
   pattern = r"(?<=\{).+?(?=\})"
   keys_to_resolve = [k for (k, v) in params if match(pattern, v) !== nothing]
   isempty(keys_to_resolve) && return params
   params_new = Dict()
   # insert values that don't need to be resolved
   [params_new[k] = v for (k, v) in params if match(pattern, v) === nothing]
+  args = Dict(kwargs)
   for key in keys_to_resolve
-    kwargs_to_resolve = filter(kw -> String(kw[1]) == key, kwargs)
-    if !isempty(kwargs_to_resolve)
-      params_new[key] = replace_params_with_kwargs(params[key], pattern; kwargs_to_resolve...)
+    mutated_value = params[key]
+    for m in eachmatch(pattern, params[key])
+      kwarg_key = replace(m.match, r"[{}]" => "") # {param} => param
+      kwarg_value = get(args, Symbol(kwarg_key), missing)
+      if !ismissing(kwarg_value)
+        new_value = replace_params_with_kwargs(
+          kwarg_value, pattern; Dict(Symbol(kwarg_key) => kwarg_value)...
+        )
+        mutated_value = replace(mutated_value, "{$kwarg_key}" => new_value)
+      end
     end
+    params_new[key] = mutated_value
   end
   args = Dict(kwargs)
   specific_params = resolve_specific_query_params(
-    url, 
-    from=get(args, :from, missing), 
-    to=get(args, :to, missing)
+    url; from=get(args, :from, missing), to=get(args, :to, missing)
   )
-  merge(params_new, specific_params)
+  return merge(params_new, specific_params)
 end
 
-# TODO: Throw exception if the string still has unresolved parameters
 function resolve_url_params(url::AbstractString; kwargs...)
-  replace_params_with_kwargs(url, r"(?<=\{).+?(?=\})"; kwargs...)
+  return replace_params_with_kwargs(url, r"(?<=\{).+?(?=\})"; kwargs...)
 end
 
 function resolve_specific_query_params(url::AbstractString; from=missing, to=missing)
   specific_params = Dict()
-  if contains(url, "alphavantage") && length(tickers) > 1
-    specific_params["outputsize"] = isa(first(tickers).from, Date) ? "compact" : "full"
+  default_date = Date(unix2datetime(0)) # or Dates.today() - Dates.Day(28) ?
+  if contains(url, "alphavantage")
+    dt_from = isa(from, Date) ? from : default_date
+    specific_params["outputsize"] = dt_from > today() - Day(99) ? "compact" : "full"
   end
   if contains(url, "yfapi")
-    default_dete = Date(unix2datetime(0)) #Dates.today() - Dates.Day(28)
-    max_date = isa(from, Date) ? from :  default_dete
+    max_date = isa(from, Date) ? from : default_date
     specific_params["range"] = convert_date_to_range_expr(max_date)
   end
-  specific_params
+  return specific_params
 end
 
 function replace_params_with_kwargs(s::AbstractString, pattern::Regex; kwargs...)
@@ -165,11 +239,11 @@ function replace_params_with_kwargs(s::AbstractString, pattern::Regex; kwargs...
       end
     end
   end
-  new_s
+  return new_s
 end
 
 function convert_date_to_range_expr(end_date::Date)
-  days_delta = Dates.days(Dates.today() - end_date)
+  days_delta = days(today() - end_date)
   in(days_delta, 0:1) && return "1d"
   in(days_delta, 2:5) && return "5d"
   in(days_delta, 6:28) && return "1mo"
@@ -177,30 +251,31 @@ function convert_date_to_range_expr(end_date::Date)
   in(days_delta, 89:179) && return "6mo"
   in(days_delta, 180:364) && return "1y"
   in(days_delta, 365:1820) && return "5y"
-  "5y"
+  return "5y"
 end
 
-# TODO: Test this
-function optimistic_request_resolution(c::Channel)::Union{Vector{FinancialData}, Exception}
-    # responses:: Vector{Either{Vector{FinancialData}, Exception}}
-    # what to do when one reqest fails, but others succeed? 
-    # optimistic approach => if at least one request succedes, return a Vector{FinancialData}, but print warnings for all requests which failed
-    # pesimistic approach => if one request fails, return an Exception
-    result = Vector{FinancialData}()
-    failures = Vector{Exception}()
-    for response in c 
-      if response.err !== nothing
-        @warn "Request to: $(response.params.url) failed. Error: $(typeof(response.err))"
-        #append!(failures, response.err)
-        push!(failures, response.err)
-      else
-        #push!(result, response.value)
-        append!(result, response.value)
-      end
+"""
+What to do when there are multiple requests, some succesfull, but some failed. 
+  - optimistic approach => if at least one request succedes, return a Vector{AbstractStonxRecord},
+    but print warnings for all requests which failed
+"""
+function optimistic_request_resolution(
+  ::Type{T}, c::Channel
+)::Union{Vector{T},Exception} where {T<:AbstractStonxRecord}
+  result = T[]
+  failures = Exception[]
+  for response in c
+    if response.err !== nothing
+      @warn "Request to: $(response.params.url) failed. Error: $(typeof(response.err))"
+      push!(failures, response.err)
+    else
+      append!(result, response.value)
     end
-    if !isempty(result)
-      return result
-    end
-    return first(failures)
+  end
+  if !isempty(result)
+    return result
+  end
+  return first(failures)
 end
+
 end

@@ -1,39 +1,61 @@
+using DataFrames: nrow
+using Dates
 using Test
 
-using Stonx
-using Dates
-using DataFrames
+using Stonx: to_dataframe
+using Stonx.Models: AssetInfo, AssetPrice
 
-include("test_utils.jl")
-
-@testset "Testing conversions" begin
-
+@testset "Conversions" begin
   info = [
-    AssetInfo("AAPL", "USD", "Apple Inc.", "EQUITY", "NMS", "United States", "Consumer Electronics", "Technology", "America/New_York", 100000),
-    AssetInfo("MSFT", "USD", "Microsoft Corporation", "EQUITY", missing, "United States", "Software—Infrastructure", "Technology", "America/New_York", 181000),
+    AssetInfo(;
+      symbol="AAPL",
+      currency="USD",
+      name="Apple Inc.",
+      type="EQUITY",
+      exchange="NMS",
+      country="United States",
+      industry="Consumer Electronics",
+      sector="Technology",
+      timezone="America/New_York",
+      employees=100000,
+    ),
+    AssetInfo(;
+      symbol="MSFT",
+      currency="USD",
+      name="Microsoft Corporation",
+      type="EQUITY",
+      country="United States",
+      industry="Software—Infrastructure",
+      sector="Technology",
+      timezone="America/New_York",
+      employees=181000,
+    ),
   ]
 
   prices = [
-    AssetPrice("MSFT", Date("2022-02-16"), 299.5, missing, missing, missing, missing, missing),
-    AssetPrice("MSFT", Date("2022-02-17"), 290.73, missing, missing, missing, missing, missing),
-    AssetPrice("AAPL", Date("2022-02-17"), 168.88, missing, missing, missing, missing, missing),
-    AssetPrice("AAPL", Date("2022-02-18"), 167.3, missing, missing, missing, missing, missing),
+    AssetPrice(; symbol="MSFT", date=Date("2022-02-16"), close=299.5),
+    AssetPrice(; symbol="MSFT", date=Date("2022-02-17"), close=290.73),
+    AssetPrice(; symbol="AAPL", date=Date("2022-02-17"), close=168.88),
+    AssetPrice(; symbol="AAPL", date=Date("2022-02-18"), close=167.3),
   ]
 
-  @testset "Test to dataframe conversion of AssetInfo" begin
+  @testset "Vector{AssetInfo} to DataFrame" begin
     df = to_dataframe(info)
-    model_types = [(String(name), T) for (name, T) in zip(fieldnames(AssetInfo), AssetInfo.types)]
+    model_types = [
+      (String(name), T) for (name, T) in zip(fieldnames(AssetInfo), AssetInfo.types)
+    ]
     df_types = [(name, eltype(x)) for (name, x) in zip(names(df), eachcol(df))]
     @test length(info) == nrow(df)
     @test model_types == df_types
   end
 
-  @testset "Test to dataframe conversion of AssetPrice" begin
+  @testset "Vector{AssetPrice} to DataFrame" begin
     df = to_dataframe(prices)
-    model_types = [(String(name), T) for (name, T) in zip(fieldnames(AssetPrice), AssetPrice.types)]
+    model_types = [
+      (String(name), T) for (name, T) in zip(fieldnames(AssetPrice), AssetPrice.types)
+    ]
     df_types = [(name, eltype(x)) for (name, x) in zip(names(df), eachcol(df))]
     @test length(prices) == nrow(df)
     @test model_types == df_types
   end
-  
 end

@@ -1,7 +1,8 @@
-export DataClientError, ContentParserError, APIResponseError, APIRateExceeded, RequestBuilderError
+export APIResponseError,
+  APIRateExceeded, ContentParserError, DataClientError, RequestBuilderError
 
 struct DataClientError <: Exception
-    msg::String
+  msg::String
 end
 
 struct ContentParserError <: Exception

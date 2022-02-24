@@ -1,20 +1,22 @@
 using Test
 
-import Pipe: @pipe
+import Chain: @chain
 import Stonx: UpdatableSymbol
 import Dates
 
 # function fake_stock_data(days=30, ref_date=Dates.today(), tickers=["AAPL", "IBM", "TSLA"])
-#   dates = @pipe [ref_date - Day(i) for i in reverse(0:days-1)] |> 
+#   dates = @chain begin [ref_date - Day(i) for i in reverse(0:days-1)] |> 
 #     filter(x -> isweekday(x), _)
+#   end
 #   nrows = length(dates)
-#   return @pipe tickers |>
+#   return @chain begin tickers
 #    map(t -> DataFrame(
 #     ticker=repeat([t], nrows),
 #     date=dates,
 #     price=[100 + (rand(-8:10) * 0.1) for i in 1:nrows]),
-#     _) |>
+#     _) 
 #    vcat(_...)
+#   end
 # end
 
 isweekday(x) = !(Dates.issaturday(x) | Dates.issunday(x))
@@ -27,7 +29,7 @@ end
 
 function last_workday()
   td = Dates.today()
-  @pipe [td - Dates.Day(i) for i in 1:3] |> _[findfirst(isweekday ,_)]
+  @chain [td - Dates.Day(i) for i in 1:3] _[findfirst(isweekday ,_)]
 end
 
 function complex_tickers() 
