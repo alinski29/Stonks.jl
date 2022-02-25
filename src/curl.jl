@@ -12,20 +12,20 @@ using Stonx.Requests: optimistic_request_resolution, prepare_requests, materiali
 
 Retrieves historical time series price data from the configured API client.
 
-### Positional arguments
-- symbols can be:
+### Arguments
+- `symbols` can be:
     - `String` with one symbol / ticker
     - `Vector{String}` with multiple symbols
     - `Vector{Tuple{String, Date}}`, where tuple[1] = symbol and tuple[2] = date from / start_date
     - `Vector{Tuple{String, Date, Date}}`, where tuple[1] = symbol and tuple[2] = date from / start, tuple[3] = date to /end
-- [client] can be ommited if one of the correct environmental variable is set (`YAHOOFINANCE_TOKEN` or `ALPHAVANTAGE_TOKEN`)
-- [T <: AbstractStonxRecord] is the data type used for parsing. Change it only if you want to use your custom model. default = `AssetPrice`
+- `[client::APIClient]` : can be ommited if one of the correct environmental variable is set (`YAHOOFINANCE_TOKEN` or `ALPHAVANTAGE_TOKEN`)
+- `[T <: AbstractStonxRecord]` : data type used for parsing. Change it only if you want to use your custom model. default = `AssetPrice`
 
-### Keyword arguments
-- [interval] values = "1d", "1wk", "1mo". Frequency lower than daily is not supported. default = "1d"
-- [from] a Date oject. default = `missing`
-- [to] a Date objject. default = `missing`
-- [kwargs...] use it to pass keyword arguments if you have url / query parameters that need to be resolved at runtime.
+### Keywords
+- `[interval]` : values = "1d", "1wk", "1mo". Frequency lower than daily is not supported. default = "1d"
+- `[from]` : a Date oject. default = `missing`
+- `[to]` : a Date objject. default = `missing`
+- `[kwargs...]` : use it to pass keyword arguments if you have url / query parameters that need to be resolved at runtime.
 
 ### Examples
 ```julia-repl
@@ -81,10 +81,10 @@ end
 
 Retrieves general information about `symbols`.
 
-### Positional arguments
-- symbols a String or a Vector{String}
-- [client] can be ommited if one of the correct environmental variable is set (`YAHOOFINANCE_TOKEN` or `ALPHAVANTAGE_TOKEN`)
-- [T <: AbstractStonxRecord] is the data type used for parsing. Change it only if you want to use your custom model. default = `AssetInfo`
+### Arguments
+- `symbols`::Union{String, Vector{String}}`
+- `[client]::APIClient` : can be ommited if one of the correct environmental variable is set (`YAHOOFINANCE_TOKEN` or `ALPHAVANTAGE_TOKEN`)
+- `[T <: AbstractStonxRecord]` : data type used for parsing. Change it only if you want to use your custom model. default = `AssetInfo`
 
 ### Examples
 
@@ -117,15 +117,15 @@ end
 
 Retrieves historical exchange rate information
 
-### Positional arguments
-- [client] can be ommited if one of the correct environmental variable is set (`YAHOOFINANCE_TOKEN` or `ALPHAVANTAGE_TOKEN`)
-- [T <: AbstractStonxRecord] is the data type used for parsing. Change it only if you want to use your custom model. default = `ExchangeRate`
+### Arguments
+- `[client]::APIClient` can be ommited if one of the correct environmental variable is set (`YAHOOFINANCE_TOKEN` or `ALPHAVANTAGE_TOKEN`)
+- `[T <: AbstractStonxRecord]` is the data type used for parsing. Change it only if you want to use your custom model. default = `ExchangeRate`
 
-### Keyword arguments
-- base REQUIRED - 3 letter currency code 
-- target REQUIRED - 3letter currency code of target / quotation currency
-- [from] - a Date object. default = missing
-- [to] - a Date object. default = missing
+### Keywords
+- `base` REQUIRED - 3 letter currency code 
+- `target` REQUIRED - 3letter currency code of target / quotation currency
+- `[from]` - a Date object. default = missing
+- `[to]` - a Date object. default = missing
 
 ### Examples
 ```julia-repl
