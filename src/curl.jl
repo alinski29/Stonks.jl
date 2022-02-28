@@ -231,17 +231,17 @@ end
 #   collect_results(responses)
 # end
 
-function collect_results(c::Channel)
-  result = Dict()
-  for item in c
-    has_value = isa(item.value, Vector{AbstractStonxRecord})
-    if haskey(result, item.endpoint) && has_value
-      append!(result[item.endpoint], item.value)
-    elseif has_value
-      result[item.endpoint] = item.value
-    else
-      result[item.endpoint] = item.value
-    end
-  end
-  return result
-end
+# function collect_results(c::Channel)
+#   result = Dict()
+#   for item in c
+#     has_value = isa(item.value, Vector{AbstractStonxRecord})
+#     if haskey(result, item.endpoint) && has_value
+#       append!(result[item.endpoint], item.value)
+#     elseif has_value
+#       result[item.endpoint] = item.value
+#     else
+#       result[item.endpoint] = item.value
+#     end
+#   end
+#   return result
+# end

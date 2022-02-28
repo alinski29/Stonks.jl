@@ -19,7 +19,7 @@ using Stonx: UpdatableSymbol
 #   end
 # end
 
-get_resource(path::String) = open(f -> read(f, String), joinpath(@__DIR__, path))
+get_test_data(path::String) = open(f -> read(f, String), joinpath(@__DIR__, path))
 isweekday(x) = !(Dates.issaturday(x) | Dates.issunday(x))
 
 function last_sunday()

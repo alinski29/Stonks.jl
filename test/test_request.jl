@@ -5,6 +5,7 @@ using Test
 using Stonx.APIClients
 using Stonx.Requests
 using Stonx: UpdatableSymbol, RequestBuilderError, split_tickers_in_batches
+using Stonx.Models: AssetPrice
 
 include("test_utils.jl")
 
@@ -100,6 +101,54 @@ include("test_utils.jl")
     tickers = @chain ["AAPL", "MSFT"] map(t -> UpdatableSymbol(t), _)
     rp = Requests.resolve_request_parameters(tickers, resource; base="USD")
     @test isa(rp, RequestBuilderError)
+  end
+
+  @testset "Optimistic request resolution - success" begin
+    params = Requests.RequestParams(; 
+      url = "http://example.com",
+      tickers = map(UpdatableSymbol, ["AAPL", "MSFT"])
+    )
+    ok_values = [
+      (
+        params = params,
+        value=[
+          AssetPrice(; symbol="MSFT", date=Date("2022-02-16"), close=299.5),
+          AssetPrice(; symbol="MSFT", date=Date("2022-02-17"), close=299.92)
+        ],
+        err=nothing
+      ),
+      (
+        params = params,
+        value=[AssetPrice(; symbol="MSFT", date=Date("2022-02-17"), close=290.73)],
+        err=nothing,
+      ),
+      (
+        params = params,
+        value=nothing, 
+        err=ErrorException("Somwething went wrong")
+      )
+    ]
+    responses = Channel(3)
+    foreach(v -> push!(responses, v), ok_values)
+    close(responses)
+    res = Requests.optimistic_request_resolution(AssetPrice, responses)
+    @test isa(res, Vector{AssetPrice})
+  end
+
+  @testset "Optimistic request resolution - failure" begin
+    params = Requests.RequestParams(; 
+      url = "http://example.com",
+      tickers = map(UpdatableSymbol, ["AAPL", "MSFT"])
+    )
+    values = [
+      (params = params, value=nothing, err = ErrorException("Something went wrong")),
+      (params = params, value=nothing, err = ErrorException("Another issue")),
+    ]
+    responses = Channel(2)
+    foreach(v -> push!(responses, v), values)
+    close(responses)
+    res = Requests.optimistic_request_resolution(AssetPrice, responses)
+    @test isa(res, ErrorException)
   end
 
   @testset "Conversion of date to range expression" begin

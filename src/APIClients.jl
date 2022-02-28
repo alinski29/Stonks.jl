@@ -6,6 +6,7 @@ module APIClients
 using Chain: @chain
 using Dates
 
+using Stonx: DataClientError
 using Stonx.Parsers
 using Stonx.Models: AbstractStonxRecord, AssetPrice, AssetInfo, ExchangeRate
 
