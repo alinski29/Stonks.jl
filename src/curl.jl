@@ -16,16 +16,16 @@ Retrieves historical time series price data from the configured API client.
 - `symbols` can be:
     - `String` with one symbol / ticker
     - `Vector{String}` with multiple symbols
-    - `Vector{Tuple{String, Date}}`, where tuple[1] = symbol and tuple[2] = date from / start_date
-    - `Vector{Tuple{String, Date, Date}}`, where tuple[1] = symbol and tuple[2] = date from / start, tuple[3] = date to /end
-- `[client::APIClient]` : can be ommited if one of the correct environmental variable is set (`YAHOOFINANCE_TOKEN` or `ALPHAVANTAGE_TOKEN`)
-- `[T <: AbstractStonxRecord]` : data type used for parsing. Change it only if you want to use your custom model. default = `AssetPrice`
+    - `Vector{Tuple{String, Date}}`: tuples of form (symbol, from)
+    - `Vector{Tuple{String, Date, Date}}`, tuples of form (symbol, from, to)
+- `[client::APIClient]`: can be ommited if one of the correct environmental variable is set (`YAHOOFINANCE_TOKEN` or `ALPHAVANTAGE_TOKEN`)
+- `[T <: AbstractStonxRecord]`: data type used for parsing. Change it only if you want to use your custom model. default = `AssetPrice`
 
 ### Keywords
-- `[interval]` : values = "1d", "1wk", "1mo". Frequency lower than daily is not supported. default = "1d"
-- `[from]` : a Date oject. default = `missing`
-- `[to]` : a Date objject. default = `missing`
-- `[kwargs...]` : use it to pass keyword arguments if you have url / query parameters that need to be resolved at runtime.
+- `[interval]`: values = 1d, 1wk, 1mo. Frequency lower than daily is not supported. default = 1d
+- `[from]`: a Date oject indicating lower date limit. default = `missing`
+- `[to]`: a Date objject indicating upper date limit. default = `missing`
+- `[kwargs...]`: use it to pass keyword arguments if you have url / query parameters that need to be resolved at runtime.
 
 ### Examples
 ```julia-repl
@@ -48,13 +48,19 @@ AssetPrice("AAPL", Date("2022-02-16"), 172.55, missing, missing, missing, missin
 AssetPrice("AAPL", Date("2022-02-17"), 168.88, missing, missing, missing, missing, missing
 AssetPrice("AAPL", Date("2022-02-18"), 167.3, missing, missing, missing, missing, missing)
 
-julia> prices = get_time_series([("AAPL", Date("2022-02-17")), ("MSFT", Date("2022-02-18"))])
+julia> prices = get_time_series([
+  ("AAPL", Date("2022-02-17")),
+  ("MSFT", Date("2022-02-18"))
+  ])
 3-element Vector{AbstractStonxRecord}:
  AssetPrice("AAPL", Date("2022-02-17"), 168.88, missing, missing, missing, missing, missing)
  AssetPrice("AAPL", Date("2022-02-18"), 167.3, missing, missing, missing, missing, missing)
  AssetPrice("MSFT", Date("2022-02-18"), 287.93, missing, missing, missing, missing, missing)
 
-julia> prices = get_time_series([("AAPL", Date("2022-02-15"), Date("2022-02-16")), ("MSFT", Date("2022-02-14"), Date("2022-02-15"))])
+julia> prices = get_time_series([
+  ("AAPL", Date("2022-02-15"), Date("2022-02-16")),
+  ("MSFT", Date("2022-02-14"), Date("2022-02-15"))
+  ])
 5-element Vector{AbstractStonxRecord}:
  AssetPrice("MSFT", Date("2022-02-14"), 295.0, missing, missing, missing, missing, missing)
  AssetPrice("MSFT", Date("2022-02-15"), 300.47, missing, missing, missing, missing, missing)
@@ -82,7 +88,7 @@ end
 Retrieves general information about `symbols`.
 
 ### Arguments
-- `symbols`::Union{String, Vector{String}}`
+- `symbols::Union{String, Vector{String}}`
 - `[client]::APIClient` : can be ommited if one of the correct environmental variable is set (`YAHOOFINANCE_TOKEN` or `ALPHAVANTAGE_TOKEN`)
 - `[T <: AbstractStonxRecord]` : data type used for parsing. Change it only if you want to use your custom model. default = `AssetInfo`
 

@@ -1,14 +1,17 @@
 using Dates
 using Test
+using Logging
 
 using Stonx
 using Stonx.Models
 using Stonx.Parsers
 
+include("test_utils.jl")
+
 @testset "Yahoofinance parsers" begin
-  price_content = open(f -> read(f, String), "test/data/yahoo_prices.json")
-  overview_content = open(f -> read(f, String), "test/data/yahoo_overview.json")
-  exchange_content = open(f -> read(f, String), "test/data/yahoo_exchange.json")
+  price_content = get_resource("data/yahoo_prices.json")
+  overview_content = get_resource("data/yahoo_overview.json")
+  exchange_content = get_resource("data/yahoo_exchange.json")
   price_parser = Parsers.YahooPriceParser
   exchange_parser = Parsers.YahooExchangeRateParser
 

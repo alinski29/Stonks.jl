@@ -6,9 +6,11 @@ using Stonx
 using Stonx.Models
 using Stonx.Parsers
 
+include("test_utils.jl")
+
 @testset "Alphavantage parsers" begin
-  price_content = open(f -> read(f, String), "test/data/alphavantage_prices.json")
-  exchange_content = open(f -> read(f, String), "test/data/alphavantage_exchange.json")
+  price_content = get_resource("data/alphavantage_prices.json")
+  exchange_content = get_resource("data/alphavantage_exchange.json")
   price_parser = Parsers.AlphavantagePriceParser
   info_parser = Parsers.AlphavantageInfoParser
   exchange_parser = Parsers.AlphavantageExchangeRateParser
@@ -49,7 +51,7 @@ using Stonx.Parsers
   end
 
   @testset "Succesful overview (info) response" begin
-    overview_content = open(f -> read(f, String), "test/data/alphavantage_overview.json")
+    overview_content = get_resource("data/alphavantage_overview.json")
     data = parse_content(info_parser, overview_content)
     @test length(data) == 1
     @test first(data).symbol == "IBM"
