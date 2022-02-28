@@ -1,6 +1,9 @@
 # Stonx.jl
 ## A layman's solutiion to retrieval and storage of financial data.
 
+[![Build status](https://github.com/alinski29/Stonx.jl/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/alinski29/Stonx.jl/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/alinski29/Stonx.jl/branch/main/graph/badge.svg?token=FPIHWY0WD3)](https://codecov.io/gh/alinski29/Stonx.jl)
+
 Stonx.jl is designed with the goal of making access to financial data easier by standardizing the retrieval from various APIs into a unified data model. On top of that, it provides methods for storing the data locally in various format and gives you the tools to incrementally update it.
 If you are not satisfited with the defaults, the APIs can be easily extended, as well as the data model.
 
