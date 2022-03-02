@@ -1,15 +1,6 @@
 using DataFrames
 using Pkg
-
 using Stonx.Models: AbstractStonxRecord
-
-function dataframe_dependencies()
-  pkgs = map(x -> x.name, values(Pkg.dependencies()))
-  if !("DataFrames" in pkgs)
-    @info "Package DataFrames required for this operation. Will add it now"
-    Pkg.add(; name="DataFrames")
-  end
-end
 
 # DataFrame(x::Vector{T}) where {T<:AbstractStonxRecord} = to_dataframe(x)
 
@@ -53,11 +44,14 @@ julia> data |> to_dataframe
 ```
 """
 function to_dataframe(x::Vector{T}) where {T<:AbstractStonxRecord}
-  dataframe_dependencies()
-  df = DataFrame([name => S[] for (name, S) in zip(fieldnames(T), T.types)])
+  df = create_typed_dataframe(T)
   pairs = [(name => map(item -> getfield(item, name), x)) for name in fieldnames(T)]
   append!(df, pairs)
   return df
+end
+
+function create_typed_dataframe(::Type{T}) where {T}
+  return DataFrame([name => S[] for (name, S) in zip(fieldnames(T), T.types)])
 end
 
 function to_dict(x::Vector{T}) where {T<:AbstractStonxRecord}

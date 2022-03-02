@@ -140,12 +140,12 @@ function get_resource_from_clients(
   isempty(capable_clients) &&
     return DataClientError("No client capable of handling type $T")
   length(capable_clients) == 1 && return get_resource(fist(capable_clients), T)
-  @debug "Found $(length(capable_clients)) capable clients for handling $T. Will chose them based on provided ranking"
+  #@debug "Found $(length(capable_clients)) capable clients for handling $T. Will chose them based on provided ranking"
   resources = [get_resource(client, T) for client in capable_clients]
   min_rank = minimum(map(r -> r.rank_order, resources))
   res = filter(r -> r.rank_order == min_rank, resources)
   length(res) == 1 && return first(res)
-  @debug "Found multiple resources with the same rank: $min_rank. WIll chose one at random"
+  #@debug "Found multiple resources with the same rank: $min_rank. WIll chose one at random"
   return res[rand(1:length(res))]
 end
 

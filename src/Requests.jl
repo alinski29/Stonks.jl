@@ -44,7 +44,7 @@ function prepare_requests(
   isempty(valid_requests) && return first(requests)
   length(valid_requests) != length(requests) &&
     return first(filter(r -> isa(r, RequestBuilderError), requests))
-  @debug "Prepared $(length(valid_requests)) requests for $(resource.url)), params -> $(map(r -> r.params, valid_requests))"
+  #@debug "Prepared $(length(valid_requests)) requests for $(resource.url)), params -> $(map(r -> r.params, valid_requests))"
   return valid_requests
 end
 
@@ -150,15 +150,15 @@ function send_request(
     if resp.status != 200
       return HTTP.StatusError(resp.status, resp)
     end
-    return resp
+    return Success(resp)
   catch err
-    return err
+    return Failure(HTTP.Response, err)
   end
 end
 
 function extract_content(
   r::Either{HTTP.Response,Exception}
-)::Either{AbstractString,Exception}
+)::Either{String,Exception}
   !isa(r.value, HTTP.Response) && return r.err
   try
     content = String(r.value.body)
@@ -170,7 +170,7 @@ function extract_content(
 end
 
 function deserialize_content(
-  c::Either{AbstractString,Exception}, parser::AbstractContentParser; kwargs...
+  c::Either{String,Exception}, parser::AbstractContentParser; kwargs...
 )
   !isa(c.value, String) && return c.err
   content = c.value

@@ -20,3 +20,7 @@ end
 struct APIRateExceeded <: Exception
   msg::String
 end
+
+struct SchemaValidationError <: Exception
+  msg::String
+end
