@@ -1,5 +1,4 @@
 using DataFrames
-using Pkg
 using Stonx.Models: AbstractStonxRecord
 
 # DataFrame(x::Vector{T}) where {T<:AbstractStonxRecord} = to_dataframe(x)
