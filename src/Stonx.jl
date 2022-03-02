@@ -8,6 +8,7 @@ include("APIClients.jl")
 include("Requests.jl")
 include("curl.jl")
 include("conversions.jl")
+include("Datastores.jl")
 
 using Stonx.Models 
 using Stonx.Parsers
