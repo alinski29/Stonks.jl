@@ -1,7 +1,7 @@
 using Chain: @chain
 using Dates: today, Day
 
-using Stonx: UpdatableSymbol, Symbols, construct_updatable_symbols
+using Stonx: UpdatableSymbol, Symbols, construct_updatable_symbols, build_fx_pair
 using Stonx.APIClients: APIClient, APIResource, get_resource, get_type_param
 using Stonx.Models: AbstractStonxRecord, AssetPrice, AssetInfo, ExchangeRate
 using Stonx.Parsers: AbstractContentParser
@@ -145,56 +145,39 @@ julia> get_exchange_rate(base = "EUR", target = "USD", from = Date("2022-02-14")
 ```
 """
 function get_exchange_rate(
+  symbols::Symbols,
   client::Union{APIClient,Nothing}=nothing,
   ::Type{T}=ExchangeRate;
   interval="1d",
-  base::String,
-  target::String,
   from::Union{Date,Missing}=missing,
   to::Union{Date,Missing}=missing,
   kwargs...,
 )::Union{Vector{T},Exception} where {T<:AbstractStonxRecord}
-  @chain begin
-    get_resource(client, T)
-    get_data(
-      _,
-      [UpdatableSymbol(base)];
-      interval=interval,
-      base=base,
-      target=target,
-      from=from,
-      to=to,
-      kwargs...,
-    )
+  invalid_pairs = @chain symbols begin 
+    map(build_fx_pair, _)
+    filter(s -> typeof(s) <: Exception ,_)
   end
+  !isempty(invalid_pairs) && return first(invalid_pairs)
+  resource = get_resource(client, T)
+  tickers = construct_updatable_symbols(symbols)
+  return get_data(resource, tickers;  interval=interval, from=from, to=to, kwargs...)
 end
 
-# TODO: Need to implement batching for exchange rates
-# function get_exchange_rate(
-#   client::Union{APIClient,Nothing} = nothing,
-#   ::Type{T} = ExchangeRate;
-#   interval = "1d",
-#   pairs::Vector{Tuple{String, String}},
-#   from::Union{Date,Missing} = missing,
-#   to::Union{Date,Missing} = missing,
-#   kwargs...,
-# ) where {T<:AbstractStonxRecord}
-#   tickers = map(pair -> UpdatableSymbol(pair[1], from = from, to = to), pairs)
-#   @chain begin
-#     get_resource(client, T)
-#     get_data(
-#       _,
-#       tickers,
-#       interval = interval,
-#       base = base,
-#       target = target,
-#       from = from,
-#       to = to,
-#       kwargs...,
-#     )
-#   end
-# end
+"""
+    get_data(resource, tickers; kwargs...) -> Union{Vector{<:AbstractStonxRecord}, Exception}
 
+Generic function to get data of type resource{T}. Functions such as get_time_series, get_info, call this.
+
+### Arguments 
+- `resource::APIResource`: instance of an `APIResource`.
+- `tickers::Vector{UpdatableSymbol}`: where UpdatableSymbol(symbol; [from], [to])
+
+### Keywords 
+- `[interval]`: values = 1d, 1wk, 1mo. Frequency lower than daily is not supported. default = 1d
+- `[from]`: a Date oject indicating lower date limit. default = `missing`
+- `[to]`: a Date objject indicating upper date limit. default = `missing`
+- `[kwargs...]`: use it to pass keyword arguments if you have url / query parameters that need to be resolved at runtime.
+"""
 function get_data(
   resource::Union{APIResource,Exception}, tickers::Vector{UpdatableSymbol}; kwargs...
 )#::Union{Vector{AbstractStonxRecord},Exception}

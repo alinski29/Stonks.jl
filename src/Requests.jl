@@ -102,10 +102,21 @@ function resolve_request_parameters(
   from, to = get_minimum_dates(
     tickers; from=get(args, :from, missing), to=get(args, :to, missing)
   )
-  kwargs_new = @chain begin
-    merge(args, Dict(Symbol(resource.symbol_key) => symbol_value, :from => from, :to => to))
-    filter(kw -> kw[1] !== :symbol_key, _)
+  kwargs_to_add = Dict()
+  kwargs_to_add[:from] = from
+  kwargs_to_add[:to] = to
+  if haskey(resource.query_params, resource.symbol_key) || contains(resource.url, resource.symbol_key)
+    kwargs_to_add[Symbol(resource.symbol_key)] = symbol_value
   end
+  if length(tickers) == 1
+    ticker = first(tickers)
+    if !ismissing(ticker.fx_pair) && !haskey(resource.query_params, resource.symbol_key)
+      base, target = ticker.fx_pair
+      kwargs_to_add[:base] = base 
+      kwargs_to_add[:target] = target
+    end
+  end
+  kwargs_new = @chain merge(args, kwargs_to_add) filter(kw -> kw[1] !== :symbol_key, _)
   url_part = resolve_url_params(resource.url; symbol_key=symbol_value, kwargs_new...)
   query_params = resolve_query_params(resource.query_params, resource.url; kwargs_new...)
   validation = validate_parameter_substitution(url_part, query_params)

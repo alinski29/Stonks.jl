@@ -5,7 +5,7 @@ module Parsers
 
 using Stonx.Models: AbstractStonxRecord
 
-export parse_content
+export AbstractContentParser, CSVParser, JSONParser, parse_content
 
 abstract type AbstractParser end
 abstract type AbstractContentParser <: AbstractParser end

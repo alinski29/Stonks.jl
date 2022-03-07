@@ -3,7 +3,7 @@ Collection of logic for interfacing with HTTP APIs
 """
 module APIClients
 
-using Chain: @chain
+using Chain
 using Dates
 
 using Stonx: DataClientError
@@ -169,7 +169,7 @@ function YahooClient(api_key::String)::APIClient
     parser=Parsers.YahooPriceParser,
     headers=headers,
     max_batch_size=10,
-    max_retries=3,
+    max_retries=1,
   )
   info = APIResource{AssetInfo}(;
     url="$url/v11/finance/quoteSummary/{symbol}",
@@ -177,17 +177,17 @@ function YahooClient(api_key::String)::APIClient
     parser=Parsers.YahooInfoParser,
     headers=headers,
     max_batch_size=1,
-    max_retries=3,
+    max_retries=1,
   )
   exchange = APIResource{ExchangeRate}(;
     url="$url/v8/finance/spark",
     query_params=Dict(
-      "interval" => "{interval}", "range" => "{range}", "symbols" => "{base}{target}=X"
+      "interval" => "{interval}", "range" => "{range}", "symbols" => "{symbols}"
     ),
     parser=Parsers.YahooExchangeRateParser,
     headers=headers,
     max_batch_size=10,
-    max_retries=3,
+    max_retries=1,
   )
   return APIClient(url, Dict("price" => price, "info" => info, "exchange" => exchange))
 end

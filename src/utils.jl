@@ -12,6 +12,7 @@ Symbols = Union{
 
 struct UpdatableSymbol
   ticker::String
+  fx_pair::Union{Tuple{String,String},Missing}
   from::Union{Date,Missing}
   to::Union{Date,Missing}
 end
@@ -19,7 +20,24 @@ end
 function UpdatableSymbol(ticker; from=missing, to=missing)
   dt_from = isa(from, String) ? tryparse(Date, from) : from
   dt_to = isa(to, String) ? tryparse(Date, to) : to
-  return UpdatableSymbol(ticker, dt_from, dt_to)
+  try_fx = build_fx_pair(ticker)
+  fx = typeof(try_fx) <: Exception ? missing : (first(try_fx), last(try_fx))
+  tick = !ismissing(fx) ? "$(first(fx))$(last(fx))=X" : ticker
+  return UpdatableSymbol(tick, fx, dt_from, dt_to)
+end
+
+function build_fx_pair(symbol::String; delim="/")::Union{Tuple{String,String},Exception}
+  contains(delim, symbol) &&
+    return ArgumentError("$symbol does not contain '$delim' delimiter.")
+  splits = split(symbol, delim)
+  length(splits) != 2 &&
+    return ArgumentError("Got more than 2 splits after split($symbol, '$delim')")
+  s_len = map(s -> length(s), splits)
+  for split in splits
+    l = length(split)
+    l != 3 && return ArgumentError("$split must have only 3 characters, got $l.")
+  end
+  return (uppercase(first(splits)), uppercase(last(splits)))
 end
 
 function construct_updatable_symbols(symbols::Symbols)::Vector{UpdatableSymbol}
