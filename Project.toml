@@ -13,8 +13,7 @@ Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 
 [extras]
-Arrow = "69666777-d1a9-59fb-9406-91d4454c9d45"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "Arrow"]
+test = ["Test"]
