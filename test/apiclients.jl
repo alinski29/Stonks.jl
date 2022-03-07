@@ -27,7 +27,7 @@ using Stonx.Models: AbstractStonxRecord, AssetInfo, AssetPrice, ExchangeRate
 
   @testset "Get supported types" begin
     types = get_supported_types(test_client)
-    @test types == [ExchangeRate, AssetPrice, AssetInfo]
+    @test setdiff(types, [ExchangeRate, AssetPrice, AssetInfo]) |> isempty
   end
 
   @testset "Get resource from client of a certain type" begin

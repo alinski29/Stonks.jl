@@ -4,13 +4,26 @@ using Test
 
 using Stonx.APIClients
 using Stonx.Requests
-using Stonx: UpdatableSymbol, RequestBuilderError, split_tickers_in_batches
+using Stonx: UpdatableSymbol, RequestBuilderError, split_tickers_in_batches, build_fx_pair,  construct_updatable_symbols
 using Stonx.Models: AssetPrice
 
 include("test_utils.jl")
 
 @testset "Request utilities" begin
   test_client = APIClients.YahooClient("abc")
+
+  @testset "Build FX pairs" begin
+    @test build_fx_pair("EUR/USD") == ("EUR", "USD")
+    @test isa(build_fx_pair("EUR&USD"), ArgumentError)
+    @test isa(build_fx_pair("EURO/USD"), ArgumentError)
+    @test isa(build_fx_pair("EUR/USD/CAD"), ArgumentError)
+  end 
+
+  @testset "Build UpdatableSymbol using an FX pair" begin
+    @test first(construct_updatable_symbols("FOO/BAR")).fx_pair == ("FOO", "BAR")
+    @test first(construct_updatable_symbols("FOOOO/BAR")).fx_pair |> ismissing
+    @test last(construct_updatable_symbols(["EUR/USD", "USD/CAD"])).fx_pair == ("USD", "CAD")
+  end
 
   @testset "Ticker batching when all dates are missing" begin
     tickers = @chain ["AAPL", "MSFT", "TSLA", "IBM"] map(t -> UpdatableSymbol(t), _)
@@ -28,6 +41,12 @@ include("test_utils.jl")
     @test length(batches) == 4
     @test groups == [["AAPL"], ["MSFT", "TSLA"], ["IBM", "GOOG"], ["NFLX"]]
   end
+
+  # @testset "Ticker batching for exchange rates" begin
+  #   tickers = construct_updatable_symbols(["EUR/USD", "USD/CAD", "FOO/BAR"])
+  #   batches = split_tickers_in_batches(tickers, 2)
+  #   println(batches)
+  # end
 
   @testset "Request building using APIResource" begin
     tickers = complex_tickers()
@@ -74,6 +93,27 @@ include("test_utils.jl")
     request_params = Requests.prepare_requests(tickers, resource; interval="1d")
     @test length(request_params) == 4
     @test first(request_params).params["interval"] == "1d"
+  end
+
+  @testset "Resolution of all request parameters (url, query, others) for yahoo exchange rates" begin
+    resource = test_client.endpoints["exchange"]
+    resource.max_batch_size = 2
+    tickers = construct_updatable_symbols(["EUR/USD", "USD/CAD", "FOO/BAR"])
+    batches = Requests.split_tickers_in_batches(tickers, resource.max_batch_size)
+    request_params = map(b -> Requests.resolve_request_parameters(b, resource; interval="1d"), batches)
+    @test length(request_params) == 2
+    @test first(request_params).params["symbols"] == "EURUSD=X,USDCAD=X"
+  end
+
+  @testset "Resolution of all request parameters (url, query, others) for alphavantage exchange rates" begin
+    client = APIClients.AlphavantageJSONClient("abc")
+    resource = client.endpoints["exchange"]
+    tickers = construct_updatable_symbols(["EUR/USD", "USD/CAD", "FOO/BAR"])
+    batches = Requests.split_tickers_in_batches(tickers, resource.max_batch_size)
+    request_params = map(b -> Requests.resolve_request_parameters(b, resource; interval="1d"), batches)
+    @test length(request_params) == 3
+    @test first(request_params).params["from_symbol"] == "EUR"
+    @test first(request_params).params["to_symbol"] == "USD"
   end
 
   @testset "Resolution of request parameters for alphavantage json client" begin

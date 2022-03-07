@@ -2,18 +2,17 @@ using CSV
 using DataFrames
 using Test
 
-using Stonx.Datastores: WriteOperation, WriteTransaction
-using Stonx.Datastores: backup, cleanup, commit, execute, rollback, write, write_tmp
-using Stonx.Datastores: list_partition_nesting
+using Stonx.Stores: WriteOperation, WriteTransaction, list_partition_nesting
+using Stonx.Stores: backup, cleanup, commit, execute, rollback, write, write_tmp
 
 include("test_utils.jl")
 
-@testset "Datastore writes" begin
+@testset "Store writes" begin
   symbols = ["AAPL", "IBM"]
   data = fake_stock_data(7, last_workday(), symbols)
   dest = joinpath(@__DIR__, "data/test_stonx")
-  tr = @chain symbols begin 
-    map(s -> WriteOperation(filter(:symbol => ==(s), data), "csv", "symbol=$s"), _) 
+  tr = @chain symbols begin
+    map(s -> WriteOperation(filter(:symbol => ==(s), data), "csv", "symbol=$s"), _)
     WriteTransaction(_, "csv", dest)
   end
   writer_csv(df::AbstractDataFrame, path::String) = CSV.write(path, df)

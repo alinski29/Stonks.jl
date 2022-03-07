@@ -1,12 +1,12 @@
 using Test
 
 @testset "Stonx" begin
-  include("test_request.jl")
-  include("test_apiclients.jl")
-  include("test_yahoo_parsers.jl")
-  include("test_alphavantage_parsers.jl")
-  include("test_conversions.jl")
-  include("test_write_utils.jl")
-  include("test_datastore.jl")
-  include("test_updates.jl")
+  include("requests.jl")
+  include("apiclients.jl")
+  include("parsers_yahoo.jl")
+  include("parsers_alphavantage.jl")
+  include("conversions.jl")
+  include("stores_atomic_write.jl")
+  include("stores.jl")
+  include("stores_updates.jl")
 end

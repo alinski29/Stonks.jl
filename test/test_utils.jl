@@ -3,7 +3,7 @@ using DataFrames
 using Dates
 using Test
 
-using Stonx: UpdatableSymbol, AssetPrice, is_weekday, last_sunday, last_workday
+using Stonx: UpdatableSymbol, AssetPrice, ExchangeRate, is_weekday, last_sunday, last_workday, build_fx_pair
 
 function fake_stock_data(days=30, ref_date=today(), symbols=["AAPL", "IBM", "TSLA"])
   dates = @chain begin
@@ -30,6 +30,21 @@ function fake_price_data(days=30, ref_date=today, symbols = ["AAPL", "IBM", "TSL
   for symbol in symbols 
     append!(data, 
       map(d -> AssetPrice(; symbol=symbol, date=d, close=100+ rand()*10 ), dates)
+    )
+  end
+  return data
+end
+
+function fake_exchange_data(days=30, ref_date=today, symbols = ["EUR/USD", "USD/CAD", "USD/JPY"])::Vector{ExchangeRate}
+  dates = @chain begin
+    [ref_date - Day(i) for i in reverse(0:days-1)]
+    filter(x -> is_weekday(x), _)
+  end
+  data = ExchangeRate[]
+  for symbol in symbols 
+    base, target = build_fx_pair(symbol)
+    append!(data, 
+      map(d -> ExchangeRate(; base=base, target=target, date=d, rate=1 + rand()*10 ), dates)
     )
   end
   return data
