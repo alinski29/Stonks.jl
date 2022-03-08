@@ -69,7 +69,6 @@ include("test_utils.jl")
     candidates = find_update_candidates(
       df, symbols; ids=["base", "target"], time_column=ds.time_column
     )
-    println(candidates)
     @test length(candidates) == length(symbols)
     @test isa(maximum(map(x -> x.from, candidates)), Date)
     @test all(map(c -> !isnothing(c.fx_pair), candidates))
