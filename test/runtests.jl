@@ -1,6 +1,6 @@
 using Test
 
-@testset "Stonx" begin
+@testset "Stonks" begin
   include("requests.jl")
   include("apiclients.jl")
   include("parsers_yahoo.jl")

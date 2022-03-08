@@ -2,8 +2,8 @@ using DataFrames
 using Dates
 using Test
 
-using Stonx: to_dataframe
-using Stonx.Models: AssetInfo, AssetPrice
+using Stonks: to_dataframe
+using Stonks.Models: AssetInfo, AssetPrice
 
 include("test_utils.jl")
 

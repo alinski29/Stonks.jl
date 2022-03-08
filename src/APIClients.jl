@@ -6,17 +6,17 @@ module APIClients
 using Chain
 using Dates
 
-using Stonx: DataClientError
-using Stonx.Parsers
-using Stonx.Models: AbstractStonxRecord, AssetPrice, AssetInfo, ExchangeRate
+using Stonks: DataClientError
+using Stonks.Parsers
+using Stonks.Models: AbstractStonksRecord, AssetPrice, AssetInfo, ExchangeRate
 
-export APIClient, APIResource
+export APIClient, APIResource, AlphavantageJSONClient, YahooClient
 
 abstract type AbstractDataClient end
 abstract type AbstractAPIClient <: AbstractDataClient end
 
 """
-    APIResource{T<:AbstractStonxRecord}
+    APIResource{T<:AbstractStonksRecord}
 
 Container holding all information required to make requests to an API endpoint.
 
@@ -44,7 +44,7 @@ APIResource{T}(;
 )
 ```
 """
-mutable struct APIResource{T<:AbstractStonxRecord}
+mutable struct APIResource{T<:AbstractStonksRecord}
   url::String
   query_params::Dict{String,String}
   parser::Parsers.AbstractContentParser
@@ -64,7 +64,7 @@ function APIResource{T}(;
   max_batch_size=1,
   max_retries=0,
   rank_order=1,
-) where {T<:AbstractStonxRecord}
+) where {T<:AbstractStonksRecord}
   symbol_key = isempty(symbol_key) && max_batch_size > 1 ? "symbols" : "symbol"
   return APIResource{T}(
     url, query_params, parser, headers, symbol_key, max_batch_size, max_retries, rank_order
@@ -77,17 +77,17 @@ A container for holding data required to make request to one or multiple APIs.
 Just a collection of `APIResource`s.
 """
 mutable struct APIClient <: AbstractDataClient
-  url::String
   endpoints::Dict{String,APIResource}
-  function APIClient(url, endpoints)
-    return new(url, endpoints)
+  url::String
+  function APIClient(endpoints, url="")
+    return new(endpoints, url)
   end
 end
 get_supported_types(client::APIClient) = [get_type_param(v) for (k, v) in client.endpoints]
 
 function get_resource(
   client::Union{APIClient,Nothing}, ::Type{T}
-) where {T<:AbstractStonxRecord}
+) where {T<:AbstractStonksRecord}
   if client !== nothing
     return first([r for (k, r) in client.endpoints if typeof(r) == APIResource{T}])
   else
@@ -134,12 +134,12 @@ If multiple resources are capable:
 """
 function get_resource_from_clients(
   clients::Union{Vector{APIClient},Exception}, ::Type{T}
-) where {T<:AbstractStonxRecord}
+) where {T<:AbstractStonksRecord}
   typeof(clients) <: Exception && return clients
   capable_clients = [client for client in clients if T in get_supported_types(client)]
   isempty(capable_clients) &&
     return DataClientError("No client capable of handling type $T")
-  length(capable_clients) == 1 && return get_resource(fist(capable_clients), T)
+  length(capable_clients) == 1 && return get_resource(first(capable_clients), T)
   #@debug "Found $(length(capable_clients)) capable clients for handling $T. Will chose them based on provided ranking"
   resources = [get_resource(client, T) for client in capable_clients]
   min_rank = minimum(map(r -> r.rank_order, resources))
@@ -189,7 +189,7 @@ function YahooClient(api_key::String)::APIClient
     max_batch_size=10,
     max_retries=1,
   )
-  return APIClient(url, Dict("price" => price, "info" => info, "exchange" => exchange))
+  return APIClient(Dict("price" => price, "info" => info, "exchange" => exchange), url)
 end
 
 """
@@ -237,7 +237,7 @@ function AlphavantageJSONClient(api_key::String)::APIClient
     max_retries=3,
     rank_order=2,
   )
-  return APIClient(url, Dict("price" => price, "info" => info, "exchange" => exchange))
+  return APIClient(Dict("price" => price, "info" => info, "exchange" => exchange), url)
 end
 
 end

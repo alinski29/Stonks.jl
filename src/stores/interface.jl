@@ -3,11 +3,11 @@ using Dates
 using DataFrames
 using Logging
 
-using Stonx: AbstractStonxRecord, Symbols, UpdatableSymbol
-using Stonx:
+using Stonks: AbstractStonksRecord, Symbols, UpdatableSymbol
+using Stonks:
   construct_updatable_symbols, create_typed_dataframe, last_workday, get_data, to_dataframe
-using Stonx.APIClients: APIClient, APIResource, get_resource
-using Stonx.Stores: FileStore
+using Stonks.APIClients: APIClient, APIResource, get_resource
+using Stonks.Stores: FileStore
 
 """
     load(ds, [partitions]=missing) -> DataFrame
@@ -15,20 +15,37 @@ using Stonx.Stores: FileStore
 Read data from a `Store` instance into a DataFrame. If there is no data at `ds.path`, a file with 0 records and the correct types with be created. 
 
 ### Arguments
-- `ds::FileStore{AbstractStonxRecord}`: a `FileStore` instance
+- `ds::FileStore{AbstractStonksRecord}`: a `FileStore` instance
 - `[partitions]::Dict{String, Vector{String}}`: a dict of column => values, used for partition prunning. default = `missing`
 """
 function load(
   ds::FileStore{T}, partitions::Union{Dict{String,Vector{String}},Missing}=missing
-)::Union{DataFrame,Exception} where {T<:AbstractStonxRecord}
+)::Union{DataFrame,Exception} where {T<:AbstractStonksRecord}
   !isdir(ds.path) && init(ds)
-  files = ismissing(partitions) ? list_nested_files(ds.path) : filter_files(ds, partitions)
-  if typeof(files) <: Exception
-    return files
+  all_files = list_nested_files(ds.path)
+  p_files = !ismissing(partitions) ? filter_files(ds, partitions) : []
+  #println(all_files)
+  #println(p_files)
+  if typeof(all_files) <: Exception
+    return all_files
   end
-  if isempty(files)
+  if isempty(all_files)
     return ErrorException("No files found at dir '$(ds.path)'")
   end
+  files = String[] 
+  if !ismissing(partitions) && !isempty(ds.partitions) 
+    if typeof(p_files) <: Exception
+      return p_files
+    elseif isempty(intersect(all_files, p_files))
+      return create_typed_dataframe(T)
+    else
+      @info "partition filter will be applied: $partitions"
+      append!(files, p_files)
+    end
+  else 
+    append!(files, all_files)
+  end
+  #println(files)
   try
     # non-partitioned dataset
     if length(files) == 1
@@ -58,14 +75,14 @@ Writes data to a location.
 
 ### Arguments
 - `ds::FileStore`
-- `data`::Union{AbstractDataFrame, Vector{AbstractStonxRecord}}
+- `data`::Union{AbstractDataFrame, Vector{AbstractStonksRecord}}
 
 ### Examples
 ```julia-repl
-julia> using Stonx, Dates
+julia> using Stonks, Dates
 julia> dest = joinpath(@__DIR__, "data/prices")
 julia> ds = FileStore{AssetPrice}(; path=dest, ids=["symbol"], partitions=["symbol"], time_column="date")
-julia> data = get_time_series(["MSFT", "TSLA"]; from = Date("2022-03-03"), to = Date("2022-03-07"))
+julia> data = get_price(["MSFT", "TSLA"]; from = Date("2022-03-03"), to = Date("2022-03-07"))
 4-element Vector{AssetPrice}:
  AssetPrice("MSFT", Date("2022-03-03"), 295.92, missing, missing, missing, missing, missing)
  AssetPrice("MSFT", Date("2022-03-04"), 289.86, missing, missing, missing, missing, missing)
@@ -80,7 +97,7 @@ julia> readdir(ds, path)
 """
 function save(
   ds::FileStore, data::Union{AbstractDataFrame,Vector{T}}
-) where {T<:AbstractStonxRecord}
+) where {T<:AbstractStonksRecord}
   df = typeof(data) <: AbstractDataFrame ? data : to_dataframe(data)
   get_type_param(::FileStore{S}) where {S} = S
   valid_schema = validate_schema(get_type_param(ds), df)
@@ -150,14 +167,14 @@ function update(
   symbols::Union{Symbols,Nothing}=nothing,
   client::Union{APIClient,Nothing}=nothing;
   interval::String="1d",
+  to::Union{Date, Missing}=missing,
   force::Bool=false,
-)::Union{FileStore{T},ErrorException} where {T<:AbstractStonxRecord}
+)::Union{FileStore{T},ErrorException} where {T<:AbstractStonksRecord}
   # Must implement for partitioned data as well
   df = (
     if !isnothing(symbols) && length(ds.ids) == 1
       tickers = construct_updatable_symbols(symbols)
       partitions = Dict(first(ds.ids) => map(t -> t.ticker, tickers))
-      @info "partition filter will be applied: $partitions"
       load(ds, partitions)
     else
       load(ds)
@@ -176,7 +193,8 @@ function update(
   if ismissing(ds.time_column) && isnothing(symbols) && force
     @warn "Got force=true. This will fetch and overwrite all data"
   end
-  candidates = find_update_candidates(df, symbols; ids=ds.ids, time_column=ds.time_column)
+  ref_date = !ismissing(to) ? to : last_workday()
+  candidates = find_update_candidates(df, symbols; ids=ds.ids, time_column=ds.time_column, ref_date=ref_date)
   if isempty(candidates)
     @info "No update candidates found, datastore already up to date"
     return ds
@@ -191,9 +209,9 @@ function update(
     return updates
   end
   new_df = force ? to_dataframe(updates) : vcat(df, to_dataframe(updates))
-  _, err = save(ds, new_df)
-  if typeof(err) <: Exception
-    return err
+  try_save = save(ds, new_df)
+  if typeof(try_save) <: Exception
+    return try_save
   end
   return ds
 end

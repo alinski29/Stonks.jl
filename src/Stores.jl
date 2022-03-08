@@ -4,7 +4,7 @@ using CSV
 using Chain
 using DataFrames
 
-using Stonx.Models: AbstractStonxRecord, AssetInfo, AssetPrice, ExchangeRate
+using Stonks.Models: AbstractStonksRecord, AssetInfo, AssetPrice, ExchangeRate
 
 export AbstractStore, FileStore, load, save, update
 
@@ -15,7 +15,7 @@ reader_csv(path::String) = DataFrame(CSV.File(path))
 ensure_path(path::String) = isabspath(path) ? path : joinpath(@__DIR__, path)
 
 """
-    FileStore{T<:AbstractStonxRecord}
+    FileStore{T<:AbstractStonksRecord}
 
 Container holding all information for data persistance.
 
@@ -38,7 +38,7 @@ function FileStore{T}(;
   time_column=missing,
   reader=reader_csv(path::String) = DataFrame(CSV.File(path)),
   writer=writer_csv(path::String) = CSV.write(path, df),
-) where {T<:AbstractStonxRecord}
+) where {T<:AbstractStonksRecord}
   return FileStore{T}(
     ensure_path(path),
     map(String, ids),
@@ -53,7 +53,7 @@ end
 
 ### Examples 
 ```julia 
-using Stonx
+using Stonks
 dest = joinpath(@__DIR__, "data/stonx")
 FileStore{AssetInfo}(; path=dest, ids=["symbol"])
 FileStore{AssetPrice}(; path=dest, ids=["symbol"], time_column="date")
@@ -65,7 +65,7 @@ write = write_arrow(df::AbstractDataFrame, path::String) = open(path, "w") do io
 FileStore{ExchangeRate}(; path=dest, ids=[:base, :target], time_column=:date, reader=read, writer=write)
 ```
 """
-struct FileStore{T<:AbstractStonxRecord,R,W} <: AbstractStore
+struct FileStore{T<:AbstractStonksRecord,R,W} <: AbstractStore
   path::String
   ids::AbstractVector{AbstractString}
   format::String
@@ -81,7 +81,7 @@ struct FileStore{T<:AbstractStonxRecord,R,W} <: AbstractStore
     time_column=missing,
     reader=reader_csv,
     writer=writer_csv,
-  ) where {T<:AbstractStonxRecord}
+  ) where {T<:AbstractStonksRecord}
     @chain [ids, partitions, [time_column]] begin
       filter(!isempty, _)
       foreach(x -> if !ismissing(first(x))
@@ -101,7 +101,7 @@ struct FileStore{T<:AbstractStonxRecord,R,W} <: AbstractStore
   end
 end
 
-function infer_time_column(::Type{T})::Union{String,Missing} where {T<:AbstractStonxRecord}
+function infer_time_column(::Type{T})::Union{String,Missing} where {T<:AbstractStonksRecord}
   T_fields = [String(x) for x in fieldnames(T)]
   T === AssetInfo && return missing
   if T === AssetPrice || T === ExchangeRate
@@ -111,7 +111,7 @@ function infer_time_column(::Type{T})::Union{String,Missing} where {T<:AbstractS
   return missing
 end
 
-# function infer_ids(::Type{T}) where {T<:AbstractStonxRecord}
+# function infer_ids(::Type{T}) where {T<:AbstractStonksRecord}
 #   T_fields = [String(x) for x in fieldnames(T)]
 #   if T === AssetPrice || T === AssetInfo
 #     "symbol" in T_fields && return ["symbol"]
@@ -124,7 +124,7 @@ end
 
 function check_type_membership(
   ::Type{T}, fields::Vector{String}
-) where {T<:AbstractStonxRecord}
+) where {T<:AbstractStonksRecord}
   T_fields = [String(x) for x in fieldnames(T)]
   for field in map(String, fields)
     !(field in T_fields) && throw(DomainError("$field not a member of $T"))
@@ -140,7 +140,7 @@ function FileStore{T}(;
   time_column=missing,
   reader=reader_csv,
   writer=writer_csv,
-) where {T<:AbstractStonxRecord}
+) where {T<:AbstractStonksRecord}
   return FileStore{T}(
     ensure_path(path),
     map(String, ids),

@@ -2,10 +2,10 @@ using Chain: @chain
 using Dates: Day, today
 using Test
 
-using Stonx.APIClients
-using Stonx.Requests
-using Stonx: UpdatableSymbol, RequestBuilderError, split_tickers_in_batches, build_fx_pair,  construct_updatable_symbols
-using Stonx.Models: AssetPrice
+using Stonks.APIClients
+using Stonks.Requests
+using Stonks: UpdatableSymbol, RequestBuilderError, split_tickers_in_batches, build_fx_pair,  construct_updatable_symbols
+using Stonks.Models: AssetPrice
 
 include("test_utils.jl")
 

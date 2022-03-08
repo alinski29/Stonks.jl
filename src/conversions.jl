@@ -1,12 +1,12 @@
 using DataFrames
-using Stonx.Models: AbstractStonxRecord
+using Stonks.Models: AbstractStonksRecord
 
-# DataFrame(x::Vector{T}) where {T<:AbstractStonxRecord} = to_dataframe(x)
+# DataFrame(x::Vector{T}) where {T<:AbstractStonksRecord} = to_dataframe(x)
 
 """
     to_dataframe(data)
 
-Converts an object of type `Vector{T} where T<:AbstractStonxRecord` to a {DataFrame}.
+Converts an object of type `Vector{T} where T<:AbstractStonksRecord` to a {DataFrame}.
 The types of the {DataFrame} will match the types of `T`.
 
 ### Examples
@@ -42,7 +42,7 @@ julia> data |> to_dataframe
    3 │ EUR     USD     2022-02-14  1.13052
 ```
 """
-function to_dataframe(x::Vector{T}) where {T<:AbstractStonxRecord}
+function to_dataframe(x::Vector{T}) where {T<:AbstractStonksRecord}
   df = create_typed_dataframe(T)
   pairs = [(name => map(item -> getfield(item, name), x)) for name in fieldnames(T)]
   append!(df, pairs)
@@ -53,6 +53,6 @@ function create_typed_dataframe(::Type{T}) where {T}
   return DataFrame([name => S[] for (name, S) in zip(fieldnames(T), T.types)])
 end
 
-function to_dict(x::Vector{T}) where {T<:AbstractStonxRecord}
+function to_dict(x::Vector{T}) where {T<:AbstractStonksRecord}
   return Dict([name => map(item -> getfield(item, name), x) for name in fieldnames(T)])
 end

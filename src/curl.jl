@@ -1,14 +1,14 @@
 using Chain: @chain
 using Dates: today, Day
 
-using Stonx: UpdatableSymbol, Symbols, construct_updatable_symbols, build_fx_pair
-using Stonx.APIClients: APIClient, APIResource, get_resource, get_type_param
-using Stonx.Models: AbstractStonxRecord, AssetPrice, AssetInfo, ExchangeRate
-using Stonx.Parsers: AbstractContentParser
-using Stonx.Requests: optimistic_request_resolution, prepare_requests, materialize_request
+using Stonks: UpdatableSymbol, Symbols, construct_updatable_symbols, build_fx_pair
+using Stonks.APIClients: APIClient, APIResource, get_resource, get_type_param
+using Stonks.Models: AbstractStonksRecord, AssetPrice, AssetInfo, ExchangeRate
+using Stonks.Parsers: AbstractContentParser
+using Stonks.Requests: optimistic_request_resolution, prepare_requests, materialize_request
 
 """
-    get_time_series(symbols, [client], [T <: AbstractStonxRecord] = AssetPrice; [interval] = "1d", [from] = missing, [to] = missing, [kwargs...])
+    get_price(symbols, [client], [T <: AbstractStonksRecord] = AssetPrice; [interval] = "1d", [from] = missing, [to] = missing, [kwargs...])
 
 Retrieves historical time series price data from the configured API client.
 
@@ -19,7 +19,7 @@ Retrieves historical time series price data from the configured API client.
     - `Vector{Tuple{String, Date}}`: tuples of form (symbol, from)
     - `Vector{Tuple{String, Date, Date}}`, tuples of form (symbol, from, to)
 - `[client::APIClient]`: can be ommited if one of the correct environmental variable is set (`YAHOOFINANCE_TOKEN` or `ALPHAVANTAGE_TOKEN`)
-- `[T <: AbstractStonxRecord]`: data type used for parsing. Change it only if you want to use your custom model. default = `AssetPrice`
+- `[T <: AbstractStonksRecord]`: data type used for parsing. Change it only if you want to use your custom model. default = `AssetPrice`
 
 ### Keywords
 - `[interval]`: values = 1d, 1wk, 1mo. Frequency lower than daily is not supported. default = 1d
@@ -33,14 +33,14 @@ julia> today = Dates.today()
 2022-02-18
 julia> length(ENV["YAHOOFINANCE_TOKEN"]) # value will be used to create a client
 40
-julia> get_time_series("AAPL", from = today - Dates.Day(1))
-1-element Vector{AbstractStonxRecord}
+julia> get_price("AAPL", from = today - Dates.Day(1))
+1-element Vector{AbstractStonksRecord}
  AssetPrice("AAPL", Date("2022-02-17"), 168.88, missing, missing, missing, missing, missing)
  AssetPrice("AAPL", Date("2022-02-18"), 167.3, missing, missing, missing, missing, missing)
 
 julia> from = today - Dates.Day(2)
 2022-02-16
-julia> prices = get_time_series(["AAPL", "MSFT"], from = from)
+julia> prices = get_price(["AAPL", "MSFT"], from = from)
 AssetPrice("MSFT", Date("2022-02-16"), 299.5, missing, missing, missing, missing, missing)
 AssetPrice("MSFT", Date("2022-02-17"), 290.73, missing, missing, missing, missing, missing
 AssetPrice("MSFT", Date("2022-02-18"), 287.93, missing, missing, missing, missing, missing
@@ -48,27 +48,27 @@ AssetPrice("AAPL", Date("2022-02-16"), 172.55, missing, missing, missing, missin
 AssetPrice("AAPL", Date("2022-02-17"), 168.88, missing, missing, missing, missing, missing
 AssetPrice("AAPL", Date("2022-02-18"), 167.3, missing, missing, missing, missing, missing)
 
-julia> prices = get_time_series([
+julia> prices = get_price([
   ("AAPL", Date("2022-02-17")),
   ("MSFT", Date("2022-02-18"))
   ])
-3-element Vector{AbstractStonxRecord}:
+3-element Vector{AbstractStonksRecord}:
  AssetPrice("AAPL", Date("2022-02-17"), 168.88, missing, missing, missing, missing, missing)
  AssetPrice("AAPL", Date("2022-02-18"), 167.3, missing, missing, missing, missing, missing)
  AssetPrice("MSFT", Date("2022-02-18"), 287.93, missing, missing, missing, missing, missing)
 
-julia> prices = get_time_series([
+julia> prices = get_price([
   ("AAPL", Date("2022-02-15"), Date("2022-02-16")),
   ("MSFT", Date("2022-02-14"), Date("2022-02-15"))
   ])
-5-element Vector{AbstractStonxRecord}:
+5-element Vector{AbstractStonksRecord}:
  AssetPrice("MSFT", Date("2022-02-14"), 295.0, missing, missing, missing, missing, missing)
  AssetPrice("MSFT", Date("2022-02-15"), 300.47, missing, missing, missing, missing, missing)
  AssetPrice("AAPL", Date("2022-02-15"), 172.79, missing, missing, missing, missing, missing)
  AssetPrice("AAPL", Date("2022-02-16"), 172.55, missing, missing, missing, missing, missing)
 ```
 """
-function get_time_series(
+function get_price(
   symbols::Symbols,
   client::Union{APIClient,Nothing}=nothing,
   ::Type{T}=AssetPrice;
@@ -76,21 +76,21 @@ function get_time_series(
   from=missing,
   to=missing,
   kwargs...,
-)::Union{Vector{T},Exception} where {T<:AbstractStonxRecord}
+)::Union{Vector{T},Exception} where {T<:AbstractStonksRecord}
   resource = get_resource(client, T)
   tickers = construct_updatable_symbols(symbols)
   return get_data(resource, tickers; interval=interval, from=from, to=to, kwargs...)
 end
 
 """
-    get_info(symbols, [client], [T <: AbstractStonxRecord] = AssetInfo)
+    get_info(symbols, [client], [T <: AbstractStonksRecord] = AssetInfo)
 
 Retrieves general information about `symbols`.
 
 ### Arguments
 - `symbols::Union{String, Vector{String}}`
 - `[client]::APIClient` : can be ommited if one of the correct environmental variable is set (`YAHOOFINANCE_TOKEN` or `ALPHAVANTAGE_TOKEN`)
-- `[T <: AbstractStonxRecord]` : data type used for parsing. Change it only if you want to use your custom model. default = `AssetInfo`
+- `[T <: AbstractStonksRecord]` : data type used for parsing. Change it only if you want to use your custom model. default = `AssetInfo`
 
 ### Examples
 
@@ -112,20 +112,20 @@ function get_info(
   client::Union{APIClient,Nothing}=nothing,
   ::Type{T}=AssetInfo;
   kwargs...,
-) where {T<:AbstractStonxRecord}
+) where {T<:AbstractStonksRecord}
   resource = get_resource(client, T)
   tickers = construct_updatable_symbols(symbols)
   return get_data(resource, tickers, kwargs...)
 end
 
 """
-    get_exchange_rate([client], [T <: AbstractStonxRecord]; base, target, from = missing, to = missing)
+    get_exchange_rate([client], [T <: AbstractStonksRecord]; base, target, from = missing, to = missing)
 
 Retrieves historical exchange rate information
 
 ### Arguments
 - `[client]::APIClient` can be ommited if one of the correct environmental variable is set (`YAHOOFINANCE_TOKEN` or `ALPHAVANTAGE_TOKEN`)
-- `[T <: AbstractStonxRecord]` is the data type used for parsing. Change it only if you want to use your custom model. default = `ExchangeRate`
+- `[T <: AbstractStonksRecord]` is the data type used for parsing. Change it only if you want to use your custom model. default = `ExchangeRate`
 
 ### Keywords
 - `base` REQUIRED - 3 letter currency code 
@@ -152,25 +152,31 @@ function get_exchange_rate(
   from::Union{Date,Missing}=missing,
   to::Union{Date,Missing}=missing,
   kwargs...,
-)::Union{Vector{T},Exception} where {T<:AbstractStonxRecord}
-  invalid_pairs = @chain symbols begin 
+)::Union{Vector{T},Exception} where {T<:AbstractStonksRecord}
+  invalid_pairs = @chain symbols begin
+    isa(_, String) ? [_] : _
     map(build_fx_pair, _)
-    filter(s -> typeof(s) <: Exception ,_)
+    filter(s -> typeof(s) <: Exception, _)
   end
   !isempty(invalid_pairs) && return first(invalid_pairs)
   resource = get_resource(client, T)
   tickers = construct_updatable_symbols(symbols)
-  return get_data(resource, tickers;  interval=interval, from=from, to=to, kwargs...)
+  return get_data(resource, tickers; interval=interval, from=from, to=to, kwargs...)
 end
 
 """
-    get_data(resource, tickers; kwargs...) -> Union{Vector{<:AbstractStonxRecord}, Exception}
+    get_data(resource, tickers; kwargs...) -> Union{Vector{<:AbstractStonksRecord}, Exception}
 
-Generic function to get data of type resource{T}. Functions such as get_time_series, get_info, call this.
+Generic function to get data of type resource{T}. Functions such as get_price, get_info, call this.
 
 ### Arguments 
 - `resource::APIResource`: instance of an `APIResource`.
-- `tickers::Vector{UpdatableSymbol}`: where UpdatableSymbol(symbol; [from], [to])
+- `symbols` can be:
+    - `String` with one symbol / ticker
+    - `Vector{String}` with multiple symbols
+    - `Vector{Tuple{String, Date}}`: tuples of form (symbol, from)
+    - `Vector{Tuple{String, Date, Date}}`, tuples of form (symbol, from, to)
+    - `Vector{UpdatableSymbol}`: type Stonks.UpdatableSymbol(symbol; [from], [to])
 
 ### Keywords 
 - `[interval]`: values = 1d, 1wk, 1mo. Frequency lower than daily is not supported. default = 1d
@@ -179,8 +185,19 @@ Generic function to get data of type resource{T}. Functions such as get_time_ser
 - `[kwargs...]`: use it to pass keyword arguments if you have url / query parameters that need to be resolved at runtime.
 """
 function get_data(
-  resource::Union{APIResource,Exception}, tickers::Vector{UpdatableSymbol}; kwargs...
-)#::Union{Vector{AbstractStonxRecord},Exception}
+  resource::Union{APIResource,Exception},
+  symbols::Union{Vector{UpdatableSymbol},Symbols, Missing}=missing;
+  kwargs...,
+)#::Union{Vector{AbstractStonksRecord},Exception}
+  tickers = (
+    if ismissing(symbols)
+      [UpdatableSymbol("FOO")]
+    elseif isa(symbols, Vector{UpdatableSymbol}) 
+       symbols 
+    else 
+      construct_updatable_symbols(symbols)
+    end
+  )
   typeof(resource) <: Exception && return resource
   requests = prepare_requests(tickers, resource; kwargs...)
   typeof(requests) <: Exception && return requests
@@ -200,7 +217,7 @@ end
 # function get_data(
 #   client::APIClient,
 #   tickers::Vector{UpdatableSymbol},
-# )::Dict{String,Union{Vector{AbstractStonxRecord},Exception}}
+# )::Dict{String,Union{Vector{AbstractStonksRecord},Exception}}
 #   responses = Channel(length(client.endpoints))
 #   @sync begin
 #     for (k, resource) in client.endpoints
@@ -217,7 +234,7 @@ end
 # function collect_results(c::Channel)
 #   result = Dict()
 #   for item in c
-#     has_value = isa(item.value, Vector{AbstractStonxRecord})
+#     has_value = isa(item.value, Vector{AbstractStonksRecord})
 #     if haskey(result, item.endpoint) && has_value
 #       append!(result[item.endpoint], item.value)
 #     elseif has_value

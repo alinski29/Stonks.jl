@@ -2,8 +2,8 @@ using CSV
 using DataFrames
 using Test
 
-using Stonx.Stores: WriteOperation, WriteTransaction, list_partition_nesting
-using Stonx.Stores: backup, cleanup, commit, execute, rollback, write, write_tmp
+using Stonks.Stores: WriteOperation, WriteTransaction, list_partition_nesting
+using Stonks.Stores: backup, cleanup, commit, execute, rollback, write, write_tmp
 
 include("test_utils.jl")
 

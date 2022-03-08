@@ -2,13 +2,13 @@ using Chain
 using DataFrames
 using Dates
 
-using Stonx: AbstractStonxRecord, Symbols, SchemaValidationError, UpdatableSymbol
-using Stonx:
+using Stonks: AbstractStonksRecord, Symbols, SchemaValidationError, UpdatableSymbol
+using Stonks:
   construct_updatable_symbols, create_typed_dataframe, last_workday, get_data, to_dataframe
-using Stonx.APIClients: APIClient, APIResource, get_resource
-using Stonx.Stores: FileStore
+using Stonks.APIClients: APIClient, APIResource, get_resource
+using Stonks.Stores: FileStore
 
-function validate_schema(::Type{T}, data::DataFrame) where {T<:AbstractStonxRecord}
+function validate_schema(::Type{T}, data::DataFrame) where {T<:AbstractStonksRecord}
   get_type_param(::Vector{S}) where {S} = S
   ds_types = [
     (name=String(name), type=type) for (name, type) in zip(fieldnames(T), T.types)
@@ -27,7 +27,7 @@ function validate_schema(::Type{T}, data::DataFrame) where {T<:AbstractStonxReco
   return true
 end
 
-function apply_schema(::Type{T}, data::DataFrame) where {T<:AbstractStonxRecord}
+function apply_schema(::Type{T}, data::DataFrame) where {T<:AbstractStonksRecord}
   ds_types = [
     (name=String(name), type=type) for (name, type) in zip(fieldnames(T), T.types)
   ]
@@ -41,7 +41,7 @@ function apply_schema(::Type{T}, data::DataFrame) where {T<:AbstractStonxRecord}
   return vcat(empty_df, data)
 end
 
-function init(ds::FileStore{T}) where {T<:AbstractStonxRecord}
+function init(ds::FileStore{T}) where {T<:AbstractStonksRecord}
   df = create_typed_dataframe(T)
   if isempty(ds.partitions)
     tr = WriteTransaction([WriteOperation(df, ds.format)], ds.format, ds.path)
@@ -58,7 +58,7 @@ end
 
 function filter_files(
   ds::FileStore{T}, partitions::Dict{String,Vector{String}}
-) where {T<:AbstractStonxRecord}
+) where {T<:AbstractStonksRecord}
   for p in keys(partitions)
     !(String(p) in map(String, ds.partitions)) &&
       return ErrorException("$p is not a partition key")
@@ -134,12 +134,11 @@ function symbols_from_df(
   if nrow(groups) == 0
     return nothing
   end
+  id_lengths = map(id ->  map(length, df[:, Symbol(id)]), ids) |> maximum
   if length(ids) > 1
-    if maximum(map(length, df[:, first(ids)])) == 3 &&
-      maximum(map(length, df[:, ids[2]])) == 3
+    if id_lengths[1] == 3 && id_lengths[2] == 3
       return [
-        ("$(row[first(ids)])/$(row[ids[2]])", row[:lower_limit], ref_date) for
-        row in eachrow(groups)
+        ("$(row[ids[1]])/$(row[ids[2]])", row[:lower_limit], ref_date) for row in eachrow(groups)
       ]
     else
       return nothing
@@ -159,7 +158,7 @@ function find_update_candidates(
     return []
   elseif isnothing(symbols) && !ismissing(time_column)
     smb = symbols_from_df(df, ids; time_column=time_column, ref_date=ref_date)
-    return construct_updatable_symbols(smb)
+    return !isnothing(smb) ? construct_updatable_symbols(smb) : []
   elseif isnothing(symbols) && ismissing(time_column) && length(ids) == 1
     df_vals = unique(df[:, Symbol(first(ids))])
     return construct_updatable_symbols(df_vals)
@@ -173,8 +172,10 @@ function find_update_candidates(
   else
     ()
   end
-
   tickers = construct_updatable_symbols(symbols)
+  if all(map(t -> isa(t.from, Date) || isa(t.to, Date), tickers))
+    return tickers
+  end
   df_vals = unique(df[:, map(Symbol, ids)])
   if all(map(t -> !ismissing(t.fx_pair), tickers)) && length(ids) == 2
     g1 = map(t -> first(t.fx_pair), tickers)

@@ -2,8 +2,8 @@ using Chain: @chain
 using Dates
 using JSON3: JSON3
 
-using Stonx: JSONContent, APIResponseError, ContentParserError
-using Stonx.Models: AssetPrice, AssetInfo, ExchangeRate
+using Stonks: JSONContent, APIResponseError, ContentParserError
+using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate
 
 function parse_yahoo_info(
   content::AbstractString; kwargs...

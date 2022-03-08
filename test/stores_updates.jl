@@ -2,15 +2,15 @@ using Dates
 using DataFrames
 using Test
 
-using Stonx: SchemaValidationError, UpdatableSymbol, to_dataframe, last_workday
-using Stonx.Stores: FileStore, load, save, update
-using Stonx.Stores:
+using Stonks: SchemaValidationError, UpdatableSymbol, to_dataframe, last_workday
+using Stonks.Stores: FileStore, load, save, update
+using Stonks.Stores:
   find_update_candidates,
   list_partition_nesting,
   list_nested_files,
   validate_schema,
   symbols_from_df
-using Stonx.Models: AssetPrice, AssetInfo, ExchangeRate
+using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate
 
 include("test_utils.jl")
 
@@ -69,6 +69,7 @@ include("test_utils.jl")
     candidates = find_update_candidates(
       df, symbols; ids=["base", "target"], time_column=ds.time_column
     )
+    println(candidates)
     @test length(candidates) == length(symbols)
     @test isa(maximum(map(x -> x.from, candidates)), Date)
     @test all(map(c -> !isnothing(c.fx_pair), candidates))

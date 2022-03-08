@@ -1,14 +1,14 @@
 using Test
 
-using Stonx: DataClientError
-using Stonx.APIClients: APIClient, APIResource, YahooClient
-using Stonx.APIClients:
+using Stonks: DataClientError
+using Stonks.APIClients: APIClient, APIResource, YahooClient
+using Stonks.APIClients:
   get_type_param,
   get_supported_types,
   get_resource,
   get_resource_from_clients,
   build_clients_from_env
-using Stonx.Models: AbstractStonxRecord, AssetInfo, AssetPrice, ExchangeRate
+using Stonks.Models: AbstractStonksRecord, AssetInfo, AssetPrice, ExchangeRate
 
 @testset "Client building utilities" begin
   test_client = YahooClient("abc")
@@ -59,7 +59,7 @@ using Stonx.Models: AbstractStonxRecord, AssetInfo, AssetPrice, ExchangeRate
   @testset "Get resource with no configured clients" begin
     set_env_vars()
     clients = build_clients_from_env()
-    struct MyCustomType <: AbstractStonxRecord
+    struct MyCustomType <: AbstractStonksRecord
       value::String
     end
     resource = get_resource_from_clients(clients, MyCustomType)

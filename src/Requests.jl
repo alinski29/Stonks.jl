@@ -10,11 +10,11 @@ using HTTP: HTTP
 using JSON3: JSON3
 using Logging: @debug, @warn
 
-using Stonx: UpdatableSymbol, Either, Success, RequestBuilderError
-using Stonx: split_tickers_in_batches, get_minimum_dates
-using Stonx.APIClients: APIResource, APIClient
-using Stonx.Models: AbstractStonxRecord, AssetInfo, AssetPrice, ExchangeRate
-using Stonx.Parsers: AbstractContentParser, parse_content
+using Stonks: UpdatableSymbol, Either, Success, Failure, RequestBuilderError
+using Stonks: split_tickers_in_batches, get_minimum_dates
+using Stonks.APIClients: APIResource, APIClient
+using Stonks.Models: AbstractStonksRecord, AssetInfo, AssetPrice, ExchangeRate
+using Stonks.Parsers: AbstractContentParser, parse_content
 
 @kwdef struct RequestParams
   url::String
@@ -267,12 +267,12 @@ end
 
 """
 What to do when there are multiple requests, some succesfull, but some failed. 
-  - optimistic approach => if at least one request succedes, return a Vector{AbstractStonxRecord},
+  - optimistic approach => if at least one request succedes, return a Vector{AbstractStonksRecord},
     but print warnings for all requests which failed
 """
 function optimistic_request_resolution(
   ::Type{T}, c::Channel
-)::Union{Vector{T},Exception} where {T<:AbstractStonxRecord}
+)::Union{Vector{T},Exception} where {T<:AbstractStonksRecord}
   result = T[]
   failures = Exception[]
   for response in c

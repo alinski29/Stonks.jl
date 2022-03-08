@@ -2,9 +2,6 @@ using Chain: @chain
 using Dates
 using JSON3: JSON3
 
-export Either, Success, Failure, UpdatableSymbol
-export split_tickers_in_batches, get_minimum_dates
-
 JSONContent = Union{JSON3.Object,JSON3.Array}
 Symbols = Union{
   String,Vector{String},Vector{Tuple{String,Date}},Vector{Tuple{String,Date,Date}}

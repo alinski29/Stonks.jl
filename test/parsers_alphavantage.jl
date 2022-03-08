@@ -2,9 +2,10 @@
 using Dates
 using Test
 
-using Stonx
-using Stonx.Models
-using Stonx.Parsers
+using Stonks
+using Stonks: JSONContent, APIResponseError, ContentParserError
+using Stonks.Models
+using Stonks.Parsers
 
 include("test_utils.jl")
 

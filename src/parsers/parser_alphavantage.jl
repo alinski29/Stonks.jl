@@ -3,8 +3,8 @@ using Dates
 using JSON3: JSON3
 using Logging: @warn
 
-using Stonx: JSONContent, APIResponseError, ContentParserError
-using Stonx.Models: AssetPrice, AssetInfo, ExchangeRate
+using Stonks: JSONContent, APIResponseError, ContentParserError
+using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate
 
 function parse_alphavantage_price(
   content::AbstractString; kwargs...

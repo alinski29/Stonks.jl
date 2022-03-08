@@ -6,12 +6,12 @@ module Models
 using Base: @kwdef
 using Dates
 
-export AbstractStonxRecord, AssetInfo, AssetPrice, ExchangeRate, EconomicIndicator
+export AbstractStonksRecord, AssetInfo, AssetPrice, ExchangeRate, EconomicIndicator
 
 """
 Abstract type inteded to be subtyped by an data model
 """
-abstract type AbstractStonxRecord end
+abstract type AbstractStonksRecord end
 
 """
 General information about a quoted symbol / ticker.
@@ -24,7 +24,7 @@ AssetInfo(;\n
   [industry::String], [sector::String],[timezone::String], [employees::Integer]\n
 )
 """
-@kwdef struct AssetInfo <: AbstractStonxRecord
+@kwdef struct AssetInfo <: AbstractStonksRecord
   symbol::String
   currency::String
   name::Union{String,Missing} = missing
@@ -48,7 +48,7 @@ AssetPrice(;
   [volume::Float64]\n
 )
 """
-@kwdef struct AssetPrice <: AbstractStonxRecord
+@kwdef struct AssetPrice <: AbstractStonksRecord
   symbol::String
   date::Date
   close::Float64
@@ -65,14 +65,14 @@ Container for holding an exchange rate datapoint. Lowest frequency is daily.
 ### Constructors
 ExchangeRate(; base::String, target::String, date::Date, rate::Float64)
 """
-@kwdef struct ExchangeRate <: AbstractStonxRecord
+@kwdef struct ExchangeRate <: AbstractStonksRecord
   base::String
   target::String
   date::Date
   rate::Float64
 end
 
-@kwdef struct EconomicIndicator <: AbstractStonxRecord
+@kwdef struct EconomicIndicator <: AbstractStonksRecord
   symbol::String
   name::String
   date::Date

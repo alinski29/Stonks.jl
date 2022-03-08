@@ -2,15 +2,15 @@ using Chain
 using DataFrames
 using Test
 
-using Stonx: SchemaValidationError, to_dataframe
-using Stonx.Stores: FileStore, load, save
-using Stonx.Stores:
+using Stonks: SchemaValidationError, to_dataframe
+using Stonks.Stores: FileStore, load, save
+using Stonks.Stores:
   generate_partition_pairs,
   filter_files,
   list_nested_files,
   list_partition_nesting,
   validate_schema
-using Stonx.Models: AssetPrice, AssetInfo
+using Stonks.Models: AssetPrice, AssetInfo
 
 include("test_utils.jl")
 
@@ -169,8 +169,9 @@ include("test_utils.jl")
     save(ds, prices)
     df = load(ds, Dict("symbol" => ["AAPL", "MSFT"]))
     @test sort(unique(df[:, :symbol])) == ["AAPL", "MSFT"]
-    err = load(ds, Dict("foo" => ["BAR", "BAZ"]))
-    @test typeof(err) <: Exception
+    data = load(ds, Dict("foo" => ["BAR", "BAZ"]))
+    #println(data)
+    @test typeof(data) <: Exception
     rm(dest; recursive=true, force=true)
   end
 
