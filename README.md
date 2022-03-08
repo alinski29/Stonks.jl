@@ -12,7 +12,7 @@
     </h1>
   </p>
   <p>
-    <b> 📈 The layman's solutiion to retrieval and storage of financial data.</b>
+    <b> 📈 The layman's solution for retrieval and storage of financial data.</b>
   </p>
   <p>
   <a href="https://github.com/alinski29/Stonks.jl/actions/workflows/ci.yml/badge.svg?branch=main">
@@ -78,14 +78,14 @@ julia> ref_date = Date("2022-02-18")
 2022-02-18
 
 # to can be ommited, defaults to current day.
-julia> get_price("AAPL", client; from = ref_date - Day(1), to = ref_date)
+julia> get_price("AAPL", client; from=ref_date-Day(1), to=ref_date)
 2-element Vector{AssetPrice}:
  AssetPrice("AAPL", Date("2022-02-18"), 167.3, 169.82, 170.5413, 166.19, missing, 82772674)
  AssetPrice("AAPL", Date("2022-02-17"), 168.88, 171.03, 171.91, 168.47, missing, 69589344)
  # you can omit the client if you have the correct environment variables set
 julia> length(ENV["ALPHAVANTAGE_TOKEN"]) # ENV["YAHOOFINANCE_TOKEN"] works as well
 16
-julia> prices = get_price(["AAPL", "MSFT"]; from = ref_date - Day(2), to = ref_date) 
+julia> prices = get_price(["AAPL", "MSFT"]; from=ref_date-Day(2), to=ref_date) 
 6-element Vector{AssetPrice}:
  AssetPrice("AAPL", Date("2022-02-18"), 167.3, 169.82, 170.5413, 166.19, missing, 82772674)
  AssetPrice("AAPL", Date("2022-02-17"), 168.88, 171.03, 171.91, 168.47, missing, 69589344)
@@ -121,19 +121,20 @@ julia> get_info(["AAPL", "MSFT"])
 
 ### **Get exchange rates**
 ```julia
-# Same API as get_price. the symbol needs to be a currency pair like $base/$quote, each consisting of exactly 3 characters.
-julia> get_exchange_rate("EUR/USD", from = ref_date - Day(1), to = ref_date)
+# Same API as get_price. the symbol needs to be a currency pair like $base/$quote,
+# each consisting of exactly 3 characters.
+julia> get_exchange_rate("EUR/USD", from=ref_date-Day(1), to=ref_date)
 3-element Vector{ExchangeRate}:
  ExchangeRate("EUR", "USD", Date("2022-02-18"), 1.13203)
  ExchangeRate("EUR", "USD", Date("2022-02-17"), 1.13592)
-julia> get_exchange_rate(["EUR/USD", "USD/CAD"], from = ref_date - Day(1), to = ref_date)
+julia> get_exchange_rate(["EUR/USD", "USD/CAD"], from=ref_date-Day(1), to=ref_date)
 # 4-element Vector{ExchangeRate}:
  ExchangeRate("EUR", "USD", Date("2022-02-18"), 1.13203)
  ExchangeRate("EUR", "USD", Date("2022-02-17"), 1.13592)
  ExchangeRate("USD", "CAD", Date("2022-02-18"), 1.2748)
  ExchangeRate("USD", "CAD", Date("2022-02-17"), 1.2707)
 # Also works with []Tuple{String, Date} or []Tuple{String, Date, Date}
-julia> prices = get_exchange_rate([
+julia>get_exchange_rate([
   ("EUR/USD", Date("2022-02-15"), Date("2022-02-16")),
   ("USD/CAD", Date("2022-02-14"), Date("2022-02-15")),
 ])
@@ -173,7 +174,7 @@ d_end = Date("2022-03-06")
 2022-03-06
 
 symbols = ["AAPL", "MSFT"]
-data = get_price(symbols; from=d_end - Day(7), to=d_end - Day(5))
+data = get_price(symbols; from=d_end-Day(7), to=d_end-Day(5))
 
 save(ds, data)
 println(readdir(dest))
@@ -203,7 +204,8 @@ show_stats(ds)
 
 # to is optional, defaults to latest workday. here, we need it for reproductible results.
 update(ds; to=d_end)
-show_stats(ds) # dt_end (2022-03-06) is a Sunday, so the latest available data is from a Friday (2022-03-04).
+show_stats(ds) 
+# d_end (2022-03-06) is a Sunday, so the latest available data is from a Friday (2022-03-04).
 2×4 DataFrame
  Row │ symbol  date_maximum  date_minimum  nrows 
      │ String  Date          Date          Int64 
@@ -224,7 +226,8 @@ show_stats(ds)
    3 │ IBM     2022-03-04    2022-02-28        5
    4 │ MSFT    2022-03-04    2022-02-28        5
 # update(ds, ["IBM", "AMD"]) - will include data since earliest available
-# update(ds, vcat(symbols, ["IBM", "AMD"])) - will also update the existing symbols if there is new data
+# update(ds, vcat(symbols, ["IBM", "AMD"])) - will also update the existing symbols, 
+#  if there is new data
 ```
 
 ## **Advanced usage**
@@ -321,8 +324,9 @@ function parse_inflation_data(content::AbstractString; kwargs...)
   end
 end
 
-# Define an API resource, wrap your parser function around a concrete subtype of AbstractContentParser.
-# subtypes(Stonks.Parsers.AbstractContentParser) = [Stonks.Parsers.JSONParser, Stonks.Parsers.CSVParser]
+# Define an API resource, wrap your function around a subtype of AbstractContentParser.
+# subtypes(Stonks.Parsers.AbstractContentParser)
+# [Stonks.Parsers.JSONParser, Stonks.Parsers.CSVParser]
 my_resource = APIResource{MacroIndicator}(;
   url="https://www.alphavantage.co/query",
   headers=Dict("accept" => "application/json"),
