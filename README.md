@@ -229,6 +229,7 @@ show_stats(ds)
 
 ## **Advanced usage**
 ---
+
 ### **Plug in any data format**
 <details hide>
   <summary>Show</summary>
@@ -282,9 +283,9 @@ show(df)
 <details hide>
   <summary>Show</summary>
 
+ Assume we'll receive the following content from an API.
+ Source: https://www.alphavantage.co/query?function=INFLATION&apikey=demo
 ```json
- # Assume we'll receive the following content from an API.
- # Source: "https://www.alphavantage.co/query?function=INFLATION&apikey=demo"
  {
   "name": "Inflation - US Consumer Prices",
   "interval": "annual",
@@ -368,14 +369,13 @@ Stonks.APIClients.get_supported_types(my_client)
  AssetInfo
 ```
 </details>
+
 ---
 
 ## **Contributing**
----
-The project uses [git-flow workflow](https://danielkummer.github.io/git-flow-cheatsheet/). 
-If you want to add a new feature, open a branch feature/<feature-name> and make a PR to develop.
+The project uses [git-flow workflow](https://danielkummer.github.io/git-flow-cheatsheet/). <br/>
+If you want to add a new feature, open a branch feature/$feature-name and make a PR to develop branch. <br/>
 Reporting issues in Github issues is highly appreciated.
----
 
 ## **License**
 ---
