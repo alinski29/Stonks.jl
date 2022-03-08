@@ -15,7 +15,7 @@ using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate
 include("test_utils.jl")
 
 @testset "Store updates" begin
-  dest = joinpath(@__DIR__, "data/test_stonx")
+  dest = joinpath(@__DIR__, "data/test_stonks")
   symbols = ["AAPL", "MSFT"]
 
   ds = FileStore{AssetPrice}(;

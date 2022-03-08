@@ -10,7 +10,7 @@ include("test_utils.jl")
 @testset "Store writes" begin
   symbols = ["AAPL", "IBM"]
   data = fake_stock_data(7, last_workday(), symbols)
-  dest = joinpath(@__DIR__, "data/test_stonx")
+  dest = joinpath(@__DIR__, "data/test_stonks")
   tr = @chain symbols begin
     map(s -> WriteOperation(filter(:symbol => ==(s), data), "csv", "symbol=$s"), _)
     WriteTransaction(_, "csv", dest)
@@ -19,7 +19,7 @@ include("test_utils.jl")
   get_type_param(::Vector{S}) where {S} = S
 
   @testset "Write using a WriteOperation" begin
-    path = joinpath(@__DIR__, "data/test_stonx")
+    path = joinpath(@__DIR__, "data/test_stonks")
     @chain begin
       WriteOperation(data, "csv")
       write(_, path, writer_csv)

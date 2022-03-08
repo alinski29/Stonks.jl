@@ -54,7 +54,7 @@ end
 ### Examples 
 ```julia 
 using Stonks
-dest = joinpath(@__DIR__, "data/stonx")
+dest = joinpath(@__DIR__, "data/stonks")
 FileStore{AssetInfo}(; path=dest, ids=["symbol"])
 FileStore{AssetPrice}(; path=dest, ids=["symbol"], time_column="date")
 FileStore{AssetPrice}(; path=dest, ids=["symbol"], partitions=["symbol"], time_column ="date")

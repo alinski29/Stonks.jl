@@ -16,7 +16,7 @@ include("test_utils.jl")
 
 @testset "Store functionality" begin
   symbols = ["AAPL", "MSFT"]
-  dest = joinpath(@__DIR__, "data/test_stonx")
+  dest = joinpath(@__DIR__, "data/test_stonks")
   prices = to_dataframe(test_price_data())
   info = to_dataframe(test_info_data())
   ds = FileStore{AssetPrice}(; path=dest, ids=["symbol"])
