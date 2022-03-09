@@ -2,9 +2,9 @@ using DataFrames
 using Stonks.Models: AbstractStonksRecord
 
 """
-    to_dataframe(data) -> DataFrame
+    to_dataframe(data::Vecotr{<:AbstractStonksRecord}) -> DataFrame
 
-Converts an object of type `Vector{<:AbstractStonksRecord} to a {DataFrame}.
+Converts an object of type `Vector{<:AbstractStonksRecord}` to a `DataFrame`.
 The types of the `DataFrame` will match the types of `T`.
 
 ### Examples

@@ -46,7 +46,6 @@ FileStore{<:AbstractStonksRecord}(;
 # where,
 reader_csv(path::String) = DataFrame(CSV.File(path))
 writer_csv(df::AbstractDataFrame, path::String) = CSV.write(path, df)
-end
 ```
 
 ### Examples 
