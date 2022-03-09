@@ -1,13 +1,11 @@
 using DataFrames
 using Stonks.Models: AbstractStonksRecord
 
-# DataFrame(x::Vector{T}) where {T<:AbstractStonksRecord} = to_dataframe(x)
-
 """
-    to_dataframe(data)
+    to_dataframe(data) -> DataFrame
 
-Converts an object of type `Vector{T} where T<:AbstractStonksRecord` to a {DataFrame}.
-The types of the {DataFrame} will match the types of `T`.
+Converts an object of type `Vector{<:AbstractStonksRecord} to a {DataFrame}.
+The types of the `DataFrame` will match the types of `T`.
 
 ### Examples
 ```julia-repl

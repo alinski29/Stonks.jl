@@ -87,7 +87,7 @@ function Base.show(io::IO, r::Either{T,E}) where {T,E<:Exception}
 end
 
 """
-Utility function used to group multiple tickers inside a single reuqest if the API endpoint allows it (based on APIResource.tickers_per_query value)
+Utility function used to group multiple tickers inside a single reuqest if the API resource allows it (based on APIResource.tickers_per_query value)
   example: tickers = ["AAPL", "MSFT", "AMZN"]
   max_size = 10 => [ ["AAPL", "MSFT", "AMZN"] ] (all symbols inside the first batch)
   max_size = 1 => [ ["AAPL"], ["MSFT"], ["AMZN"] ] (all symbols in separate batches)

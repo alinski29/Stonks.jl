@@ -12,23 +12,25 @@ using Stonks.Models: AbstractStonksRecord, AssetPrice, AssetInfo, ExchangeRate
 
 export APIClient, APIResource, AlphavantageJSONClient, YahooClient
 
+"""
+Abstract type to be subtyped by any type responsible for data retrieval, like HTTP API or web socket.
+"""
 abstract type AbstractDataClient end
-abstract type AbstractAPIClient <: AbstractDataClient end
 
 """
     APIResource{T<:AbstractStonksRecord}
 
-Container holding all information required to make requests to an API endpoint.
+Stores data required to make requests to an API resource.
 
 ### Fields 
-- `url::String`: the url of the API endpoint, excluding query parameters
-- `query_params::Dict{String, String}`: parameters used in the request.
-- `parser::AbstractContentParser`: a subtype of `AbstractContentParser` implementing `parse_content`.
+- `url::String`: the url of the API resource, excluding query parameters
+- `query_params::Dict{String, String}`: parameters used in the request
+- `parser::AbstractContentParser`: a subtype of `AbstractContentParser` implementing `parse_content`
 - `headers::Dict{String,String}`: HTTP headers
-- `symbol_key::String`: with what name will the symbol/symbols will be found
-- `max_batch_size::Integer`: the maximum number of symbols allowed in a single request.
+- `symbol_key::String`: indicates the identifier for the symbol
+- `max_batch_size::Integer`: the maximum number of symbols allowed in a single request
 - `max_retries::Integer`: how many times to retry a failed request
-- `rank_order::Integer`: if you have multiple `APIClients` capable of handling type `T`, the one wil the highest value will be used.
+- `rank_order::Integer`: if multiple `APIResource` capable of handling `T`, the one with highest values is preffered.
 
 ### Constructors
 ```julia
@@ -73,23 +75,31 @@ end
 get_type_param(::APIResource{T}) where {T} = T
 
 """
-A container for holding data required to make request to one or multiple APIs.
-Just a collection of `APIResource`s.
+Groups collection of `APIResource`. Can hold resources from the same or different API.
+
+### Fields 
+- `resources::Dict{String,APIResource}`
+- `[url::String]`: for descriptive purposes. should be ommited if you mix in resources from different APIs.
+
+### Constructors
+```julia
+APIClient(resources::Dict{String, APIResource}, url::String="")
+```
 """
 mutable struct APIClient <: AbstractDataClient
-  endpoints::Dict{String,APIResource}
+  resources::Dict{String,APIResource}
   url::String
-  function APIClient(endpoints, url="")
-    return new(endpoints, url)
+  function APIClient(resources, url="")
+    return new(resources, url)
   end
 end
-get_supported_types(client::APIClient) = [get_type_param(v) for (k, v) in client.endpoints]
+get_supported_types(client::APIClient) = [get_type_param(v) for (k, v) in client.resources]
 
 function get_resource(
   client::Union{APIClient,Nothing}, ::Type{T}
 ) where {T<:AbstractStonksRecord}
   if client !== nothing
-    return first([r for (k, r) in client.endpoints if typeof(r) == APIResource{T}])
+    return first([r for (k, r) in client.resources if typeof(r) == APIResource{T}])
   else
     @chain begin
       build_clients_from_env()
@@ -153,10 +163,10 @@ end
     YahooClient(api_key::String) -> APIClient
 
 Utility function for creating a client for accessing yahoofinance API. 
-Contains the following `endpoints`: 
-  - "info" => `APIResource{AssetInfo}`
-  - "price" => `APIResource{AssetPrice}`
-  - "exchange" => `APIResource{ExchangeRate}`
+Contains the following `resources`: 
+  - info => `APIResource{AssetInfo}`
+  - price => `APIResource{AssetPrice}`
+  - exchange => `APIResource{ExchangeRate}`
 """
 function YahooClient(api_key::String)::APIClient
   url = "https://yfapi.net"
@@ -196,10 +206,10 @@ end
     AlphavantageJSONClient(api_key::String) -> APIClient
 
 Utility function for creating a client for accessing alphavantage API. 
-Contains the following `endpoints`: 
-  - "info" => `APIResource{AssetInfo}`
-  - "price" => `APIResource{AssetPrice}`
-  - "exchange" => `APIResource{ExchangeRate}`
+Contains the following `resources`: 
+  - info => `APIResource{AssetInfo}`
+  - price => `APIResource{AssetPrice}`
+  - exchange => `APIResource{ExchangeRate}`
 """
 function AlphavantageJSONClient(api_key::String)::APIClient
   url = "https://www.alphavantage.co"

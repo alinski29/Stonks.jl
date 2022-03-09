@@ -21,7 +21,7 @@ using Stonks.Models: AbstractStonksRecord, AssetInfo, AssetPrice, ExchangeRate
   unset_env_vars()
 
   @testset "Get type parameter of API resource" begin
-    T = get_type_param(test_client.endpoints["price"])
+    T = get_type_param(test_client.resources["price"])
     @test T === AssetPrice
   end
 

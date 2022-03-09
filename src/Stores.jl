@@ -8,7 +8,10 @@ using Stonks.Models: AbstractStonksRecord, AssetInfo, AssetPrice, ExchangeRate
 
 export AbstractStore, FileStore, load, save, update
 
-abstract type AbstractStore end
+"""
+Abstract type to be subtyped by all types of Stores, like `FileStore`. `DatabaseStore`.
+"""
+abstract type AbstractStore{T <: AbstractStonksRecord} end
 
 writer_csv(df::AbstractDataFrame, path::String) = CSV.write(path, df)
 reader_csv(path::String) = DataFrame(CSV.File(path))
@@ -17,37 +20,32 @@ ensure_path(path::String) = isabspath(path) ? path : joinpath(@__DIR__, path)
 """
     FileStore{T<:AbstractStonksRecord}
 
-Container holding all information for data persistance.
+Stores all information needed for data storage and retrieval.
 
 ### Fields 
 - `path::String`: absolute or relative path 
-- `ids::AbstractVector{AbstractString}`: list of identifiers. maximum 2 identifiers.
-- `format::String`: file format. all files will have the ending like "data.{format}"
-- `partitions::AbstractVector{AbstractString}`: columns used for data partitioning. columns have to be members of T.
-- `time_colum::Union{AbstractString, Missing}`: column representing time dimension.
-- `reader::Function`: `reader(path::String) -> DataFrame`
-- `writer::Function`: `writer(df::AbstractDataFrame, path::String) -> DataFrame`
+- `ids::AbstractVector{AbstractString}`: list of identifiers. maximum 2 identifiers
+- `format::String`: file format. all files will have the ending like "data.{format}". default = "csv"
+- `partitions::AbstractVector{AbstractString}`: columns used for data partitioning. columns have to be members of T
+- `time_colum::Union{AbstractString, Missing}`: column representing time dimension. Can be skipped for `AssetPrice` and `ExchangeRate`.
+- `reader::Function`: reader(path::String) -> DataFrame
+- `writer::Function`: writer(df::AbstractDataFrame, path::String) -> DataFrame
 
-### Constructor
+### Constructors
 ```julia
-function FileStore{T}(;
+FileStore{<:AbstractStonksRecord}(;
   path,
   ids,
   format="csv",
   partitions=[],
   time_column=missing,
-  reader=reader_csv(path::String) = DataFrame(CSV.File(path)),
-  writer=writer_csv(path::String) = CSV.write(path, df),
-) where {T<:AbstractStonksRecord}
-  return FileStore{T}(
-    ensure_path(path),
-    map(String, ids),
-    format,
-    map(String, partitions),
-    time_column,
-    reader,
-    writer,
-  )
+  reader=reader_csv,
+  writer=writer_csv,
+)
+
+# where,
+reader_csv(path::String) = DataFrame(CSV.File(path))
+writer_csv(df::AbstractDataFrame, path::String) = CSV.write(path, df)
 end
 ```
 
@@ -57,15 +55,15 @@ using Stonks
 dest = joinpath(@__DIR__, "data/stonks")
 FileStore{AssetInfo}(; path=dest, ids=["symbol"])
 FileStore{AssetPrice}(; path=dest, ids=["symbol"], time_column="date")
-FileStore{AssetPrice}(; path=dest, ids=["symbol"], partitions=["symbol"], time_column ="date")
+FileStore{AssetPrice}(; path=dest, ids=[:symbol], partitions=[:symbol], time_column ="date")
 
-using Arrow
+using Arrow, DataFrames
 read = read_arrow(path::String) = Arrow.Table(path) |> DataFrame
 write = write_arrow(df::AbstractDataFrame, path::String) = open(path, "w") do io Arrow.write(io, df) end
-FileStore{ExchangeRate}(; path=dest, ids=[:base, :target], time_column=:date, reader=read, writer=write)
+FileStore{ExchangeRate}(; path=dest, ids=[:base, :target], time_column="date", reader=read, writer=write)
 ```
 """
-struct FileStore{T<:AbstractStonksRecord,R,W} <: AbstractStore
+struct FileStore{T<:AbstractStonksRecord,R,W} <: AbstractStore{T}
   path::String
   ids::AbstractVector{AbstractString}
   format::String

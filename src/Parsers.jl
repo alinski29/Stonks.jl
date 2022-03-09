@@ -7,8 +7,10 @@ using Stonks.Models: AbstractStonksRecord
 
 export AbstractContentParser, CSVParser, JSONParser, parse_content
 
-abstract type AbstractParser end
-abstract type AbstractContentParser <: AbstractParser end
+"""
+Abstract type to be subclassed by any type of parser.
+"""
+abstract type AbstractContentParser end
 
 """
 A wrapper type for a function implementing `parse_content` interface for JSON content.

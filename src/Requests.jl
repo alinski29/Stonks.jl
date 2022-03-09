@@ -51,10 +51,10 @@ end
 #"""
 #    prepare_requests(tickers, provider; kwargs...)
 #
-#Prepares request for all all the API endpoints. It will run `prepare_requests(tickers, resource)` for each key of `provider.endpoints`. 
+#Prepares request for all all the API resources. It will run `prepare_requests(tickers, resource)` for each key of `provider.resources`. 
 #"""
 # function prepare_requests(tickers::Vector{UpdatableSymbol}, provider::APIClient; kwargs...)::Union{Dict{String,Vector{RequestParams}}, Exception}
-#   requests = Dict(k => prepare_requests(tickers, resource; kwargs...) for (k, resource) in provider.endpoints)
+#   requests = Dict(k => prepare_requests(tickers, resource; kwargs...) for (k, resource) in provider.resources)
 #   # Requests: Dict{String, Vector{RequestParams}}
 #   valid_requests = Dict()
 #   for (k, reqs) in requests
@@ -73,9 +73,9 @@ end
 #   if !isempty(diff)
 #     @warn("The following resources have errors and were removed: $(join(diff, ','))")
 #   end
-#   _req_per_endpoint = [k => length(v) for (k, v) in valid_requests]
-#   _total_req = sum([v for (k, v) in _req_per_endpoint])
-#   @debug "Prepared a total of $(_total_req) requests: $(_req_per_endpoint)"
+#   _req_per_resource = [k => length(v) for (k, v) in valid_requests]
+#   _total_req = sum([v for (k, v) in _req_per_resource])
+#   @debug "Prepared a total of $(_total_req) requests: $(_req_per_resource)"
 #   return requests
 # end
 

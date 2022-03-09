@@ -31,7 +31,7 @@
   <p>
 </div>
 
-Stonks.jl is the Julia library that lets you access and store financial data from multiple APIS into a unified data model. It gives you the tools to generalize the data retrieval and storage from any API with a simple API in a type-safe manner.
+Stonks.jl is the Julia library that lets you access and store financial data from multiple APIs into a unified data model. It gives you the tools to generalize the data retrieval and storage from any API with a simple interface in a type-safe manner.
 
 <details open>
   <summary><b>Table of contents</b></summary>
@@ -46,7 +46,7 @@ Stonks.jl is the Julia library that lets you access and store financial data fro
   - [Persisting data](#persisting-data)
 - [Advanced usage](#advanced-usage)
   - [Plug in any data format](#plug-in-any-data-format)
-  - [Create API endpoints for your custom models](#create-api-endpoints-for-your-custom-models)
+  - [Create API resources for your custom models](#create-api-resources-for-your-custom-models)
   - [Create your client from combining API resources](#create-your-client-from-combining-api-resources)
 - [Contributing](#contributing)
 - [License](#license)
@@ -57,9 +57,9 @@ Stonks.jl is the Julia library that lets you access and store financial data fro
 ## **Features**
 
 - Designed to work with several APIs in an agnostic way, where several APIs are capable of returning the same data.
-- Comes with a pre-defined data model (types), but you're free to [design your own types](#create-api-endpoints-for-your-custom-models).
+- Comes with a pre-defined data model (types), but you're free to [design your own types](#create-api-resources-for-your-custom-models).
 - Store and update data locally with ease using the [`FileStore`](#persisting-data), which can work with [any file format](#plug-in-any-data-format). Supports data partitioning, writes are atomic, schema validation on read and write. Incrementally update everything in your datastore with just one function.
-- Batching of multiple stock tickers if the API endpoint allows it, thus minimizing the number of requests.
+- Batching of multiple stock tickers if the API resource allows it, thus minimizing the number of requests.
 - Asynchronous request processing. Multiple requests will processed asynchronously and multi-threaded, thus minimizing the network wait time.
 - Silent by design. The main exposed functions for fetching and saving data don't throw an error, making your program crash. Instead, it will return the error with an explanative message of what went wrong. 
 ---
@@ -123,6 +123,7 @@ julia> get_info(["AAPL", "MSFT"])
 ```julia
 # Same API as get_price. the symbol needs to be a currency pair like $base/$quote,
 # each consisting of exactly 3 characters.
+julia> ref_date = Date("2022-02-18")
 julia> get_exchange_rate("EUR/USD", from=ref_date-Day(1), to=ref_date)
 3-element Vector{ExchangeRate}:
  ExchangeRate("EUR", "USD", Date("2022-02-18"), 1.13203)
@@ -162,8 +163,8 @@ julia> data |> to_dataframe
 ---
 
 ### **Persisting data**
-Using a `FileStore`, you can easily persist and incrementaly update data having at least one identifier and one time dimension.
-Default file format is CSV, but you can plug in any format you wish. See [example for custom file formats](#create-api-endpoints-for-your-custom-models).
+Using a `FileStore`, you can easily persist and incrementally update data having at least one identifier and one time dimension.
+Default file format is CSV, but you can plug in any format you wish. See [example for custom file formats](#create-api-resources-for-your-custom-models).
 ```julia
 using Chain, Dates, DataFrames
 using Stonks
@@ -282,7 +283,7 @@ show(df)
 ```
 </details>
 
-### **Create API endpoints for your custom models**
+### **Create API resources for your custom models**
 <details hide>
   <summary>Show</summary>
 
@@ -329,7 +330,7 @@ end
 # [Stonks.Parsers.JSONParser, Stonks.Parsers.CSVParser]
 my_resource = APIResource{MacroIndicator}(;
   url="https://www.alphavantage.co/query",
-  headers=Dict("accept" => "application/json"),
+  headers=Dict("accept" => "application/json"),prices
   query_params=Dict("function" => "INFLATION", "apikey" => "demo"),
   parser=Stonks.JSONParser(parse_inflation_data),
 )
@@ -361,9 +362,9 @@ yc = YahooClient("<my_secret_key>")
 ac = AlphavantageJSONClient("<my_secret_key>")
 
 my_client = Stonks.APIClient(Dict(
-  "price" => ac.endpoints["price"],
-  "info" => yc.endpoints["info"],
-  "exchange" => yc.endpoints["exchange"], 
+  "price" => ac.resources["price"],
+  "info" => yc.resources["info"],
+  "exchange" => yc.resources["exchange"], 
   # ... + your own custom resources
 ))
 Stonks.APIClients.get_supported_types(my_client)

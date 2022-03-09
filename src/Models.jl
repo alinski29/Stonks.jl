@@ -6,23 +6,33 @@ module Models
 using Base: @kwdef
 using Dates
 
-export AbstractStonksRecord, AssetInfo, AssetPrice, ExchangeRate, EconomicIndicator
+export AbstractStonksRecord, AssetInfo, AssetPrice, ExchangeRate
 
 """
-Abstract type inteded to be subtyped by an data model
+Abstract type inteded to be subtyped by an data model.
+
+All subtypes are constructed from keyword args and optional values default to `missing`.
 """
 abstract type AbstractStonksRecord end
 
 """
-General information about a quoted symbol / ticker.
+Stores general information about a quoted symbol / ticker.
 
 ### Constructors
-* All optional [kwarg]s have `missing` default values.
-AssetInfo(;\n
-  symbol::String, currency::String,\n
-  [name::String], [type::String], [exchange::String], [country::String],\n
-  [industry::String], [sector::String],[timezone::String], [employees::Integer]\n
+```julia
+AssetInfo(;
+  symbol::String,
+  currency::String,
+  name::Union{String,Missing}=missing,
+  type::Union{String,Missing}=missing,
+  exchange::Union{String,Missing}=missing,
+  country::Union{String,Missing}=missing,
+  industry::Union{String,Missing}=missing,
+  sector::Union{String,Missing}=missing,
+  timezone::Union{String,Missing}=missing,
+  employees::Union{Integer,Missing}=missing,
 )
+```
 """
 @kwdef struct AssetInfo <: AbstractStonksRecord
   symbol::String
@@ -36,17 +46,23 @@ AssetInfo(;\n
   timezone::Union{String,Missing} = missing
   employees::Union{Integer,Missing} = missing
 end
-
 """
-Container for holding a time series datapoint with price data. Lowest frequency is daily.
+Stores a time series datapoint with price information. Lowest frequency is daily.
 
 ### Constructors
-* All optional [kwarg]s have `missing` default values.
-AssetPrice(;
-  symbol::String, date::Date, close::Float64,\n
-  [open::Float64], [high::Float64], [low::Float64], [close_adjusted::Float64],\n 
-  [volume::Float64]\n
+```julia 
+AssetPrice(
+  symbol::String,
+  date::Date,
+  close::Float64,
+  open::Union{Float64,Missing} = missing,
+  high::Union{Float64,Missing} = missing,
+  low::Union{Float64,Missing} = missing,
+  close_adjusted::Union{Float64,Missing} = missing,
+  volume::Union{Integer,Missing} = missing,
 )
+end
+```
 """
 @kwdef struct AssetPrice <: AbstractStonksRecord
   symbol::String
@@ -60,10 +76,17 @@ AssetPrice(;
 end
 
 """
-Container for holding an exchange rate datapoint. Lowest frequency is daily.
+Stores an exchange rate datapoint. Lowest frequency is daily.
 
 ### Constructors
-ExchangeRate(; base::String, target::String, date::Date, rate::Float64)
+```julia
+ExchangeRate(;
+  base::String,
+  target::String,
+  date::Date,
+  rate::Float64,
+)
+```
 """
 @kwdef struct ExchangeRate <: AbstractStonksRecord
   base::String
@@ -72,11 +95,11 @@ ExchangeRate(; base::String, target::String, date::Date, rate::Float64)
   rate::Float64
 end
 
-@kwdef struct EconomicIndicator <: AbstractStonksRecord
-  symbol::String
-  name::String
-  date::Date
-  value::Number
-end
+# @kwdef struct EconomicIndicator <: AbstractStonksRecord
+#   symbol::String
+#   name::String
+#   date::Date
+#   value::Number
+# end
 
 end

@@ -50,7 +50,7 @@ include("test_utils.jl")
 
   @testset "Request building using APIResource" begin
     tickers = complex_tickers()
-    resource = test_client.endpoints["price"]
+    resource = test_client.resources["price"]
     resource.max_batch_size = 2
     request_params = Requests.prepare_requests(tickers, resource; interval="1d")
     @test length(request_params) == 4
@@ -62,12 +62,12 @@ include("test_utils.jl")
   #   request_params = Requests.prepare_requests(tickers, test_client, interval = "1d")
   #   println(request_params)
   #   #@test isa(request_params, Dict)
-  #   #@test keys(request_params) == keys(test_client.endpoints)
+  #   #@test keys(request_params) == keys(test_client.resources)
   # end
 
   @testset "Resolution of url params" begin
-    url = "https://example.com/{endpoint}/{symbol}?lang=en&symbol={symbol}"
-    new_url = Requests.resolve_url_params(url; endpoint="quote", symbol="AAPL", foo="bar")
+    url = "https://example.com/{resource}/{symbol}?lang=en&symbol={symbol}"
+    new_url = Requests.resolve_url_params(url; resource="quote", symbol="AAPL", foo="bar")
     @test new_url == "https://example.com/quote/AAPL?lang=en&symbol=AAPL"
   end
 
@@ -88,7 +88,7 @@ include("test_utils.jl")
   end
 
   @testset "Resolution of all request parameters (url, query, others)" begin
-    resource = test_client.endpoints["price"]
+    resource = test_client.resources["price"]
     tickers = complex_tickers()
     request_params = Requests.prepare_requests(tickers, resource; interval="1d")
     @test length(request_params) == 4
@@ -96,7 +96,7 @@ include("test_utils.jl")
   end
 
   @testset "Resolution of all request parameters (url, query, others) for yahoo exchange rates" begin
-    resource = test_client.endpoints["exchange"]
+    resource = test_client.resources["exchange"]
     resource.max_batch_size = 2
     tickers = construct_updatable_symbols(["EUR/USD", "USD/CAD", "FOO/BAR"])
     batches = Requests.split_tickers_in_batches(tickers, resource.max_batch_size)
@@ -107,7 +107,7 @@ include("test_utils.jl")
 
   @testset "Resolution of all request parameters (url, query, others) for alphavantage exchange rates" begin
     client = APIClients.AlphavantageJSONClient("abc")
-    resource = client.endpoints["exchange"]
+    resource = client.resources["exchange"]
     tickers = construct_updatable_symbols(["EUR/USD", "USD/CAD", "FOO/BAR"])
     batches = Requests.split_tickers_in_batches(tickers, resource.max_batch_size)
     request_params = map(b -> Requests.resolve_request_parameters(b, resource; interval="1d"), batches)
@@ -118,7 +118,7 @@ include("test_utils.jl")
 
   @testset "Resolution of request parameters for alphavantage json client" begin
     client = APIClients.AlphavantageJSONClient("abc")
-    resource = client.endpoints["price"]
+    resource = client.resources["price"]
     tickers = @chain ["AAPL", "MSFT"] map(t -> UpdatableSymbol(t), _)
     request_params = Requests.prepare_requests(tickers, resource)
     @test first(request_params).params["symbol"] == "AAPL"
@@ -134,7 +134,7 @@ include("test_utils.jl")
   end
 
   @testset "Validation of request parameters" begin
-    resource = test_client.endpoints["price"]
+    resource = test_client.resources["price"]
     resource.query_params = Dict(
       "symbols" => "{symbols}", "from_symbol" => "{base}", "foo" => "{target}"
     )
