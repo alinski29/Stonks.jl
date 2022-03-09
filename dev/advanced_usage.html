@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Advanced usage · Stonks.jl</title><script data-outdated-warner src="assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="index.html"><img src="assets/logo.jpg" alt="Stonks.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="index.html">Stonks.jl</a></span></div><form class="docs-search" action="search.html"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="index.html">Home</a></li><li><span class="tocitem">User guide</span><ul><li><a class="tocitem" href="basic_usage.html">Basic usage</a></li><li class="is-active"><a class="tocitem" href="advanced_usage.html">Advanced usage</a><ul class="internal"><li><a class="tocitem" href="#Plug-in-any-data-format"><span>Plug in any data format</span></a></li><li><a class="tocitem" href="#Create-API-resources-for-your-custom-models"><span>Create API resources for your custom models</span></a></li><li><a class="tocitem" href="#Create-your-client-from-combining-API-resources"><span>Create your client from combining API resources</span></a></li></ul></li></ul></li><li><span class="tocitem">API</span><ul><li><a class="tocitem" href="api_types.html">Types</a></li><li><a class="tocitem" href="api_functions.html">Functions</a></li></ul></li><li><a class="tocitem" href="contributing.html">Contributing</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">User guide</a></li><li class="is-active"><a href="advanced_usage.html">Advanced usage</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="advanced_usage.html">Advanced usage</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/alinski29/Stonks.jl/blob/master/docs/src/advanced_usage.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Advanced-usage"><a class="docs-heading-anchor" href="#Advanced-usage">Advanced usage</a><a id="Advanced-usage-1"></a><a class="docs-heading-anchor-permalink" href="#Advanced-usage" title="Permalink"></a></h1><hr/><h2 id="Plug-in-any-data-format"><a class="docs-heading-anchor" href="#Plug-in-any-data-format">Plug in any data format</a><a id="Plug-in-any-data-format-1"></a><a class="docs-heading-anchor-permalink" href="#Plug-in-any-data-format" title="Permalink"></a></h2><p>The <a href="api_types.html#Stonks.Stores.FileStore"><code>FileStore</code></a> uses CSV as the default format for reading and writing data. If you wish more performance, you are free to use it with any format you like.  You just need to provide functions for reading and writing data with your format.  Here&#39;s an example using the <a href="https://github.com/apache/arrow-julia">Arrow</a> file format.</p><pre><code class="language-julia hljs">using Arrow, Dates, DataFrames
+using Stonks
+
+function write_arrow(df::AbstractDataFrame, path::String)
+  open(path, &quot;w&quot;) do io
+    Arrow.write(io, df)
+  end
+end
+read_arrow(path::String) = DataFrame(Arrow.Table(path))
+
+ds = FileStore{AssetPrice}(;
+  path=joinpath(@__DIR__, &quot;data/arrow&quot;),
+  ids=[:symbol],
+  format=&quot;arrow&quot;,
+  time_column=&quot;date&quot;,
+  reader=read_arrow,
+  writer=write_arrow,
+)
+
+data = [
+  AssetPrice(; symbol=&quot;MSFT&quot;, date=Date(&quot;2022-02-16&quot;), close=299.5),
+  AssetPrice(; symbol=&quot;MSFT&quot;, date=Date(&quot;2022-02-17&quot;), close=290.73),
+  AssetPrice(; symbol=&quot;AAPL&quot;, date=Date(&quot;2022-02-17&quot;), close=168.88),
+  AssetPrice(; symbol=&quot;AAPL&quot;, date=Date(&quot;2022-02-18&quot;), close=167.3),
+]
+
+save(ds, data)
+readdir(ds.path)
+1-element Vector{String}:
+ &quot;data.arrow&quot;
+
+df = load(ds)
+show(df)
+4×8 DataFrame
+ Row │ symbol  date        close    open      high      low       close_adjusted  volume   
+     │ String  Date        Float64  Float64?  Float64?  Float64?  Float64?        Integer? 
+─────┼─────────────────────────────────────────────────────────────────────────────────────
+   1 │ MSFT    2022-02-16   299.5    missing   missing   missing         missing   missing 
+   2 │ MSFT    2022-02-17   290.73   missing   missing   missing         missing   missing 
+   3 │ AAPL    2022-02-17   168.88   missing   missing   missing         missing   missing 
+   4 │ AAPL    2022-02-18   167.3    missing   missing   missing         missing   missing </code></pre><hr/><h2 id="Create-API-resources-for-your-custom-models"><a class="docs-heading-anchor" href="#Create-API-resources-for-your-custom-models">Create API resources for your custom models</a><a id="Create-API-resources-for-your-custom-models-1"></a><a class="docs-heading-anchor-permalink" href="#Create-API-resources-for-your-custom-models" title="Permalink"></a></h2><p>Assume we&#39;ll receive the following content from an API. Source: <a href="https://www.alphavantage.co/query?function=INFLATION&amp;apikey=demo">https://www.alphavantage.co/query?function=INFLATION&amp;apikey=demo</a></p><pre><code class="language-json hljs"> {
+  &quot;name&quot;: &quot;Inflation - US Consumer Prices&quot;,
+  &quot;interval&quot;: &quot;annual&quot;,
+  &quot;unit&quot;: &quot;percent&quot;,
+  &quot;data&quot;: [
+    {&quot;date&quot;: &quot;2020-01-01&quot;, &quot;value&quot;: &quot;1.2335&quot;},
+    {&quot;date&quot;: &quot;2019-01-01&quot;, &quot;value&quot;: &quot;1.8122&quot;}
+  ]
+}</code></pre><pre><code class="language-julia hljs">using Chain, Dates, JSON3
+using Stonks: Stonks, APIResource, JSONParser
+
+# Create your custom type
+struct MacroIndicator &lt;: AbstractStonksRecord
+  name::String
+  date::Date
+  value::Number
+end
+
+# Define a function with the same signature as `parse_conent`
+# parse_content(content::AbstractString; kwargs...) -&gt; Vector{&lt;:AbstractStonksRecord}
+function parse_inflation_data(content::AbstractString; kwargs...)
+  js = JSON3.read(content)
+  from, to = get(kwargs, :from, missing), get(kwargs, :to, missing)
+  return @chain js[&quot;data&quot;] begin 
+    map(x -&gt; MacroIndicator(
+      &quot;US Consumer Prices&quot;, tryparse(Date, x[:date]), tryparse(Float64, x[:value])), _,
+    )
+    isa(from, Date) ? filter(row -&gt; row.date &gt;= from, _) : _
+    isa(to, Date) ? filter(row -&gt; row.date &lt;= to, _) : _
+  end
+end
+
+# Define an API resource, wrap your function around a subtype of AbstractContentParser.
+# subtypes(Stonks.Parsers.AbstractContentParser)
+# [Stonks.Parsers.JSONParser, Stonks.Parsers.CSVParser]
+my_resource = APIResource{MacroIndicator}(;
+  url=&quot;https://www.alphavantage.co/query&quot;,
+  headers=Dict(&quot;accept&quot; =&gt; &quot;application/json&quot;),prices
+  query_params=Dict(&quot;function&quot; =&gt; &quot;INFLATION&quot;, &quot;apikey&quot; =&gt; &quot;demo&quot;),
+  parser=Stonks.JSONParser(parse_inflation_data),
+)
+
+data = get_data(my_resource; from=Date(&quot;2019-01-01&quot;))
+foreach(println, data)
+MacroIndicator(&quot;US Consumer Prices&quot;, Date(&quot;2020-01-01&quot;), 1.23358439630637)
+MacroIndicator(&quot;US Consumer Prices&quot;, Date(&quot;2019-01-01&quot;), 1.81221007526015)
+
+# convert it to a dataframe - types are preserved.
+to_dataframe(data)
+2×3 DataFrame
+ Row │ name       date        value   
+     │ String     Date        Number  
+─────┼────────────────────────────────
+   1 │ US Consumer Prices  2020-01-01  1.23358
+   2 │ US Consumer Prices  2019-01-01  1.81221</code></pre><hr/><h2 id="Create-your-client-from-combining-API-resources"><a class="docs-heading-anchor" href="#Create-your-client-from-combining-API-resources">Create your client from combining API resources</a><a id="Create-your-client-from-combining-API-resources-1"></a><a class="docs-heading-anchor-permalink" href="#Create-your-client-from-combining-API-resources" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Stonks: Stonks, APIClient
+
+yc = YahooClient(&quot;&lt;my_secret_key&gt;&quot;)
+ac = AlphavantageJSONClient(&quot;&lt;my_secret_key&gt;&quot;)
+
+my_client = Stonks.APIClient(Dict(
+  &quot;price&quot; =&gt; ac.resources[&quot;price&quot;],
+  &quot;info&quot; =&gt; yc.resources[&quot;info&quot;],
+  &quot;exchange&quot; =&gt; yc.resources[&quot;exchange&quot;], 
+  # ... + your own custom resources
+))
+Stonks.APIClients.get_supported_types(my_client)
+3-element Vector{DataType}:
+ ExchangeRate
+ AssetPrice
+ AssetInfo</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="basic_usage.html">« Basic usage</a><a class="docs-footer-nextpage" href="api_types.html">Types »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.14 on <span class="colophon-date" title="Wednesday 9 March 2022 13:47">Wednesday 9 March 2022</span>. Using Julia version 1.7.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
