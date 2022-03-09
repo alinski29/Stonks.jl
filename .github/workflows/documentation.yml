@@ -4,7 +4,6 @@ on:
   pull_request:
     branches: [main, master]
     tags: '*'
-  pull_request:
 jobs:
   build:
     runs-on: ubuntu-latest
