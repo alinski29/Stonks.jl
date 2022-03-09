@@ -26,14 +26,13 @@
    src=https://codecov.io/gh/alinski29/Stonks.jl/branch/main/graph/badge.svg?token=FPIHWY0WD3
    alt="Coverage status"
    />
-   </a>
+  </a>
   <a href="https://github.com/alinski29/Stonks.jl/actions/workflows/documentation.yml/badge.svg?branch=main">
   <img
   src="https://github.com/alinski29/Stonks.jl/actions/workflows/documentation.yml/badge.svg?branch=main"
   alt="Documentation status"
-  >
-  <img
   />
+  </a>
   </p>  
   <p>
 </div>
