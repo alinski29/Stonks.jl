@@ -15,7 +15,7 @@ Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
 [compat]
 CSV = "0.5"
 Chain = "0.4"
-DataFrames = "1.4"
+DataFrames = "1"
 HTTP = "0.9"
 JSON3 = "1.9"
 julia = "1"
