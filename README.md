@@ -27,6 +27,13 @@
    alt="Coverage status"
    />
    </a>
+  <a href="https://github.com/alinski29/Stonks.jl/actions/workflows/documentation.yml/badge.svg?branch=main">
+  <img
+  src="https://github.com/alinski29/Stonks.jl/actions/workflows/documentation.yml/badge.svg?branch=main"
+  alt="Documentation status"
+  >
+  <img
+  />
   </p>  
   <p>
 </div>
