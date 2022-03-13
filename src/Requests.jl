@@ -10,7 +10,7 @@ using HTTP: HTTP
 using JSON3: JSON3
 using Logging: @debug, @warn
 
-using Stonks: UpdatableSymbol, Either, Success, Failure, RequestBuilderError
+using Stonks: UpdatableSymbol, RequestBuilderError, APIResponseError
 using Stonks: split_tickers_in_batches, get_minimum_dates
 using Stonks.APIClients: APIResource, APIClient
 using Stonks.Models: AbstractStonksRecord, AssetInfo, AssetPrice, ExchangeRate
@@ -152,43 +152,48 @@ function validate_parameter_substitution(url::String, query_params::Dict{String,
 end
 
 function send_request(
-  req::RequestParams, retries::Integer=3
-)::Either{HTTP.Response,Exception}
+  req::RequestParams, retries::Integer=0
+)::Union{HTTP.Response,Exception}
   try
     resp = HTTP.request(
       "GET", req.url; headers=req.headers, query=req.query, retries=retries
     )
     if resp.status != 200
-      return HTTP.StatusError(resp.status, resp)
+      return APIResponseError("Code: $(resp.status)")
     end
-    return Success(resp)
+    return resp
   catch err
-    return Failure(HTTP.Response, err)
+    if isa(err, HTTP.ExceptionRequest.StatusError)
+      msg = String(err.response.body)
+      return APIResponseError("Code: $(err.status); msg: $msg")
+      #return err
+    end
+    return APIResponseError(String(err))
   end
 end
 
 function extract_content(
-  r::Either{HTTP.Response,Exception}
-)::Either{String,Exception}
-  !isa(r.value, HTTP.Response) && return r.err
+  resp::Union{HTTP.Response,Exception}
+)::Union{String,Exception}
+  !isa(resp, HTTP.Response) && return resp
   try
-    content = String(r.value.body)
+    content = String(resp.body)
     # @TODO: Add checks on content length
-    return Success(content)
+    return content
   catch err
-    return Failure(typeof(err), err)
+    return err
   end
 end
 
 function deserialize_content(
-  c::Either{String,Exception}, parser::AbstractContentParser; kwargs...
+  c::Union{String,Exception}, parser::AbstractContentParser; kwargs...
 )
-  !isa(c.value, String) && return c.err
-  content = c.value
+  !isa(c, String) && return c
+  content = c
   try
-    return Success(parse_content(parser, content; kwargs...))
+    return parse_content(parser, content; kwargs...)
   catch err
-    return Failure(typeof(err), err)
+    return APIResponseError(err.msg)
   end
 end
 
