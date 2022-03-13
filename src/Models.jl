@@ -44,7 +44,7 @@ AssetInfo(;
   industry::Union{String,Missing} = missing
   sector::Union{String,Missing} = missing
   timezone::Union{String,Missing} = missing
-  employees::Union{Integer,Missing} = missing
+  employees::Union{Int,Missing} = missing
 end
 """
 Stores a time series datapoint with price information. Lowest frequency is daily.
