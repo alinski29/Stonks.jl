@@ -3,6 +3,7 @@ using Test
 @testset "Stonks" begin
   include("requests.jl")
   include("apiclients.jl")
+  include("parsers_utils.jl")
   include("parsers_yahoo.jl")
   include("parsers_alphavantage.jl")
   include("conversions.jl")

@@ -3,7 +3,7 @@ using Dates
 using JSON3: JSON3
 
 using Stonks: JSONContent, APIResponseError, ContentParserError
-using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate
+using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate, IncomeStatement
 
 function parse_yahoo_info(
   content::AbstractString; kwargs...
@@ -83,6 +83,74 @@ function parse_yahoo_exchange_rate(
     vcat(_...)
     unique
   end
+end
+
+function parse_yahoo_income_statement(
+  content::AbstractString; kwargs...
+)::Union{Vector{IncomeStatement},Exception}
+  maybe_js = @chain begin
+    content
+    validate_yahoo_response
+    unpack_quote_summary_response
+  end
+  typeof(maybe_js) <: Exception && return maybe_js
+  js = maybe_js
+  from, to = [get(kwargs, arg, missing) for arg in [:from, :to]]
+  frequency = get(kwargs, :frequency, missing)
+  symbol = get(kwargs, :symbol, missing)
+  keys_default = [:incomeStatementHistory, :incomeStatementHistoryQuarterly]
+  keys_exp = (
+    if ismissing(frequency)
+      keys_default
+    elseif frequency in ["annual", "annualy", "year", "yearly"]
+      [:incomeStatementHistory]
+    elseif frequency in ["quarter", "quarterly"]
+      [:incomeStatementHistoryQuarterly]
+    else
+      keys_default
+    end
+  )
+  key_check = setdiff(keys_exp, keys(js))
+  if !isempty(key_check)
+    return ContentParserError("Missing keys: $(join(key_check, ","))")
+  end
+  for key in key_check
+    if !haskey(js[key], :incomeStatementHistory)
+      return ContentParserError("Missing keys js[$key][:incomeStatementHistory]")
+    end
+  end
+  remaps = Dict(
+    :sellingGeneralAndAdministrative => :sellingGeneralAdministrative,
+    :researchAndDevelopment => :researchDevelopment,
+  )
+  data = IncomeStatement[]
+  for key in keys_exp
+    js_vals = js[key][:incomeStatementHistory]
+    dvals = map(x -> begin
+      dval = js_to_dict(x)
+      dval[:fiscalDate] = Date(unix2datetime(dval[:endDate]))
+      dval
+    end, js_vals)
+    freq = key == :incomeStatementHistory ? "yearly" : "quarterly"
+    is = map(
+      obj -> tryparse_js(
+        IncomeStatement,
+        obj;
+        fixed=Dict(:symbol => symbol, :frequency => freq),
+        remaps=remaps,
+      ),
+      dvals,
+    )
+    append!(data, is)
+  end
+  original_len, latest_date = length(data), maximum(map(x -> x.fiscalDate, data))
+  res = apply_filters(data, "fiscalDate"; from=from, to=to)
+  if isempty(res)
+    @warn """No datapoints between '$from' and '$to' after filtering.
+             Original length: $original_len. Latest date: $latest_date"""
+    return IncomeStatement[]
+  end
+  return res
 end
 
 function parse_price_record(js_value::JSONContent)::Union{Vector{AssetPrice},Nothing}

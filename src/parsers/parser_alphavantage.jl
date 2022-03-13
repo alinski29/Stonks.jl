@@ -4,7 +4,7 @@ using JSON3: JSON3
 using Logging: @warn
 
 using Stonks: JSONContent, APIResponseError, ContentParserError
-using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate
+using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate, IncomeStatement
 
 function parse_alphavantage_price(
   content::AbstractString; kwargs...
@@ -109,6 +109,52 @@ function parse_alphavantage_exchange_rate(
       rate=tryparse(Float64, v["4. close"]),
     ) for (k, v) in series
   ]
+end
+
+function parse_alphavantage_income_statement(
+  content::AbstractString; kwargs...
+)::Union{Vector{IncomeStatement},Exception}
+  maybe_js = validate_alphavantage_response(content)
+  typeof(maybe_js) <: Exception && return maybe_js
+  js = maybe_js
+  from, to = [get(kwargs, arg, missing) for arg in [:from, :to]]
+  symbol = get(kwargs, :symbol, get(js, :symbol, missing))
+  frequency = get(kwargs, :frequency, missing) 
+  keys_default = [:annualReports, :quarterlyReports]
+  keys_exp = (
+    if ismissing(frequency)
+      keys_default
+    elseif frequency in ["annual", "annualy", "year", "yearly"]
+      [:annualReports]
+    elseif frequency in ["quarter", "quarterly"]
+      [:quarterlyReports]
+    else 
+      keys_default
+    end
+  )
+  key_check = setdiff(keys_exp, keys(js))
+  if !isempty(key_check)
+    return ContentParserError("Missing keys: $(join(key_check, ","))")
+  end
+  remaps = Dict(:fiscalDate => :fiscalDateEnding)
+  data = IncomeStatement[]
+  for key in keys_exp
+    freq = key == :annualReports ? "yearly" : "quarterly"
+    is = map(obj -> tryparse_js(
+      IncomeStatement, obj; 
+      fixed=Dict(:symbol => symbol, :frequency => freq),
+      remaps=remaps,
+    ), js[key])
+    append!(data, is)
+  end
+  original_len, latest_date = length(data), maximum(map(x -> x.fiscalDate, data))
+  res = apply_filters(data, "fiscalDate"; from=from, to=to)
+  if isempty(res) 
+    @warn """No datapoints between '$from' and '$to' after filtering.
+             Original length: $original_len. Latest date: $latest_date"""
+    return IncomeStatement[]
+  end
+  return res
 end
 
 function validate_alphavantage_response(

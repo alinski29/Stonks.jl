@@ -6,7 +6,7 @@ module Models
 using Base: @kwdef
 using Dates
 
-export AbstractStonksRecord, AssetInfo, AssetPrice, ExchangeRate
+export AbstractStonksRecord, AssetInfo, AssetPrice, ExchangeRate, IncomeStatement
 
 """
 Abstract type inteded to be subtyped by an data model.
@@ -30,7 +30,7 @@ AssetInfo(;
   industry::Union{String,Missing}=missing,
   sector::Union{String,Missing}=missing,
   timezone::Union{String,Missing}=missing,
-  employees::Union{Integer,Missing}=missing,
+  employees::Union{Int,Missing}=missing,
 )
 ```
 """
@@ -93,6 +93,57 @@ ExchangeRate(;
   target::String
   date::Date
   rate::Float64
+end
+
+"""
+Stores a datapoint containing income statement information. 
+Follows normalized fields mapped to GAAP and IFRS taxonomies of the SEC.
+
+### Constructors 
+```julia
+IncomeStatement(;
+  symbol::String,
+  frequency::String,
+  fiscalDate::Date,
+  totalRevenue::Int64,
+  costOfRevenue::Int64,
+  grossProfit::Int64,
+  operatingIncome::Int64,
+  sellingGeneralAndAdministrative::Union{Int64,Missing} = missing,
+  researchAndDevelopment::Union{Int64,Missing} = missing,
+  depreciation::Union{Int64,Missing} = missing,
+  depreciationAndAmortization::Union{Int64,Missing} = missing,
+  incomeBeforeTax::Union{Int64,Missing} = missing,
+  incomeTaxExpense::Union{Int64,Missing} = missing,
+  interestAndDebtExpense::Union{Int64,Missing} = missing,
+  comprehensiveIncomeNetOfTax::Union{Int64,Missing} = missing,
+  ebit::Union{Int64,Missing} = missing,
+  ebitda::Union{Int64,Missing} = missing,
+  netIncome::Int64,
+  netIncomeApplicableToCommonShares::Union{Int64,Missing} = missing,
+)
+```
+"""
+@kwdef struct IncomeStatement <: AbstractStonksRecord
+  symbol::String
+  frequency::String
+  fiscalDate::Date
+  totalRevenue::Int64
+  costOfRevenue::Int64
+  grossProfit::Int64
+  operatingIncome::Int64
+  sellingGeneralAndAdministrative::Union{Int64,Missing} = missing
+  researchAndDevelopment::Union{Int64,Missing} = missing
+  depreciation::Union{Int64,Missing} = missing # Depreciation, Total 
+  depreciationAndAmortization::Union{Int64,Missing} = missing
+  incomeBeforeTax::Union{Int64,Missing} = missing
+  incomeTaxExpense::Union{Int64,Missing} = missing
+  interestAndDebtExpense::Union{Int64,Missing} = missing
+  comprehensiveIncomeNetOfTax::Union{Int64,Missing} = missing
+  ebit::Union{Int64,Missing} = missing
+  ebitda::Union{Int64,Missing} = missing
+  netIncome::Int64
+  netIncomeApplicableToCommonShares::Union{Int64,Missing} = missing
 end
 
 # @kwdef struct EconomicIndicator <: AbstractStonksRecord

@@ -12,9 +12,11 @@ include("test_utils.jl")
 @testset "Alphavantage parsers" begin
   price_content = get_test_data("data/alphavantage_prices.json")
   exchange_content = get_test_data("data/alphavantage_exchange.json")
+  is_content = get_test_data("data/alphavantage_income_statement.json")
   price_parser = Parsers.AlphavantagePriceParser
   info_parser = Parsers.AlphavantageInfoParser
   exchange_parser = Parsers.AlphavantageExchangeRateParser
+  is_parser = Parsers.AlphavantageIncomeStatementParser
 
   @testset "Succesful price response" begin
     data = parse_content(price_parser, price_content)
@@ -77,5 +79,35 @@ include("test_utils.jl")
     dates = map(x -> x.date, data)
     @test minimum(dates) == from
     @test maximum(dates) == to
+  end
+
+  @testset "Successful income statement response" begin
+    data = parse_content(is_parser, is_content)
+    dates = map(x -> x.fiscalDate, data)
+    @test isa(data, Vector{Models.IncomeStatement})
+    @test length(data) == 25
+    @test first(data).symbol == "IBM"
+  end
+
+  @testset "Successful income statement response with yearly frequency" begin
+    data = parse_content(is_parser, is_content; frequency="yearly")
+    @test length(data) == 5
+  end
+
+  @testset "Successful income statement response with quarterly frequency" begin
+    data = parse_content(is_parser, is_content; frequency="quarterly")
+    @test length(data) == 20
+  end
+
+  @testset "Successful income statement response with date filters" begin
+    date_min, date_max = Date("2020-01-01"), Date("2020-12-31")
+    data = parse_content(is_parser, is_content; from=date_min, to=date_max)
+    dates = map(x -> x.fiscalDate, data)
+    @test minimum(dates) >= date_min && maximum(dates) <= date_max
+  end
+
+  @testset "Empty income statement response" begin
+    res = parse_content(is_parser, "{}")
+    @test isa(res, ContentParserError)
   end
 end
