@@ -19,6 +19,7 @@ using Stonks.Parsers: AbstractContentParser, parse_content
 @kwdef struct RequestParams
   url::String
   tickers::Vector{UpdatableSymbol}
+  retries::Int8 = 0
   headers::Dict{String,String} = Dict()
   params::Dict{String,String} = Dict()
   query::String = ""
@@ -124,6 +125,7 @@ function resolve_request_parameters(
   return RequestParams(;
     url=url_part,
     params=query_params,
+    retries=resource.max_retries,
     tickers=tickers,
     headers=resource.headers,
     query=join(["$k=$v" for (k, v) in query_params], "&"),
@@ -151,12 +153,10 @@ function validate_parameter_substitution(url::String, query_params::Dict{String,
   end
 end
 
-function send_request(
-  req::RequestParams, retries::Integer=0
-)::Union{HTTP.Response,Exception}
+function send_request(req::RequestParams)::Union{HTTP.Response,Exception}
   try
     resp = HTTP.request(
-      "GET", req.url; headers=req.headers, query=req.query, retries=retries
+      "GET", req.url; headers=req.headers, query=req.query, retries=rp.retries
     )
     if resp.status != 200
       return APIResponseError("Code: $(resp.status)")
@@ -166,7 +166,6 @@ function send_request(
     if isa(err, HTTP.ExceptionRequest.StatusError)
       msg = String(err.response.body)
       return APIResponseError("Code: $(err.status); msg: $msg")
-      #return err
     end
     return APIResponseError(String(err))
   end
