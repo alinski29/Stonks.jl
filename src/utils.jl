@@ -29,7 +29,6 @@ function build_fx_pair(symbol::String; delim="/")::Union{Tuple{String,String},Ex
   splits = split(symbol, delim)
   length(splits) != 2 &&
     return ArgumentError("Got more than 2 splits after split($symbol, '$delim')")
-  s_len = map(s -> length(s), splits)
   for split in splits
     l = length(split)
     l != 3 && return ArgumentError("$split must have only 3 characters, got $l.")

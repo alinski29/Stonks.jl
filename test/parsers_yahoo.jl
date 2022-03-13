@@ -15,6 +15,32 @@ include("test_utils.jl")
   exchange_content = get_test_data("data/yahoo_exchange.json")
   price_parser = Parsers.YahooPriceParser
   exchange_parser = Parsers.YahooExchangeRateParser
+  is_parser = Parsers.YahooIncomeStatementParser
+
+  @testset "Unpack quote summary response" begin
+    content = """{
+      "quoteSummary": {
+        "result": null,
+        "error": {
+          "code": "Not Found",
+          "description": "No fundamentals data found for any of the summaryTypes=incomeStatementHistory"
+        }
+      }
+    }"""
+    res = Parsers.unpack_quote_summary_response(JSON3.read(content))
+    @test isa(res, APIResponseError)
+    content = """{"foo": "bar"}"""
+    res = Parsers.unpack_quote_summary_response(JSON3.read(content))
+    @test isa(res, ContentParserError)
+    content = """{
+      "quoteSummary": {
+        "result": [{"foo": "bar"}],
+        "error": null
+      }
+    }"""
+    res = Parsers.unpack_quote_summary_response(JSON3.read(content))
+    @test isa(res, JSONContent)
+  end
 
   @testset "Succesful price response" begin
     data = parse_content(price_parser, price_content)
@@ -59,7 +85,7 @@ include("test_utils.jl")
       }
     }"""
     data = parse_content(price_parser, content)
-    @test isa(data, ContentParserError)
+    @test isa(data, APIResponseError)
   end
 
   @testset "Succesful yahoofinance response on AssetInfo" begin

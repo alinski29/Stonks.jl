@@ -186,7 +186,6 @@ function YahooClient(api_key::String)::APIClient
     query_params=Dict("modules" => "assetProfile,quoteType,price"),
     parser=Parsers.YahooInfoParser,
     headers=headers,
-    max_batch_size=1,
     max_retries=1,
   )
   exchange = APIResource{ExchangeRate}(;
@@ -221,7 +220,7 @@ function AlphavantageJSONClient(api_key::String)::APIClient
     ),
     parser=Parsers.AlphavantagePriceParser,
     headers=headers,
-    max_retries=3,
+    max_retries=1,
     rank_order=2,
   )
   info = APIResource{AssetInfo}(;
@@ -231,7 +230,7 @@ function AlphavantageJSONClient(api_key::String)::APIClient
     ),
     parser=Parsers.AlphavantageInfoParser,
     headers=headers,
-    max_retries=3,
+    max_retries=1,
     rank_order=2,
   )
   exchange = APIResource{ExchangeRate}(;
@@ -244,7 +243,7 @@ function AlphavantageJSONClient(api_key::String)::APIClient
     ),
     parser=Parsers.AlphavantageExchangeRateParser,
     headers=headers,
-    max_retries=3,
+    max_retries=1,
     rank_order=2,
   )
   return APIClient(Dict("price" => price, "info" => info, "exchange" => exchange), url)

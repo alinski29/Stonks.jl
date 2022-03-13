@@ -282,7 +282,7 @@ function optimistic_request_resolution(
   failures = Exception[]
   for response in c
     if response.err !== nothing
-      @warn "Request to: $(response.params.url) failed. Error: $(typeof(response.err))"
+      @warn "Request to: $(response.params.url) failed. $(response.err)"
       push!(failures, response.err)
     else
       append!(result, response.value)

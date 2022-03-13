@@ -226,8 +226,13 @@ function get_data(
   @sync begin
     for rp in requests
       Threads.@spawn begin
-        res = materialize_request(rp, resource.parser; from=rp.from, to=rp.to)
-        push!(responses, (params=rp, err=res.err, value=res.value))
+        symbol = length(rp.tickers) == 1 ? first(rp.tickers).ticker : missing
+        res = materialize_request(
+          rp, resource.parser; from=rp.from, to=rp.to, symbol=symbol
+        )
+        err = typeof(res) <: Exception ? res : nothing
+        value = typeof(res) <: Exception ? nothing : res
+        push!(responses, (params=rp, err=err, value=value))
       end
     end
   end

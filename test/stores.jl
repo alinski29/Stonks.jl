@@ -170,7 +170,6 @@ include("test_utils.jl")
     df = load(ds, Dict("symbol" => ["AAPL", "MSFT"]))
     @test sort(unique(df[:, :symbol])) == ["AAPL", "MSFT"]
     data = load(ds, Dict("foo" => ["BAR", "BAZ"]))
-    #println(data)
     @test typeof(data) <: Exception
     rm(dest; recursive=true, force=true)
   end
