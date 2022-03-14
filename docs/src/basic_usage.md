@@ -47,6 +47,7 @@ julia> ENV["ALPHAVANTAGE_TOKEN"]
 ---
 
 ## API Summary
+```@raw html
 <div align="left">
 <style type="text/css">
 .tg  {border-collapse:collapse;border-color:#ccc;border-spacing:0;}
@@ -76,7 +77,7 @@ julia> ENV["ALPHAVANTAGE_TOKEN"]
     <th class="tg-9sbb" rowspan="2">Type</th>
     <th class="tg-9sbb" rowspan="2">Function</th>
     <th class="tg-9sbb" rowspan="2">Description</th>
-    <th class="tg-9sbb" colspan="2">Clients</th>
+    <th class="tg-9sbb" colspan="2" style="text-align:center;vertical-align:middle">Clients</th>
   </tr>
   <tr>
     <th class="tg-rek1">Alphavantage</th>
@@ -142,7 +143,7 @@ julia> ENV["ALPHAVANTAGE_TOKEN"]
 </tbody>
 </table>
 </div>
-
+```
 
 ---
 ## Get price time series
