@@ -19,7 +19,7 @@ using Stonks.Parsers: AbstractContentParser, parse_content
 @kwdef struct RequestParams
   url::String
   tickers::Vector{UpdatableSymbol}
-  retries::Int8 = 0
+  retries::Int = 0
   headers::Dict{String,String} = Dict()
   params::Dict{String,String} = Dict()
   query::String = ""
@@ -156,7 +156,7 @@ end
 function send_request(req::RequestParams)::Union{HTTP.Response,Exception}
   try
     resp = HTTP.request(
-      "GET", req.url; headers=req.headers, query=req.query, retries=rp.retries
+      "GET", req.url; headers=req.headers, query=req.query, retries=req.retries
     )
     if resp.status != 200
       return APIResponseError("Code: $(resp.status)")
@@ -290,7 +290,10 @@ function optimistic_request_resolution(
   if !isempty(result)
     return result
   end
-  return first(failures)
+  if !isempty(failures)
+    return first(failures)
+  end
+  return result
 end
 
 end
