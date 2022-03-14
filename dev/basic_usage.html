@@ -5,7 +5,101 @@ Pkg.dev(&quot;https://github.com/alinski29/Stonks.jl&quot;)</code></pre><p>Throu
 # or client = AlphavantageJSONClient(&quot;&lt;my_token&gt;&quot;)</code></pre><hr/><h3 id="Client-resolution-fron-ENV-variables"><a class="docs-heading-anchor" href="#Client-resolution-fron-ENV-variables">Client resolution fron ENV variables</a><a id="Client-resolution-fron-ENV-variables-1"></a><a class="docs-heading-anchor-permalink" href="#Client-resolution-fron-ENV-variables" title="Permalink"></a></h3><p>You can omit the <code>client</code> parameter in all functions IF you set one of the environment variables:</p><ul><li>For Alphavantage: <code>ALPHAVANTAGE_TOKEN</code> =&gt; will build an <code>APIClient</code> using <a href="api_functions.html#Stonks.APIClients.AlphavantageJSONClient"><code>AlphavantageJSONClient</code></a></li><li>For Yahoo Finance: <code>YAHOOFINANCE_TOKEN</code> =&gt; will build an <code>APIClient</code> using <a href="api_functions.html#Stonks.APIClients.YahooClient"><code>YahooClient</code></a></li></ul><p>In your terminal, type:</p><pre><code class="language-bash hljs">export ALPHAVANTAGE_TOKEN=&#39;MY_TOKEN&#39;
 echo $ALPHAVANTAGE_TOKEN
 MY_TOKEN</code></pre><pre><code class="language-julia hljs">julia&gt; ENV[&quot;ALPHAVANTAGE_TOKEN&quot;]
-&quot;MY_TOKEN&quot;</code></pre><hr/><h2 id="API-Summary"><a class="docs-heading-anchor" href="#API-Summary">API Summary</a><a id="API-Summary-1"></a><a class="docs-heading-anchor-permalink" href="#API-Summary" title="Permalink"></a></h2><p>&lt;div align=&quot;left&quot;&gt; &lt;style type=&quot;text/css&quot;&gt; .tg  {border-collapse:collapse;border-color:#ccc;border-spacing:0;} .tg td{background-color:#fff;border-color:#ccc;border-style:solid;border-width:1px;color:#333;   font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;word-break:normal;} .tg th{background-color:#f0f0f0;border-color:#ccc;border-style:solid;border-width:1px;color:#333;   font-family:Arial, sans-serif;font-size:14px;font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;} .tg .tg-hfmg{border-color:#9b9b9b;font-family:inherit;text-align:center;vertical-align:middle} .tg .tg-rek1{background-color:#efefef;border-color:#9b9b9b;font-family:inherit;text-align:center;vertical-align:top} .tg .tg-otat{background-color:#f9f9f9;border-color:#9b9b9b;font-family:inherit;text-align:left;vertical-align:top} .tg .tg-d7ja{background-color:#f9f9f9;border-color:#9b9b9b;font-family:inherit;font-size:16px;font-weight:bold;text-align:center;   vertical-align:top} .tg .tg-9sbb{border-color:#9b9b9b;font-family:inherit;font-size:18px;font-weight:bold;text-align:center;vertical-align:middle} .tg .tg-6cmx{background-color:#f9f9f9;border-color:#9b9b9b;font-family:inherit;text-align:center;vertical-align:middle} .tg .tg-psru{border-color:#9b9b9b;font-family:inherit;text-align:left;vertical-align:top} &lt;/style&gt; &lt;table class=&quot;tg&quot; style=&quot;undefined;table-layout: fixed; width: 896px&quot;&gt; &lt;colgroup&gt; &lt;col style=&quot;width: 174px&quot;&gt; &lt;col style=&quot;width: 195px&quot;&gt; &lt;col style=&quot;width: 245px&quot;&gt; &lt;col style=&quot;width: 136px&quot;&gt; &lt;col style=&quot;width: 146px&quot;&gt; &lt;/colgroup&gt; &lt;thead&gt;   &lt;tr&gt;     &lt;th class=&quot;tg-9sbb&quot; rowspan=&quot;2&quot;&gt;Type&lt;/th&gt;     &lt;th class=&quot;tg-9sbb&quot; rowspan=&quot;2&quot;&gt;Function&lt;/th&gt;     &lt;th class=&quot;tg-9sbb&quot; rowspan=&quot;2&quot;&gt;Description&lt;/th&gt;     &lt;th class=&quot;tg-9sbb&quot; colspan=&quot;2&quot;&gt;Clients&lt;/th&gt;   &lt;/tr&gt;   &lt;tr&gt;     &lt;th class=&quot;tg-rek1&quot;&gt;Alphavantage&lt;/th&gt;     &lt;th class=&quot;tg-rek1&quot;&gt;Yahoo Finance&lt;/th&gt;   &lt;/tr&gt; &lt;/thead&gt; &lt;tbody&gt;   &lt;tr&gt;     &lt;td class=&quot;tg-psru&quot;&gt;&lt;a href=&quot;https://alinski29.github.io/Stonks.jl/dev/api<em>types.html#Stonks.Models.AssetInfo&quot; target=&quot;</em>blank&quot; rel=&quot;noopener noreferrer&quot;&gt;AssetInfo&lt;/a&gt;&lt;/td&gt;     &lt;td class=&quot;tg-psru&quot;&gt;&lt;a href=&quot;https://alinski29.github.io/Stonks.jl/dev/api<em>functions.html#Stonks.get</em>info&quot; target=&quot;<em>blank&quot; rel=&quot;noopener noreferrer&quot;&gt;get</em>info&lt;/a&gt;&lt;/td&gt;     &lt;td class=&quot;tg-psru&quot;&gt;Basic stock information&lt;/td&gt;     &lt;td class=&quot;tg-hfmg&quot;&gt;&amp;#9989;&lt;/td&gt;     &lt;td class=&quot;tg-hfmg&quot;&gt;&amp;#9989;&lt;/td&gt;   &lt;/tr&gt;   &lt;tr&gt;     &lt;td class=&quot;tg-otat&quot;&gt;&lt;a href=&quot;https://alinski29.github.io/Stonks.jl/dev/api<em>types.html#Stonks.Models.AssetPrice&quot; target=&quot;</em>blank&quot; rel=&quot;noopener noreferrer&quot;&gt;AssetPrice&lt;/a&gt;&lt;/td&gt;     &lt;td class=&quot;tg-otat&quot;&gt;&lt;a href=&quot;https://alinski29.github.io/Stonks.jl/dev/api<em>functions.html#Stonks.get</em>price&quot; target=&quot;<em>blank&quot; rel=&quot;noopener noreferrer&quot;&gt;get</em>price&lt;/a&gt;&lt;/td&gt;     &lt;td class=&quot;tg-otat&quot;&gt;Historical price time series&lt;br&gt;&lt;/td&gt;     &lt;td class=&quot;tg-6cmx&quot;&gt;&amp;#9989;&lt;/td&gt;     &lt;td class=&quot;tg-6cmx&quot;&gt;&amp;#9989;&lt;/td&gt;   &lt;/tr&gt;   &lt;tr&gt;     &lt;td class=&quot;tg-psru&quot;&gt;&lt;a href=&quot;https://alinski29.github.io/Stonks.jl/dev/api<em>types.html#Stonks.Models.ExchangeRate&quot; target=&quot;</em>blank&quot; rel=&quot;noopener noreferrer&quot;&gt;ExchangeRate&lt;/a&gt;&lt;/td&gt;     &lt;td class=&quot;tg-psru&quot;&gt;&lt;a href=&quot;https://alinski29.github.io/Stonks.jl/dev/api<em>functions.html#Stonks.get</em>exchange<em>rate&quot; target=&quot;</em>blank&quot; rel=&quot;noopener noreferrer&quot;&gt;get<em>exchange</em>rate&lt;/a&gt;&lt;/td&gt;     &lt;td class=&quot;tg-psru&quot;&gt;Historical exchange rate time series&lt;br&gt;&lt;/td&gt;     &lt;td class=&quot;tg-hfmg&quot;&gt;&amp;#9989;&lt;/td&gt;     &lt;td class=&quot;tg-hfmg&quot;&gt;&amp;#9989;&lt;/td&gt;   &lt;/tr&gt;   &lt;tr&gt;     &lt;td class=&quot;tg-otat&quot;&gt;&lt;a href=&quot;https://alinski29.github.io/Stonks.jl/dev/api<em>types.html#Stonks.Models.IncomeStatement&quot; target=&quot;</em>blank&quot; rel=&quot;noopener noreferrer&quot;&gt;IncomeStatement&lt;/a&gt;&lt;/td&gt;     &lt;td class=&quot;tg-otat&quot;&gt;&lt;a href=&quot;https://alinski29.github.io/Stonks.jl/dev/api<em>functions.html#Stonks.get</em>income<em>statement&quot; target=&quot;</em>blank&quot; rel=&quot;noopener noreferrer&quot;&gt;get<em>income</em>statement&lt;/a&gt;&lt;/td&gt;     &lt;td class=&quot;tg-otat&quot;&gt;Historical income statement&lt;br&gt;&lt;/td&gt;     &lt;td class=&quot;tg-6cmx&quot;&gt;&amp;#9989;&lt;/td&gt;     &lt;td class=&quot;tg-6cmx&quot;&gt;&amp;#9989;&lt;/td&gt;   &lt;/tr&gt;   &lt;tr&gt;     &lt;td class=&quot;tg-psru&quot;&gt;&lt;a href=&quot;https://alinski29.github.io/Stonks.jl/dev/api<em>types.html#Stonks.Models.BalanceSheet&quot; target=&quot;</em>blank&quot; rel=&quot;noopener noreferrer&quot;&gt;BalanceSheet&lt;/a&gt;&lt;/td&gt;     &lt;td class=&quot;tg-psru&quot;&gt;&lt;a href=&quot;https://alinski29.github.io/Stonks.jl/dev/api<em>functions.html#Stonks.get</em>balance<em>sheet&quot; target=&quot;</em>blank&quot; rel=&quot;noopener noreferrer&quot;&gt;get<em>balance</em>sheet&lt;/a&gt;&lt;/td&gt;     &lt;td class=&quot;tg-psru&quot;&gt;Historical balance sheet data&lt;br&gt;&lt;/td&gt;     &lt;td class=&quot;tg-hfmg&quot;&gt;&amp;#9989;&lt;/td&gt;     &lt;td class=&quot;tg-hfmg&quot;&gt;&amp;#9989;&lt;/td&gt;   &lt;/tr&gt;   &lt;tr&gt;     &lt;td class=&quot;tg-d7ja&quot; colspan=&quot;2&quot;&gt;Upcoming&lt;/td&gt;     &lt;td class=&quot;tg-otat&quot;&gt;&lt;/td&gt;     &lt;td class=&quot;tg-6cmx&quot;&gt;&lt;/td&gt;     &lt;td class=&quot;tg-6cmx&quot;&gt;&lt;/td&gt;   &lt;/tr&gt;   &lt;tr&gt;     &lt;td class=&quot;tg-psru&quot;&gt;CashFlowStatement&lt;/td&gt;     &lt;td class=&quot;tg-psru&quot;&gt;get<em>cash</em>flows&lt;/td&gt;     &lt;td class=&quot;tg-psru&quot;&gt;&lt;/td&gt;     &lt;td class=&quot;tg-hfmg&quot;&gt;&lt;/td&gt;     &lt;td class=&quot;tg-hfmg&quot;&gt;&lt;/td&gt;   &lt;/tr&gt;   &lt;tr&gt;     &lt;td class=&quot;tg-otat&quot;&gt;Earnings&lt;/td&gt;     &lt;td class=&quot;tg-otat&quot;&gt;get_earnings&lt;/td&gt;     &lt;td class=&quot;tg-otat&quot;&gt;&lt;/td&gt;     &lt;td class=&quot;tg-6cmx&quot;&gt;&lt;/td&gt;     &lt;td class=&quot;tg-6cmx&quot;&gt;&lt;/td&gt;   &lt;/tr&gt; &lt;/tbody&gt; &lt;/table&gt; &lt;/div&gt;</p><hr/><h2 id="Get-price-time-series"><a class="docs-heading-anchor" href="#Get-price-time-series">Get price time series</a><a id="Get-price-time-series-1"></a><a class="docs-heading-anchor-permalink" href="#Get-price-time-series" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Dates
+&quot;MY_TOKEN&quot;</code></pre><hr/><h2 id="API-Summary"><a class="docs-heading-anchor" href="#API-Summary">API Summary</a><a id="API-Summary-1"></a><a class="docs-heading-anchor-permalink" href="#API-Summary" title="Permalink"></a></h2><div align="left">
+<style type="text/css">
+.tg  {border-collapse:collapse;border-color:#ccc;border-spacing:0;}
+.tg td{background-color:#fff;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
+  font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{background-color:#f0f0f0;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
+  font-family:Arial, sans-serif;font-size:14px;font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-hfmg{border-color:#9b9b9b;font-family:inherit;text-align:center;vertical-align:middle}
+.tg .tg-rek1{background-color:#efefef;border-color:#9b9b9b;font-family:inherit;text-align:center;vertical-align:top}
+.tg .tg-otat{background-color:#f9f9f9;border-color:#9b9b9b;font-family:inherit;text-align:left;vertical-align:top}
+.tg .tg-d7ja{background-color:#f9f9f9;border-color:#9b9b9b;font-family:inherit;font-size:16px;font-weight:bold;text-align:center;
+  vertical-align:top}
+.tg .tg-9sbb{border-color:#9b9b9b;font-family:inherit;font-size:18px;font-weight:bold;text-align:center;vertical-align:middle}
+.tg .tg-6cmx{background-color:#f9f9f9;border-color:#9b9b9b;font-family:inherit;text-align:center;vertical-align:middle}
+.tg .tg-psru{border-color:#9b9b9b;font-family:inherit;text-align:left;vertical-align:top}
+</style>
+<table class="tg" style="undefined;table-layout: fixed; width: 896px">
+<colgroup>
+<col style="width: 174px">
+<col style="width: 195px">
+<col style="width: 245px">
+<col style="width: 136px">
+<col style="width: 146px">
+</colgroup>
+<thead>
+  <tr>
+    <th class="tg-9sbb" rowspan="2">Type</th>
+    <th class="tg-9sbb" rowspan="2">Function</th>
+    <th class="tg-9sbb" rowspan="2">Description</th>
+    <th class="tg-9sbb" colspan="2" style="text-align:center;vertical-align:middle">Clients</th>
+  </tr>
+  <tr>
+    <th class="tg-rek1">Alphavantage</th>
+    <th class="tg-rek1">Yahoo Finance</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-psru"><a href="https://alinski29.github.io/Stonks.jl/dev/api_types.html#Stonks.Models.AssetInfo" target="_blank" rel="noopener noreferrer">AssetInfo</a></td>
+    <td class="tg-psru"><a href="https://alinski29.github.io/Stonks.jl/dev/api_functions.html#Stonks.get_info" target="_blank" rel="noopener noreferrer">get_info</a></td>
+    <td class="tg-psru">Basic stock information</td>
+    <td class="tg-hfmg">&#9989;</td>
+    <td class="tg-hfmg">&#9989;</td>
+  </tr>
+  <tr>
+    <td class="tg-otat"><a href="https://alinski29.github.io/Stonks.jl/dev/api_types.html#Stonks.Models.AssetPrice" target="_blank" rel="noopener noreferrer">AssetPrice</a></td>
+    <td class="tg-otat"><a href="https://alinski29.github.io/Stonks.jl/dev/api_functions.html#Stonks.get_price" target="_blank" rel="noopener noreferrer">get_price</a></td>
+    <td class="tg-otat">Historical price time series<br></td>
+    <td class="tg-6cmx">&#9989;</td>
+    <td class="tg-6cmx">&#9989;</td>
+  </tr>
+  <tr>
+    <td class="tg-psru"><a href="https://alinski29.github.io/Stonks.jl/dev/api_types.html#Stonks.Models.ExchangeRate" target="_blank" rel="noopener noreferrer">ExchangeRate</a></td>
+    <td class="tg-psru"><a href="https://alinski29.github.io/Stonks.jl/dev/api_functions.html#Stonks.get_exchange_rate" target="_blank" rel="noopener noreferrer">get_exchange_rate</a></td>
+    <td class="tg-psru">Historical exchange rate time series<br></td>
+    <td class="tg-hfmg">&#9989;</td>
+    <td class="tg-hfmg">&#9989;</td>
+  </tr>
+  <tr>
+    <td class="tg-otat"><a href="https://alinski29.github.io/Stonks.jl/dev/api_types.html#Stonks.Models.IncomeStatement" target="_blank" rel="noopener noreferrer">IncomeStatement</a></td>
+    <td class="tg-otat"><a href="https://alinski29.github.io/Stonks.jl/dev/api_functions.html#Stonks.get_income_statement" target="_blank" rel="noopener noreferrer">get_income_statement</a></td>
+    <td class="tg-otat">Historical income statement<br></td>
+    <td class="tg-6cmx">&#9989;</td>
+    <td class="tg-6cmx">&#9989;</td>
+  </tr>
+  <tr>
+    <td class="tg-psru"><a href="https://alinski29.github.io/Stonks.jl/dev/api_types.html#Stonks.Models.BalanceSheet" target="_blank" rel="noopener noreferrer">BalanceSheet</a></td>
+    <td class="tg-psru"><a href="https://alinski29.github.io/Stonks.jl/dev/api_functions.html#Stonks.get_balance_sheet" target="_blank" rel="noopener noreferrer">get_balance_sheet</a></td>
+    <td class="tg-psru">Historical balance sheet data<br></td>
+    <td class="tg-hfmg">&#9989;</td>
+    <td class="tg-hfmg">&#9989;</td>
+  </tr>
+  <tr>
+    <td class="tg-d7ja" colspan="2">Upcoming</td>
+    <td class="tg-otat"></td>
+    <td class="tg-6cmx"></td>
+    <td class="tg-6cmx"></td>
+  </tr>
+  <tr>
+    <td class="tg-psru">CashFlowStatement</td>
+    <td class="tg-psru">get_cash_flows</td>
+    <td class="tg-psru"></td>
+    <td class="tg-hfmg"></td>
+    <td class="tg-hfmg"></td>
+  </tr>
+  <tr>
+    <td class="tg-otat">Earnings</td>
+    <td class="tg-otat">get_earnings</td>
+    <td class="tg-otat"></td>
+    <td class="tg-6cmx"></td>
+    <td class="tg-6cmx"></td>
+  </tr>
+</tbody>
+</table>
+</div><hr/><h2 id="Get-price-time-series"><a class="docs-heading-anchor" href="#Get-price-time-series">Get price time series</a><a id="Get-price-time-series-1"></a><a class="docs-heading-anchor-permalink" href="#Get-price-time-series" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Dates
 
 # Create a  client
 client = YahooClient(&quot;&lt;api_key&gt;&quot;) # or AlphavantageJSONClient(&lt;api_key&gt;)
@@ -135,4 +229,4 @@ show_stats(ds)
    4 │ MSFT    2022-03-04    2022-02-28        5
 # update(ds, [&quot;IBM&quot;, &quot;AMD&quot;]) - will include data since earliest available
 # update(ds, vcat(symbols, [&quot;IBM&quot;, &quot;AMD&quot;])) - will also update the existing symbols, 
-#  if there is new data</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="index.html">« Home</a><a class="docs-footer-nextpage" href="advanced_usage.html">Advanced usage »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.14 on <span class="colophon-date" title="Monday 14 March 2022 17:51">Monday 14 March 2022</span>. Using Julia version 1.7.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+#  if there is new data</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="index.html">« Home</a><a class="docs-footer-nextpage" href="advanced_usage.html">Advanced usage »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.14 on <span class="colophon-date" title="Monday 14 March 2022 18:49">Monday 14 March 2022</span>. Using Julia version 1.7.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
