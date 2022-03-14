@@ -14,6 +14,8 @@ AbstractStonksRecord
 AssetInfo
 AssetPrice
 ExchangeRate
+IncomeStatement
+BalanceSheet
 ```
 ---
 ## API Clients
