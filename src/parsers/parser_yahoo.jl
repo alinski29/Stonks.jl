@@ -3,7 +3,7 @@ using Dates
 using JSON3: JSON3
 
 using Stonks: JSONContent, APIResponseError, ContentParserError
-using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate, IncomeStatement
+using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate, IncomeStatement, BalanceSheet
 
 function parse_yahoo_info(
   content::AbstractString; kwargs...
@@ -99,6 +99,7 @@ function parse_yahoo_income_statement(
   frequency = get(kwargs, :frequency, missing)
   symbol = get(kwargs, :symbol, missing)
   keys_default = [:incomeStatementHistory, :incomeStatementHistoryQuarterly]
+  currency = extract_currency(js)
   keys_exp = (
     if ismissing(frequency)
       keys_default
@@ -151,6 +152,112 @@ function parse_yahoo_income_statement(
     return IncomeStatement[]
   end
   return res
+end
+
+function parse_yahoo_balance_sheet(
+  content::AbstractString; kwargs...
+)::Union{Vector{BalanceSheet},Exception}
+  maybe_js = @chain begin
+    content
+    validate_yahoo_response
+    unpack_quote_summary_response
+  end
+  typeof(maybe_js) <: Exception && return maybe_js
+  js = maybe_js
+  from, to = [get(kwargs, arg, missing) for arg in [:from, :to]]
+  frequency = get(kwargs, :frequency, missing)
+  symbol = get(kwargs, :symbol, missing)
+  keys_default = [:balanceSheetHistory, :balanceSheetHistoryQuarterly]
+  currency = extract_currency(js)
+  keys_exp = (
+    if ismissing(frequency)
+      keys_default
+    elseif frequency in ["annual", "annualy", "year", "yearly"]
+      [:balanceSheetHistory]
+    elseif frequency in ["quarter", "quarterly"]
+      [:balanceSheetHistoryQuarterly]
+    else
+      keys_default
+    end
+  )
+  key_check = setdiff(keys_exp, keys(js))
+  if !isempty(key_check)
+    return ContentParserError("Missing keys: $(join(key_check, ","))")
+  end
+  for key in key_check
+    if !haskey(js[key], :balanceSheetStatements)
+      return ContentParserError("Missing keys js[$key][:balanceSheetStatements]")
+    end
+  end
+  remaps = Dict(
+    :cashAndCashEquivalents => :cash,
+    :currentNetReceivables => :netReceivables,
+    :goodwill => :goodWill,
+    :currentAccountsPayable => :accountsPayable,
+    :otherCurrentLiabilities => :otherCurrentLiab,
+    :totalLiabilities => :totalLiab,
+    :totalShareholderEquity => :totalStockholderEquity,
+  )
+  data = BalanceSheet[]
+  for key in keys_exp
+    js_vals = js[key][:balanceSheetStatements]
+    dvals = map(
+      x -> begin
+        dval = js_to_dict(x)
+        dval[:fiscalDate] = Date(unix2datetime(dval[:endDate]))
+        ks = [
+          :intangibleAssets,
+          :goodWill,
+          :treasuryStock,
+          :otherStockholderEquity,
+          :longTermDebt,
+          :longTermDebtNonCurrent,
+        ]
+        for k in ks
+          if haskey(dval, k)
+            dval[k] = !isa(dval[k], Int64) ? tryparse(Int64, dval[k]) : dval[k]
+          else 
+            dval[k] = missing
+          end
+        end
+        dval[:intangibleAssets] = dval[:intangibleAssets] + dval[:goodWill]
+        dval[:treasuryStock] =
+          abs(dval[:treasuryStock]) - abs(dval[:otherStockholderEquity])
+        dval[:longTermDebtNoncurrent] = dval[:longTermDebt]
+        delete!(dval, :longTermDebt)
+        [delete!(dval, k) for (k, v) in dval if ismissing(v)]
+        dval
+      end,
+      js_vals,
+    )
+    freq = key == :balanceSheetHistory ? "yearly" : "quarterly"
+    bs = map(
+      obj -> tryparse_js(
+        BalanceSheet,
+        obj;
+        fixed=Dict(:symbol => symbol, :frequency => freq, :currency => currency),
+        remaps=remaps,
+      ),
+      dvals,
+    )
+    append!(data, bs)
+  end
+  original_len, latest_date = length(data), maximum(map(x -> x.fiscalDate, data))
+  res = apply_filters(data, "fiscalDate"; from=from, to=to)
+  if isempty(res)
+    @warn """No datapoints between '$from' and '$to' after filtering.
+             Original length: $original_len. Latest date: $latest_date"""
+    return BalanceSheet[]
+  end
+  return res
+end
+
+function extract_currency(js::JSONContent)
+  if haskey(js, :price)
+    return (haskey(js[:price], :currency) ? js[:price][:currency] : missing)
+  else
+    return missing
+  end
 end
 
 function parse_price_record(js_value::JSONContent)::Union{Vector{AssetPrice},Nothing}

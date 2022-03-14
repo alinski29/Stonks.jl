@@ -9,7 +9,7 @@ using Dates
 using Stonks: DataClientError
 using Stonks.Parsers
 using Stonks.Models:
-  AbstractStonksRecord, AssetPrice, AssetInfo, ExchangeRate, IncomeStatement
+  AbstractStonksRecord, AssetPrice, AssetInfo, ExchangeRate, IncomeStatement, BalanceSheet
 
 export APIClient, APIResource, AlphavantageJSONClient, YahooClient
 
@@ -54,7 +54,7 @@ mutable struct APIResource{T<:AbstractStonksRecord}
   headers::Dict{String,String}
   symbol_key::String
   max_batch_size::Int8
-  max_retries::Int8
+  max_retries::Int
   rank_order::Int8
 end
 # constructor from kwargs
@@ -169,6 +169,7 @@ Contains the following `resources`:
   - price => `APIResource{AssetPrice}`
   - exchange => `APIResource{ExchangeRate}`
   - income_statement => `APIResource{IncomeStatement}`
+  - balance_sheet => `APIResource{BalanceSheet}`
 """
 function YahooClient(api_key::String)::APIClient
   url = "https://yfapi.net"
@@ -203,9 +204,19 @@ function YahooClient(api_key::String)::APIClient
   income_statement = APIResource{IncomeStatement}(;
     url="$url/v11/finance/quoteSummary/{symbol}",
     query_params=Dict(
-      "modules" => "incomeStatementHistory,incomeStatementHistoryQuarterly"
+      "modules" => "price,incomeStatementHistory,incomeStatementHistoryQuarterly"
     ),
     parser=Parsers.YahooIncomeStatementParser,
+    headers=headers,
+    max_retries=1,
+    rank_order=2,
+  )
+  balance_sheet = APIResource{BalanceSheet}(;
+    url="$url/v11/finance/quoteSummary/{symbol}",
+    query_params=Dict(
+      "modules" => "price,balanceSheetHistory,balanceSheetHistoryQuarterly"
+    ),
+    parser=Parsers.YahooBalanceSheetParser,
     headers=headers,
     max_retries=1,
     rank_order=2,
@@ -215,6 +226,7 @@ function YahooClient(api_key::String)::APIClient
     "info" => info,
     "exchange" => exchange,
     "income_statement" => income_statement,
+    "balance_sheet" => balance_sheet,
   )
   return APIClient(resources, url)
 end
@@ -228,6 +240,7 @@ Contains the following `resources`:
   - price => `APIResource{AssetPrice}`
   - exchange => `APIResource{ExchangeRate}`
   - income_statement => `APIResource{IncomeStatement}`
+  - balance_sheet => `APIResource{BalanceSheet}`
 """
 function AlphavantageJSONClient(api_key::String)::APIClient
   url = "https://www.alphavantage.co"
@@ -275,11 +288,22 @@ function AlphavantageJSONClient(api_key::String)::APIClient
     max_retries=1,
     rank_order=1,
   )
+  balance_sheet = APIResource{BalanceSheet}(;
+    url="$url/query",
+    query_params=Dict(
+      "function" => "BALANCE_SHEET", "symbol" => "{symbol}", "apikey" => api_key
+    ),
+    parser=Parsers.AlphavantageBalanceSheetParser,
+    headers=headers,
+    max_retries=1,
+    rank_order=1,
+  )
   resources = Dict(
     "price" => price,
     "info" => info,
     "exchange" => exchange,
     "income_statement" => income_statement,
+    "balance_sheet" => balance_sheet,
   )
   return APIClient(resources, url)
 end

@@ -15,9 +15,11 @@ include("test_utils.jl")
   overview_content = get_test_data("data/yahoo_overview.json")
   exchange_content = get_test_data("data/yahoo_exchange.json")
   is_content = get_test_data("data/yahoo_income_statement.json")
+  bs_content = get_test_data("data/yahoo_balance_sheet.json")
   price_parser = Parsers.YahooPriceParser
   exchange_parser = Parsers.YahooExchangeRateParser
   is_parser = Parsers.YahooIncomeStatementParser
+  bs_parser = Parsers.YahooBalanceSheetParser
 
   @testset "Unpack quote summary response" begin
     content = """{
@@ -147,5 +149,19 @@ include("test_utils.jl")
     }"""
     res = parse_content(is_parser, content)
     @test isa(res, APIResponseError)
+  end
+
+  @testset "Succesful balance sheet response" begin
+    data = parse_content(bs_parser, bs_content; symbol="IBM")
+    dates = map(x -> x.fiscalDate, data)
+    @test minimum(dates) == Date("2018-12-31")
+    @test maximum(dates) == Date("2021-12-31")
+    @test isa(data, Vector{BalanceSheet})
+  end
+
+  @testset "Succesful balance sheet response with from date filter" begin
+    data = parse_content(bs_parser, bs_content; from=Date("2020-01-01"), symbol="IBM")
+    dates = map(x -> x.fiscalDate, data)
+    @test minimum(dates) >= Date("2020-01-01")
   end
 end

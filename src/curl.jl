@@ -4,7 +4,7 @@ using Dates: today, Day
 using Stonks: UpdatableSymbol, Symbols, construct_updatable_symbols, build_fx_pair
 using Stonks.APIClients: APIClient, APIResource, get_resource, get_type_param
 using Stonks.Models:
-  AbstractStonksRecord, AssetPrice, AssetInfo, ExchangeRate, IncomeStatement
+  AbstractStonksRecord, AssetPrice, AssetInfo, ExchangeRate, IncomeStatement, BalanceSheet
 using Stonks.Parsers: AbstractContentParser
 using Stonks.Requests: optimistic_request_resolution, prepare_requests, materialize_request
 
@@ -235,6 +235,54 @@ function get_income_statement(
 end
 
 """
+    get_balance_sheet(
+      symbols, [client], [T<:AbstractStonksRecord];
+      [frequency] = missing, [from] = missing, [to] = missing, [kwargs...]
+    ) -> Union{Vector{T}, Exception}
+
+Retrieves main information from balance sheet statement.
+
+### Arguments
+- `symbols` can be:
+    - `String` with one symbol / ticker
+    - `Vector{String}` with multiple symbols
+    - `Vector{Tuple{String, Date}}`: tuples of form (symbol, from)
+    - `Vector{Tuple{String, Date, Date}}`, tuples of form (symbol, from, to)
+- `[client::APIClient]`: can be ommited if one of the correct environmental variable is set (`YAHOOFINANCE_TOKEN` or `ALPHAVANTAGE_TOKEN`)
+- `[T<:AbstractStonksRecord]`: data type used for parsing. Change it only if you want to use your custom model. default = `BalanceSheet`
+
+### Keywords
+- `[frequency]`: values = [yearly, quarterly]. default = `missing`, which will include both yearly and quarterly frequencies.
+- `[from]`: a Date oject indicating lower date limit. default = `missing`
+- `[to]`: a Date objject indicating upper date limit. default = `missing`
+- `[kwargs...]`: use it to pass keyword arguments if you have url / query parameters that need to be resolved at runtime.
+
+### Examples
+```julia
+get_balance_sheet("AAPL")
+get_balance_sheet(["AAPL", "IBM"])
+get_balance_sheet(["AAPL", "IBM"]; frequency="yearly")
+get_balance_sheet([
+  ("AAPL", Date("2020-01-01"), Date("2020-12-31")),
+  ("MSFT", Date("2020-01-01"), Date("2020-12-31")),
+]; frequency="quarterly")
+```
+"""
+function get_balance_sheet(
+  symbols::Symbols,
+  client::Union{APIClient,Nothing}=nothing,
+  ::Type{T}=BalanceSheet;
+  frequency::Union{String,Missing}=missing,
+  from::Union{Date,Missing}=missing,
+  to::Union{Date,Missing}=missing,
+  kwargs...,
+)::Union{Vector{T},Exception} where {T<:AbstractStonksRecord}
+  resource = get_resource(client, T)
+  tickers = construct_updatable_symbols(symbols)
+  return get_data(resource, tickers; frequency=frequency, from=from, to=to, kwargs...)
+end
+
+"""
     get_data(resource, symbols; kwargs...) -> Union{Vector{<:AbstractStonksRecord}, Exception}
 
 Generic function to get data of type resource{T}. Functions such as get_price, get_info, call this.
@@ -276,8 +324,9 @@ function get_data(
     for rp in requests
       Threads.@spawn begin
         symbol = length(rp.tickers) == 1 ? first(rp.tickers).ticker : missing
+        frequency = get(kwargs, :frequency, missing)
         res = materialize_request(
-          rp, resource.parser; from=rp.from, to=rp.to, symbol=symbol
+          rp, resource.parser; from=rp.from, to=rp.to, symbol=symbol, frequency=frequency
         )
         err = typeof(res) <: Exception ? res : nothing
         value = typeof(res) <: Exception ? nothing : res

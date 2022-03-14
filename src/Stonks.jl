@@ -15,9 +15,11 @@ using Stonks.Parsers
 using Stonks.APIClients
 using Stonks.Stores
 
-export AbstractStonksRecord, AssetInfo, AssetPrice, ExchangeRate, IncomeStatement
+export AbstractStonksRecord,
+  AssetInfo, AssetPrice, ExchangeRate, IncomeStatement, BalanceSheet
 export AlphavantageJSONClient, YahooClient
-export get_price, get_info, get_exchange_rate, get_income_statement, get_data 
+export get_price,
+  get_info, get_exchange_rate, get_income_statement, get_balance_sheet, get_data
 export to_dataframe
 export FileStore, load, save, update
 

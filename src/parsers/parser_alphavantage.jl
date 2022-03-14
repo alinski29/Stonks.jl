@@ -4,7 +4,7 @@ using JSON3: JSON3
 using Logging: @warn
 
 using Stonks: JSONContent, APIResponseError, ContentParserError
-using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate, IncomeStatement
+using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate, IncomeStatement, BalanceSheet
 
 function parse_alphavantage_price(
   content::AbstractString; kwargs...

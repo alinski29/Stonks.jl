@@ -13,10 +13,12 @@ include("test_utils.jl")
   price_content = get_test_data("data/alphavantage_prices.json")
   exchange_content = get_test_data("data/alphavantage_exchange.json")
   is_content = get_test_data("data/alphavantage_income_statement.json")
+  bs_content = get_test_data("data/alphavantage_balance_sheet.json")
   price_parser = Parsers.AlphavantagePriceParser
   info_parser = Parsers.AlphavantageInfoParser
   exchange_parser = Parsers.AlphavantageExchangeRateParser
   is_parser = Parsers.AlphavantageIncomeStatementParser
+  bs_parser = Parsers.AlphavantageBalanceSheetParser
 
   @testset "Succesful price response" begin
     data = parse_content(price_parser, price_content)
@@ -108,6 +110,31 @@ include("test_utils.jl")
 
   @testset "Empty income statement response" begin
     res = parse_content(is_parser, "{}")
+    @test isa(res, ContentParserError)
+  end
+
+  @testset "Successful balance sheet response" begin
+    data = parse_content(bs_parser, bs_content)
+    dates = map(x -> x.fiscalDate, data)
+    @test isa(data, Vector{Models.BalanceSheet})
+    @test length(data) == 25
+    @test first(data).symbol == "IBM"
+  end
+
+  @testset "Successful balance sheet response with quarterly frequency" begin
+    data = parse_content(bs_parser, bs_content; frequency="quarterly")
+    @test length(data) == 20
+  end
+
+  @testset "Successful balance sheet response with date filters" begin
+    date_min, date_max = Date("2020-01-01"), Date("2020-12-31")
+    data = parse_content(bs_parser, bs_content; from=date_min, to=date_max)
+    dates = map(x -> x.fiscalDate, data)
+    @test minimum(dates) >= date_min && maximum(dates) <= date_max
+  end
+
+  @testset "Empty balance sheet response" begin
+    res = parse_content(bs_parser, "{}")
     @test isa(res, ContentParserError)
   end
 end

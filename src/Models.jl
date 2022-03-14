@@ -6,7 +6,8 @@ module Models
 using Base: @kwdef
 using Dates
 
-export AbstractStonksRecord, AssetInfo, AssetPrice, ExchangeRate, IncomeStatement
+export AbstractStonksRecord,
+  AssetInfo, AssetPrice, ExchangeRate, IncomeStatement, BalanceSheet
 
 """
 Abstract type inteded to be subtyped by an data model.
@@ -128,6 +129,7 @@ IncomeStatement(;
   symbol::String
   frequency::String
   fiscalDate::Date
+  currency::Union{String,Missing} = missing
   totalRevenue::Int64
   costOfRevenue::Int64
   grossProfit::Int64
@@ -144,6 +146,43 @@ IncomeStatement(;
   ebitda::Union{Int64,Missing} = missing
   netIncome::Int64
   netIncomeApplicableToCommonShares::Union{Int64,Missing} = missing
+end
+
+@kwdef struct BalanceSheet <: AbstractStonksRecord
+  symbol::String
+  frequency::String
+  fiscalDate::Date
+  currency::Union{String,Missing} = missing
+  totalAssets::Int64
+  totalLiabilities::Int64
+  totalShareholderEquity::Int64
+  cashAndCashEquivalents::Union{Int64,Missing} = missing
+  currentNetReceivables::Union{Int64,Missing} = missing
+  inventory::Union{Int64,Missing} = missing
+  shortTermInvestments::Union{Int64,Missing} = missing
+  otherCurrentAssets::Union{Int64,Missing} = missing
+  totalCurrentAssets::Union{Int64,Missing} = missing
+  propertyPlantEquipment::Union{Int64,Missing} = missing
+  goodwill::Union{Int64,Missing} = missing
+  longTermInvestments::Union{Int64,Missing} = missing
+  intangibleAssets::Union{Int64,Missing} = missing
+  totalNonCurrentAssets::Union{Int64,Missing} = missing
+  currentAccountsPayable::Union{Int64,Missing} = missing
+  deferredRevenue::Union{Int64,Missing} = missing
+  shortTermDebt::Union{Int64,Missing} = missing
+  otherCurrentLiabilities::Union{Int64,Missing} = missing
+  totalCurrentLiabilities::Union{Int64,Missing} = missing
+  currentDebt::Union{Int64,Missing} = missing
+  currentLongTermDebt::Union{Int64,Missing} = missing
+  longTermDebt::Union{Int64,Missing} = missing
+  longTermDebtNonCurrent::Union{Int64,Missing} = missing
+  capitalLeaseObligations::Union{Int64,Missing} = missing
+  otherNonCurrentLiabilities::Union{Int64,Missing} = missing
+  totalNonCurrentLiabilities::Union{Int64,Missing} = missing
+  treasuryStock::Union{Int64,Missing} = missing
+  retainedEarnings::Union{Int64,Missing} = missing
+  commonStock::Union{Int64,Missing} = missing
+  commonStockSharesOutstanding::Union{Int64,Missing} = missing
 end
 
 # @kwdef struct EconomicIndicator <: AbstractStonksRecord
