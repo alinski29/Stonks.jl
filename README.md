@@ -44,6 +44,7 @@ Stonks.jl is the Julia library that lets you access and store financial data fro
 
 ---
 - [Features](#features)
+- [API Summary](#api-summary)
 - [Basic Usage](#basic-usage)
   - [Get price time series](#get-price-time-series)
   - [Get asset information](#get-asset-information)
@@ -70,6 +71,105 @@ Stonks.jl is the Julia library that lets you access and store financial data fro
 - Silent by design. The main exposed functions for fetching and saving data don't throw an error, making your program crash. Instead, it will return the error with an explanative message of what went wrong. 
 ---
 
+## **API summary**
+
+<div align="left">
+<style type="text/css">
+.tg  {border-collapse:collapse;border-color:#ccc;border-spacing:0;}
+.tg td{background-color:#fff;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
+  font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{background-color:#f0f0f0;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
+  font-family:Arial, sans-serif;font-size:14px;font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-hfmg{border-color:#9b9b9b;font-family:inherit;text-align:center;vertical-align:middle}
+.tg .tg-rek1{background-color:#efefef;border-color:#9b9b9b;font-family:inherit;text-align:center;vertical-align:top}
+.tg .tg-otat{background-color:#f9f9f9;border-color:#9b9b9b;font-family:inherit;text-align:left;vertical-align:top}
+.tg .tg-d7ja{background-color:#f9f9f9;border-color:#9b9b9b;font-family:inherit;font-size:16px;font-weight:bold;text-align:center;
+  vertical-align:top}
+.tg .tg-9sbb{border-color:#9b9b9b;font-family:inherit;font-size:18px;font-weight:bold;text-align:center;vertical-align:middle}
+.tg .tg-6cmx{background-color:#f9f9f9;border-color:#9b9b9b;font-family:inherit;text-align:center;vertical-align:middle}
+.tg .tg-psru{border-color:#9b9b9b;font-family:inherit;text-align:left;vertical-align:top}
+</style>
+<table class="tg" style="undefined;table-layout: fixed; width: 896px">
+<colgroup>
+<col style="width: 174px">
+<col style="width: 195px">
+<col style="width: 245px">
+<col style="width: 136px">
+<col style="width: 146px">
+</colgroup>
+<thead>
+  <tr>
+    <th class="tg-9sbb" rowspan="2">Type</th>
+    <th class="tg-9sbb" rowspan="2">Function</th>
+    <th class="tg-9sbb" rowspan="2">Description</th>
+    <th class="tg-9sbb" colspan="2">Clients</th>
+  </tr>
+  <tr>
+    <th class="tg-rek1">Alphavantage</th>
+    <th class="tg-rek1">Yahoo Finance</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-psru"><a href="https://alinski29.github.io/Stonks.jl/dev/api_types.html#Stonks.Models.AssetInfo" target="_blank" rel="noopener noreferrer">AssetInfo</a></td>
+    <td class="tg-psru"><a href="https://alinski29.github.io/Stonks.jl/dev/api_functions.html#Stonks.get_info" target="_blank" rel="noopener noreferrer">get_info</a></td>
+    <td class="tg-psru">Basic stock information</td>
+    <td class="tg-hfmg">&#9989;</td>
+    <td class="tg-hfmg">&#9989;</td>
+  </tr>
+  <tr>
+    <td class="tg-otat"><a href="https://alinski29.github.io/Stonks.jl/dev/api_types.html#Stonks.Models.AssetPrice" target="_blank" rel="noopener noreferrer">AssetPrice</a></td>
+    <td class="tg-otat"><a href="https://alinski29.github.io/Stonks.jl/dev/api_functions.html#Stonks.get_price" target="_blank" rel="noopener noreferrer">get_price</a></td>
+    <td class="tg-otat">Historical price time series<br></td>
+    <td class="tg-6cmx">&#9989;</td>
+    <td class="tg-6cmx">&#9989;</td>
+  </tr>
+  <tr>
+    <td class="tg-psru"><a href="https://alinski29.github.io/Stonks.jl/dev/api_types.html#Stonks.Models.ExchangeRate" target="_blank" rel="noopener noreferrer">ExchangeRate</a></td>
+    <td class="tg-psru"><a href="https://alinski29.github.io/Stonks.jl/dev/api_functions.html#Stonks.get_exchange_rate" target="_blank" rel="noopener noreferrer">get_exchange_rate</a></td>
+    <td class="tg-psru">Historical exchange rate time series<br></td>
+    <td class="tg-hfmg">&#9989;</td>
+    <td class="tg-hfmg">&#9989;</td>
+  </tr>
+  <tr>
+    <td class="tg-otat"><a href="https://alinski29.github.io/Stonks.jl/dev/api_types.html#Stonks.Models.IncomeStatement" target="_blank" rel="noopener noreferrer">IncomeStatement</a></td>
+    <td class="tg-otat"><a href="https://alinski29.github.io/Stonks.jl/dev/api_functions.html#Stonks.get_income_statement" target="_blank" rel="noopener noreferrer">get_income_statement</a></td>
+    <td class="tg-otat">Historical income statement<br></td>
+    <td class="tg-6cmx">&#9989;</td>
+    <td class="tg-6cmx">&#9989;</td>
+  </tr>
+  <tr>
+    <td class="tg-psru"><a href="https://alinski29.github.io/Stonks.jl/dev/api_types.html#Stonks.Models.BalanceSheet" target="_blank" rel="noopener noreferrer">BalanceSheet</a></td>
+    <td class="tg-psru"><a href="https://alinski29.github.io/Stonks.jl/dev/api_functions.html#Stonks.get_balance_sheet" target="_blank" rel="noopener noreferrer">get_balance_sheet</a></td>
+    <td class="tg-psru">Historical balance sheet data<br></td>
+    <td class="tg-hfmg">&#9989;</td>
+    <td class="tg-hfmg">&#9989;</td>
+  </tr>
+  <tr>
+    <td class="tg-d7ja" colspan="2">Upcoming</td>
+    <td class="tg-otat"></td>
+    <td class="tg-6cmx"></td>
+    <td class="tg-6cmx"></td>
+  </tr>
+  <tr>
+    <td class="tg-psru">CashFlowStatement</td>
+    <td class="tg-psru">get_cash_flows</td>
+    <td class="tg-psru"></td>
+    <td class="tg-hfmg"></td>
+    <td class="tg-hfmg"></td>
+  </tr>
+  <tr>
+    <td class="tg-otat">Earnings</td>
+    <td class="tg-otat">get_earnings</td>
+    <td class="tg-otat"></td>
+    <td class="tg-6cmx"></td>
+    <td class="tg-6cmx"></td>
+  </tr>
+</tbody>
+</table>
+</div>
+
+---
 ## **Basic Usage**
 
 ### **Get price time series**

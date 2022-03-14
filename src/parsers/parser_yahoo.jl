@@ -3,7 +3,7 @@ using Dates
 using JSON3: JSON3
 
 using Stonks: JSONContent, APIResponseError, ContentParserError
-using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate
+using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate, IncomeStatement, BalanceSheet
 
 function parse_yahoo_info(
   content::AbstractString; kwargs...
@@ -11,22 +11,31 @@ function parse_yahoo_info(
   maybe_js = @chain begin
     content
     validate_yahoo_response
-    unpack_info_response
+    unpack_quote_summary_response
   end
   typeof(maybe_js) <: Exception && return maybe_js
   js = maybe_js
+  key_check = setdiff([:quoteType, :price], keys(js))
+  if !isempty(key_check)
+    return ContentParserError("Missing keys: $(join(key_check, ","))")
+  end
+  res = (
+    assetProfile=get(js, "assetProfile", Dict()),
+    quoteType=get(js, "quoteType", Dict()),
+    price=get(js, "price", Dict()),
+  )
   return [
     AssetInfo(;
-      symbol=js.quoteType["symbol"],
-      currency=js.price["currency"],
-      name=get(js.quoteType, "longName", missing),
-      type=get(js.quoteType, "quoteType", missing),
-      exchange=get(js.quoteType, "exchange", missing),
-      country=get(js.assetProfile, "country", missing),
-      industry=get(js.assetProfile, "industry", missing),
-      sector=get(js.assetProfile, "sector", missing),
-      timezone=get(js.quoteType, "timeZoneFullName", missing),
-      employees=get(js.assetProfile, "fullTimeEmployees", missing),
+      symbol=res.quoteType["symbol"],
+      currency=res.price["currency"],
+      name=get(res.quoteType, "longName", missing),
+      type=get(res.quoteType, "quoteType", missing),
+      exchange=get(res.quoteType, "exchange", missing),
+      country=get(res.assetProfile, "country", missing),
+      industry=get(res.assetProfile, "industry", missing),
+      sector=get(res.assetProfile, "sector", missing),
+      timezone=get(res.quoteType, "timeZoneFullName", missing),
+      employees=get(res.assetProfile, "fullTimeEmployees", missing),
     ),
   ]
 end
@@ -76,6 +85,181 @@ function parse_yahoo_exchange_rate(
   end
 end
 
+function parse_yahoo_income_statement(
+  content::AbstractString; kwargs...
+)::Union{Vector{IncomeStatement},Exception}
+  maybe_js = @chain begin
+    content
+    validate_yahoo_response
+    unpack_quote_summary_response
+  end
+  typeof(maybe_js) <: Exception && return maybe_js
+  js = maybe_js
+  from, to = [get(kwargs, arg, missing) for arg in [:from, :to]]
+  frequency = get(kwargs, :frequency, missing)
+  symbol = get(kwargs, :symbol, missing)
+  keys_default = [:incomeStatementHistory, :incomeStatementHistoryQuarterly]
+  currency = extract_currency(js)
+  keys_exp = (
+    if ismissing(frequency)
+      keys_default
+    elseif frequency in ["annual", "annualy", "year", "yearly"]
+      [:incomeStatementHistory]
+    elseif frequency in ["quarter", "quarterly"]
+      [:incomeStatementHistoryQuarterly]
+    else
+      keys_default
+    end
+  )
+  key_check = setdiff(keys_exp, keys(js))
+  if !isempty(key_check)
+    return ContentParserError("Missing keys: $(join(key_check, ","))")
+  end
+  for key in key_check
+    if !haskey(js[key], :incomeStatementHistory)
+      return ContentParserError("Missing keys js[$key][:incomeStatementHistory]")
+    end
+  end
+  remaps = Dict(
+    :sellingGeneralAndAdministrative => :sellingGeneralAdministrative,
+    :researchAndDevelopment => :researchDevelopment,
+  )
+  data = IncomeStatement[]
+  for key in keys_exp
+    js_vals = js[key][:incomeStatementHistory]
+    dvals = map(x -> begin
+      dval = js_to_dict(x)
+      dval[:fiscalDate] = Date(unix2datetime(dval[:endDate]))
+      dval
+    end, js_vals)
+    freq = key == :incomeStatementHistory ? "yearly" : "quarterly"
+    is = map(
+      obj -> tryparse_js(
+        IncomeStatement,
+        obj;
+        fixed=Dict(:symbol => symbol, :frequency => freq),
+        remaps=remaps,
+      ),
+      dvals,
+    )
+    append!(data, is)
+  end
+  original_len, latest_date = length(data), maximum(map(x -> x.fiscalDate, data))
+  res = apply_filters(data, "fiscalDate"; from=from, to=to)
+  if isempty(res)
+    @warn """No datapoints between '$from' and '$to' after filtering.
+             Original length: $original_len. Latest date: $latest_date"""
+    return IncomeStatement[]
+  end
+  return res
+end
+
+function parse_yahoo_balance_sheet(
+  content::AbstractString; kwargs...
+)::Union{Vector{BalanceSheet},Exception}
+  maybe_js = @chain begin
+    content
+    validate_yahoo_response
+    unpack_quote_summary_response
+  end
+  typeof(maybe_js) <: Exception && return maybe_js
+  js = maybe_js
+  from, to = [get(kwargs, arg, missing) for arg in [:from, :to]]
+  frequency = get(kwargs, :frequency, missing)
+  symbol = get(kwargs, :symbol, missing)
+  keys_default = [:balanceSheetHistory, :balanceSheetHistoryQuarterly]
+  currency = extract_currency(js)
+  keys_exp = (
+    if ismissing(frequency)
+      keys_default
+    elseif frequency in ["annual", "annualy", "year", "yearly"]
+      [:balanceSheetHistory]
+    elseif frequency in ["quarter", "quarterly"]
+      [:balanceSheetHistoryQuarterly]
+    else
+      keys_default
+    end
+  )
+  key_check = setdiff(keys_exp, keys(js))
+  if !isempty(key_check)
+    return ContentParserError("Missing keys: $(join(key_check, ","))")
+  end
+  for key in key_check
+    if !haskey(js[key], :balanceSheetStatements)
+      return ContentParserError("Missing keys js[$key][:balanceSheetStatements]")
+    end
+  end
+  remaps = Dict(
+    :cashAndCashEquivalents => :cash,
+    :currentNetReceivables => :netReceivables,
+    :goodwill => :goodWill,
+    :currentAccountsPayable => :accountsPayable,
+    :otherCurrentLiabilities => :otherCurrentLiab,
+    :totalLiabilities => :totalLiab,
+    :totalShareholderEquity => :totalStockholderEquity,
+  )
+  data = BalanceSheet[]
+  for key in keys_exp
+    js_vals = js[key][:balanceSheetStatements]
+    dvals = map(
+      x -> begin
+        dval = js_to_dict(x)
+        dval[:fiscalDate] = Date(unix2datetime(dval[:endDate]))
+        ks = [
+          :intangibleAssets,
+          :goodWill,
+          :treasuryStock,
+          :otherStockholderEquity,
+          :longTermDebt,
+          :longTermDebtNonCurrent,
+        ]
+        for k in ks
+          if haskey(dval, k)
+            dval[k] = !isa(dval[k], Int64) ? tryparse(Int64, dval[k]) : dval[k]
+          else 
+            dval[k] = missing
+          end
+        end
+        dval[:intangibleAssets] = dval[:intangibleAssets] + dval[:goodWill]
+        dval[:treasuryStock] =
+          abs(dval[:treasuryStock]) - abs(dval[:otherStockholderEquity])
+        dval[:longTermDebtNoncurrent] = dval[:longTermDebt]
+        delete!(dval, :longTermDebt)
+        [delete!(dval, k) for (k, v) in dval if ismissing(v)]
+        dval
+      end,
+      js_vals,
+    )
+    freq = key == :balanceSheetHistory ? "yearly" : "quarterly"
+    bs = map(
+      obj -> tryparse_js(
+        BalanceSheet,
+        obj;
+        fixed=Dict(:symbol => symbol, :frequency => freq, :currency => currency),
+        remaps=remaps,
+      ),
+      dvals,
+    )
+    append!(data, bs)
+  end
+  original_len, latest_date = length(data), maximum(map(x -> x.fiscalDate, data))
+  res = apply_filters(data, "fiscalDate"; from=from, to=to)
+  if isempty(res)
+    @warn """No datapoints between '$from' and '$to' after filtering.
+             Original length: $original_len. Latest date: $latest_date"""
+    return BalanceSheet[]
+  end
+  return res
+end
+
+function extract_currency(js::JSONContent)
+  if haskey(js, :price)
+    return (haskey(js[:price], :currency) ? js[:price][:currency] : missing)
+  else
+    return missing
+  end
+end
+
 function parse_price_record(js_value::JSONContent)::Union{Vector{AssetPrice},Nothing}
   _keys = [String(k) for k in keys(js_value)]
   if !isempty(setdiff(["symbol", "timestamp", "close"], _keys))
@@ -117,28 +301,31 @@ end
 function validate_yahoo_response(content::AbstractString)::Union{JSONContent,Exception}
   maybe_js = JSON3.read(content)
   maybe_js === nothing && return error("Content could not be parsed as JSON")
-  js = maybe_js
+  js_keys = keys(maybe_js)
+  js = length(js_keys) == 1 ? maybe_js[first(js_keys)] : maybe_js
   error_idx = findfirst(x -> contains(lowercase(x), "error"), [String(k) for k in keys(js)])
-  error_in_response = error_idx !== nothing ? isa(js["error"], String) : false
+  error_in_response = error_idx !== nothing ? isa(js["error"], JSON3.Object) : false
   if error_in_response
-    error_msg = [String(v) for (k, v) in js][error_idx]
+    error_msg = "Response contains an error"
+    if haskey(js, :error)
+      if isa(js[:error], JSON3.Object)
+        error_msg = js[:error][first(keys(js[:error]))]
+      elseif isa(js[:error], String)
+        error_msg = js[:error]
+      end
+    end
     return APIResponseError(error_msg)
   end
-  return js
+  # In case the response has only 1 key, return the original response, not the one inside the key
+  return maybe_js
 end
 
-function unpack_info_response(js::Union{JSON3.Object,Exception})
+function unpack_quote_summary_response(js::Union{JSON3.Object,Exception})
   !isa(js, JSON3.Object) && return js
   !in("quoteSummary", keys(js)) &&
     return ContentParserError("expected key 'quoteSummary' not found in API response")
   js["quoteSummary"]["error"] !== nothing &&
-    return ContentParserError("API response contains erro")
-  res = first(js["quoteSummary"]["result"])
-  ismissing(res["quoteType"]) && return ContentParserError("quoteType key is missing")
-  ismissing(res["price"]) && return ContentParserError("price key is missing")
-  return (
-    assetProfile=get(res, "assetProfile", Dict()),
-    quoteType=get(res, "quoteType", Dict()),
-    price=get(res, "price", Dict()),
-  )
+    return APIResponseError("API response contains error")
+  res = js["quoteSummary"]["result"]
+  return length(res) == 1 ? first(res) : res
 end

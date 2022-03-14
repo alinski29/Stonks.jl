@@ -42,12 +42,6 @@ include("test_utils.jl")
     @test groups == [["AAPL"], ["MSFT", "TSLA"], ["IBM", "GOOG"], ["NFLX"]]
   end
 
-  # @testset "Ticker batching for exchange rates" begin
-  #   tickers = construct_updatable_symbols(["EUR/USD", "USD/CAD", "FOO/BAR"])
-  #   batches = split_tickers_in_batches(tickers, 2)
-  #   println(batches)
-  # end
-
   @testset "Request building using APIResource" begin
     tickers = complex_tickers()
     resource = test_client.resources["price"]
@@ -60,7 +54,6 @@ include("test_utils.jl")
   # @testset "Test request building using APIClient" begin
   #   tickers = complex_tickers()
   #   request_params = Requests.prepare_requests(tickers, test_client, interval = "1d")
-  #   println(request_params)
   #   #@test isa(request_params, Dict)
   #   #@test keys(request_params) == keys(test_client.resources)
   # end

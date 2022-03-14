@@ -29,7 +29,6 @@ function build_fx_pair(symbol::String; delim="/")::Union{Tuple{String,String},Ex
   splits = split(symbol, delim)
   length(splits) != 2 &&
     return ArgumentError("Got more than 2 splits after split($symbol, '$delim')")
-  s_len = map(s -> length(s), splits)
   for split in splits
     l = length(split)
     l != 3 && return ArgumentError("$split must have only 3 characters, got $l.")
@@ -59,31 +58,6 @@ function get_minimum_dates(
     end
   end
   return (from=get_minimum(:from, from), to=get_minimum(:to, to))
-end
-
-"""
-  Container that holds either a value or an error. 
-"""
-struct Either{T,E<:Exception}
-  value::Union{T,Nothing}
-  err::Union{E,Nothing}
-end
-
-Success(x::T) where {T} = Either{T,Exception}(x, nothing)
-Failure(::Type{T}, e::E) where {T,E<:Exception} = Either{T,E}(nothing, e)
-
-function Base.promote_rule(
-  ::Type{Either{S1,E1}}, ::Type{Either{S2,E2}}
-) where {S1,E1<:Exception,S2,E2<:Exception}
-  return Either{promote_type(S1, S2),promote_type(E1, E2)}
-end
-
-function Base.show(io::IO, r::Either{T,E}) where {T,E<:Exception}
-  return if isnothing(r.err)
-    print(io, "Failure($T, $(r.err))")
-  else
-    print(io, "Success($T, $(r.value))")
-  end
 end
 
 """

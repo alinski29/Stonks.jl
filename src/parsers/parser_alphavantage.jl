@@ -4,7 +4,7 @@ using JSON3: JSON3
 using Logging: @warn
 
 using Stonks: JSONContent, APIResponseError, ContentParserError
-using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate
+using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate, IncomeStatement, BalanceSheet
 
 function parse_alphavantage_price(
   content::AbstractString; kwargs...
@@ -110,6 +110,95 @@ function parse_alphavantage_exchange_rate(
     ) for (k, v) in series
   ]
 end
+
+function parse_alphavantage_financial_statement(
+  ::Type{T}, content::AbstractString;
+  symbol::Union{String,Missing},
+  frequency::Union{String,Missing},
+  from::Union{Date,Missing},
+  to::Union{Date,Missing},
+  remaps::Union{AbstractDict,Missing},
+)::Union{Vector{T}, Exception} where {T<:AbstractStonksRecord}
+  maybe_js = validate_alphavantage_response(content)
+  typeof(maybe_js) <: Exception && return maybe_js
+  js = maybe_js
+  smb = ismissing(symbol) ? get(js, :symbol, missing) : symbol
+  keys_default = [:annualReports, :quarterlyReports]
+  keys_exp = (
+    if ismissing(frequency)
+      keys_default
+    elseif frequency in ["annual", "annualy", "year", "yearly"]
+      [:annualReports]
+    elseif frequency in ["quarter", "quarterly"]
+      [:quarterlyReports]
+    else 
+      keys_default
+    end
+  )
+  key_check = setdiff(keys_exp, keys(js))
+  if !isempty(key_check)
+    return ContentParserError("Missing keys: $(join(key_check, ","))")
+  end
+  data = T[]
+  for key in keys_exp
+    js_vals = js[key]
+    freq = key == :annualReports ? "yearly" : "quarterly"
+    items = map(x -> begin 
+      dval = js_to_dict(x)
+      tryparse_js(
+        T, dval; 
+        fixed=Dict(:symbol => smb, :frequency => freq),
+        remaps=remaps,
+      ) 
+    end, js_vals)
+    append!(data, items)
+  end
+  original_len, latest_date = length(data), maximum(map(x -> x.fiscalDate, data))
+  res = apply_filters(data, "fiscalDate"; from=from, to=to)
+  if isempty(res) 
+    @warn """No datapoints between '$from' and '$to' after filtering.
+             Original length: $original_len. Latest date: $latest_date"""
+    return T[]
+  end
+  return res
+end
+
+function parse_alphavantage_income_statement(
+  content::AbstractString; kwargs...
+)::Union{Vector{IncomeStatement},Exception}
+  remaps = Dict(:fiscalDate => :fiscalDateEnding, :currency => :reportedCurrency)
+  maybe_res = parse_alphavantage_financial_statement(
+    IncomeStatement, content; 
+    symbol=get(kwargs, :symbol, missing),
+    frequency=get(kwargs, :frequency, missing),
+    from=get(kwargs, :from, missing),
+    to=get(kwargs, :to, missing),
+    remaps=remaps,
+  )
+  typeof(maybe_res) <: Exception && return maybe_res
+  return maybe_res
+end
+
+function parse_alphavantage_balance_sheet(
+  content::AbstractString; kwargs...
+)::Union{Vector{BalanceSheet},Exception}
+  remaps = Dict(
+    :fiscalDate => :fiscalDateEnding,
+    :currency => :reportedCurrency,
+    :cashAndCashEquivalents => :cashAndCashEquivalentsAtCarryingValue,
+  )
+  maybe_res = parse_alphavantage_financial_statement(
+    BalanceSheet, content; 
+    symbol=get(kwargs, :symbol, missing),
+    frequency=get(kwargs, :frequency, missing),
+    from=get(kwargs, :from, missing),
+    to=get(kwargs, :to, missing),
+    remaps=remaps,
+  )
+  typeof(maybe_res) <: Exception && return maybe_res
+  return maybe_res
+end
+
 
 function validate_alphavantage_response(
   content::AbstractString
