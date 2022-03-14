@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Functions · Stonks.jl</title><script data-outdated-warner src="assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="index.html"><img src="assets/logo.jpg" alt="Stonks.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="index.html">Stonks.jl</a></span></div><form class="docs-search" action="search.html"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="index.html">Home</a></li><li><span class="tocitem">User guide</span><ul><li><a class="tocitem" href="basic_usage.html">Basic usage</a></li><li><a class="tocitem" href="advanced_usage.html">Advanced usage</a></li></ul></li><li><span class="tocitem">API</span><ul><li><a class="tocitem" href="api_types.html">Types</a></li><li class="is-active"><a class="tocitem" href="api_functions.html">Functions</a><ul class="internal"><li><a class="tocitem" href="#Index"><span>Index</span></a></li><li><a class="tocitem" href="#Client-setup"><span>Client setup</span></a></li><li><a class="tocitem" href="#Retrieving-data"><span>Retrieving data</span></a></li><li><a class="tocitem" href="#DataFrame-conversion"><span>DataFrame conversion</span></a></li><li><a class="tocitem" href="#Persisting-data"><span>Persisting data</span></a></li><li><a class="tocitem" href="#Content-parsers"><span>Content parsers</span></a></li></ul></li></ul></li><li><a class="tocitem" href="contributing.html">Contributing</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">API</a></li><li class="is-active"><a href="api_functions.html">Functions</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="api_functions.html">Functions</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/alinski29/Stonks.jl/blob/master/docs/src/api_functions.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Functions"><a class="docs-heading-anchor" href="#Functions">Functions</a><a id="Functions-1"></a><a class="docs-heading-anchor-permalink" href="#Functions" title="Permalink"></a></h1><hr/><h2 id="Index"><a class="docs-heading-anchor" href="#Index">Index</a><a id="Index-1"></a><a class="docs-heading-anchor-permalink" href="#Index" title="Permalink"></a></h2><ul><li><a href="api_functions.html#Stonks.APIClients.AlphavantageJSONClient"><code>Stonks.APIClients.AlphavantageJSONClient</code></a></li><li><a href="api_functions.html#Stonks.APIClients.YahooClient"><code>Stonks.APIClients.YahooClient</code></a></li><li><a href="api_functions.html#Stonks.Parsers.parse_content"><code>Stonks.Parsers.parse_content</code></a></li><li><a href="api_functions.html#Stonks.Stores.load"><code>Stonks.Stores.load</code></a></li><li><a href="api_functions.html#Stonks.Stores.save"><code>Stonks.Stores.save</code></a></li><li><a href="api_functions.html#Stonks.Stores.update"><code>Stonks.Stores.update</code></a></li><li><a href="api_functions.html#Stonks.get_balance_sheet"><code>Stonks.get_balance_sheet</code></a></li><li><a href="api_functions.html#Stonks.get_data"><code>Stonks.get_data</code></a></li><li><a href="api_functions.html#Stonks.get_exchange_rate"><code>Stonks.get_exchange_rate</code></a></li><li><a href="api_functions.html#Stonks.get_income_statement"><code>Stonks.get_income_statement</code></a></li><li><a href="api_functions.html#Stonks.get_info"><code>Stonks.get_info</code></a></li><li><a href="api_functions.html#Stonks.get_price"><code>Stonks.get_price</code></a></li><li><a href="api_functions.html#Stonks.to_dataframe"><code>Stonks.to_dataframe</code></a></li></ul><hr/><h2 id="Client-setup"><a class="docs-heading-anchor" href="#Client-setup">Client setup</a><a id="Client-setup-1"></a><a class="docs-heading-anchor-permalink" href="#Client-setup" title="Permalink"></a></h2><p>The library comes with methods for creating <code>APIClient</code> instances with preconfigured data for these providers:</p><article class="docstring"><header><a class="docstring-binding" id="Stonks.APIClients.YahooClient" href="#Stonks.APIClients.YahooClient"><code>Stonks.APIClients.YahooClient</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">YahooClient(api_key::String) -&gt; APIClient</code></pre><p>Utility function for creating a client for accessing yahoofinance API.  Contains the following <code>resources</code>: </p><ul><li>info =&gt; <code>APIResource{AssetInfo}</code></li><li>price =&gt; <code>APIResource{AssetPrice}</code></li><li>exchange =&gt; <code>APIResource{ExchangeRate}</code></li><li>income_statement =&gt; <code>APIResource{IncomeStatement}</code></li><li>balance_sheet =&gt; <code>APIResource{BalanceSheet}</code></li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/alinski29/Stonks.jl/blob/36201509b29ed5b064e7a40a74bbd455e04d1d59/src/APIClients.jl#L163-L173">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Stonks.APIClients.AlphavantageJSONClient" href="#Stonks.APIClients.AlphavantageJSONClient"><code>Stonks.APIClients.AlphavantageJSONClient</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">AlphavantageJSONClient(api_key::String) -&gt; APIClient</code></pre><p>Utility function for creating a client for accessing alphavantage API.  Contains the following <code>resources</code>: </p><ul><li>info =&gt; <code>APIResource{AssetInfo}</code></li><li>price =&gt; <code>APIResource{AssetPrice}</code></li><li>exchange =&gt; <code>APIResource{ExchangeRate}</code></li><li>income_statement =&gt; <code>APIResource{IncomeStatement}</code></li><li>balance_sheet =&gt; <code>APIResource{BalanceSheet}</code></li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/alinski29/Stonks.jl/blob/36201509b29ed5b064e7a40a74bbd455e04d1d59/src/APIClients.jl#L234-L244">source</a></section></article><p>You can omit the <code>client</code> parameter in all functions IF you set an environment variables:</p><ul><li>Alphavantage: <code>ALPHAVANTAGE_TOKEN</code> =&gt; will build an <code>APIClient</code> using <code>AlphavantageJSONClient</code> </li><li>Yahoo Finance: <code>YAHOOFINANCE_TOKEN</code> =&gt; will build an <code>APIClient</code> using <code>YahooClient</code></li></ul><hr/><h2 id="Retrieving-data"><a class="docs-heading-anchor" href="#Retrieving-data">Retrieving data</a><a id="Retrieving-data-1"></a><a class="docs-heading-anchor-permalink" href="#Retrieving-data" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-binding" id="Stonks.get_price" href="#Stonks.get_price"><code>Stonks.get_price</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">get_price(
+  symbols, [client], [T&lt;:AbstractStonksRecord];
+  [interval] = &quot;1d&quot;, [from] = missing, [to] = missing, [kwargs...]
+) -&gt; Union{Vector{T}, Exception}</code></pre><p>Retrieves historical time series price data from the configured API client.</p><p><strong>Arguments</strong></p><ul><li><code>symbols</code> can be:<ul><li><code>String</code> with one symbol / ticker</li><li><code>Vector{String}</code> with multiple symbols</li><li><code>Vector{Tuple{String, Date}}</code>: tuples of form (symbol, from)</li><li><code>Vector{Tuple{String, Date, Date}}</code>, tuples of form (symbol, from, to)</li></ul></li><li><code>[client::APIClient]</code>: can be ommited if one of the correct environmental variable is set (<code>YAHOOFINANCE_TOKEN</code> or <code>ALPHAVANTAGE_TOKEN</code>)</li><li><code>[T&lt;:AbstractStonksRecord]</code>: data type used for parsing. Change it only if you want to use your custom model. default = <code>AssetPrice</code></li></ul><p><strong>Keywords</strong></p><ul><li><code>[interval]</code>: values = [1d, 1wk, 1mo]. Frequency lower than daily is not supported. default = 1d</li><li><code>[from]</code>: a Date oject indicating lower date limit. default = <code>missing</code></li><li><code>[to]</code>: a Date objject indicating upper date limit. default = <code>missing</code></li><li><code>[kwargs...]</code>: use it to pass keyword arguments if you have url / query parameters that need to be resolved at runtime.</li></ul><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; today = Dates.today()
+2022-02-18
+julia&gt; length(ENV[&quot;YAHOOFINANCE_TOKEN&quot;]) # value will be used to create a client
+40
+julia&gt; get_price(&quot;AAPL&quot;, from = today - Dates.Day(1))
+1-element Vector{AbstractStonksRecord}
+ AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-17&quot;), 168.88, missing, missing, missing, missing, missing)
+ AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-18&quot;), 167.3, missing, missing, missing, missing, missing)
+
+julia&gt; from = today - Dates.Day(2)
+2022-02-16
+julia&gt; prices = get_price([&quot;AAPL&quot;, &quot;MSFT&quot;], from = from)
+AssetPrice(&quot;MSFT&quot;, Date(&quot;2022-02-16&quot;), 299.5, missing, missing, missing, missing, missing)
+AssetPrice(&quot;MSFT&quot;, Date(&quot;2022-02-17&quot;), 290.73, missing, missing, missing, missing, missing
+AssetPrice(&quot;MSFT&quot;, Date(&quot;2022-02-18&quot;), 287.93, missing, missing, missing, missing, missing
+AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-16&quot;), 172.55, missing, missing, missing, missing, missing
+AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-17&quot;), 168.88, missing, missing, missing, missing, missing
+AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-18&quot;), 167.3, missing, missing, missing, missing, missing)
+
+julia&gt; prices = get_price([
+  (&quot;AAPL&quot;, Date(&quot;2022-02-17&quot;)),
+  (&quot;MSFT&quot;, Date(&quot;2022-02-18&quot;))
+  ])
+3-element Vector{AbstractStonksRecord}:
+ AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-17&quot;), 168.88, missing, missing, missing, missing, missing)
+ AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-18&quot;), 167.3, missing, missing, missing, missing, missing)
+ AssetPrice(&quot;MSFT&quot;, Date(&quot;2022-02-18&quot;), 287.93, missing, missing, missing, missing, missing)
+
+julia&gt; prices = get_price([
+  (&quot;AAPL&quot;, Date(&quot;2022-02-15&quot;), Date(&quot;2022-02-16&quot;)),
+  (&quot;MSFT&quot;, Date(&quot;2022-02-14&quot;), Date(&quot;2022-02-15&quot;))
+  ])
+5-element Vector{AbstractStonksRecord}:
+ AssetPrice(&quot;MSFT&quot;, Date(&quot;2022-02-14&quot;), 295.0, missing, missing, missing, missing, missing)
+ AssetPrice(&quot;MSFT&quot;, Date(&quot;2022-02-15&quot;), 300.47, missing, missing, missing, missing, missing)
+ AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-15&quot;), 172.79, missing, missing, missing, missing, missing)
+ AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-16&quot;), 172.55, missing, missing, missing, missing, missing)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/alinski29/Stonks.jl/blob/36201509b29ed5b064e7a40a74bbd455e04d1d59/src/curl.jl#L11-L74">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Stonks.get_info" href="#Stonks.get_info"><code>Stonks.get_info</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">get_info(symbols, [client], [T&lt;:AbstractStonksRecord]) -&gt; Union{Vector{T}, Exception}</code></pre><p>Retrieves general information about <code>symbols</code>.</p><p><strong>Arguments</strong></p><ul><li><code>symbols::Union{String, Vector{String}}</code></li><li><code>[client]::APIClient</code> : can be ommited if one of the correct environmental variable is set (<code>YAHOOFINANCE_TOKEN</code> or <code>ALPHAVANTAGE_TOKEN</code>)</li><li><code>[T&lt;:AbstractStonksRecord]</code> : data type used for parsing. Change it only if you want to use your custom model. default = <code>AssetInfo</code></li></ul><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; get_info(client, &quot;AAPL&quot;)
+1-element Vector{AssetInfo}:
+ AssetInfo(&quot;AAPL&quot;, &quot;USD&quot;, &quot;Apple Inc.&quot;, &quot;EQUITY&quot;, &quot;NMS&quot;, &quot;United States&quot;,
+  &quot;Consumer Electronics&quot;, &quot;Technology&quot;, &quot;America/New_York&quot;, 100000)
+
+julia&gt; length(ENV[&quot;YAHOOFINANCE_TOKEN&quot;]) # value will be used to create a client
+40
+julia&gt; get_info([&quot;AAPL&quot;, &quot;MSFT&quot;])
+2-element Vector{AssetInfo}:
+ AssetInfo(&quot;AAPL&quot;, &quot;USD&quot;, &quot;Apple Inc.&quot;, &quot;EQUITY&quot;, &quot;NMS&quot;, &quot;United States&quot;,
+  &quot;Consumer Electronics&quot;, &quot;Technology&quot;, &quot;America/New_York&quot;, 100000)
+ AssetInfo(&quot;MSFT&quot;, &quot;USD&quot;, &quot;Microsoft Corporation&quot;, &quot;EQUITY&quot;, &quot;NMS&quot;, &quot;United States&quot;,
+  &quot;Software—Infrastructure&quot;, &quot;Technology&quot;, &quot;America/New_York&quot;, 181000)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/alinski29/Stonks.jl/blob/36201509b29ed5b064e7a40a74bbd455e04d1d59/src/curl.jl#L89-L115">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Stonks.get_exchange_rate" href="#Stonks.get_exchange_rate"><code>Stonks.get_exchange_rate</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">get_exchange_rate(
+  symbols, [client], [T&lt;:AbstractStonksRecord]; 
+  [from] = missing, [to] = missing
+) -&gt; Union{Vector{T}, Exception}</code></pre><p>Retrieves historical exchange rate information</p><p><strong>Arguments</strong></p><ul><li><code>symbols</code> can be:<ul><li><code>String</code> formated as base/quote, each having exactly 3 characters, e.g.: &#39;EUR/USD&#39;, &#39;USD/CAD&#39;</li><li><code>Vector{String}</code> with multiple symbols</li><li><code>Vector{Tuple{String, Date}}</code>: tuples of form (symbol, from)</li><li><code>Vector{Tuple{String, Date, Date}}</code>, tuples of form (symbol, from, to)</li></ul></li><li><code>[client]::APIClient</code> can be omitted if one of the correct environmental variable is set (<code>YAHOOFINANCE_TOKEN</code> or <code>ALPHAVANTAGE_TOKEN</code>)</li><li><code>[T&lt;:AbstractStonksRecord]</code> is the data type used for parsing. Change it only if you want to use your custom model. default = <code>ExchangeRate</code></li></ul><p><strong>Keywords</strong></p><ul><li><code>[from]</code>: a Date object. default = <code>missing</code></li><li><code>[to]</code>: a Date object. default = <code>missing</code></li></ul><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; get_exchange_rate(&quot;EUR/USD&quot;, from=ref_date-Day(1), to=ref_date)
+3-element Vector{ExchangeRate}:
+ ExchangeRate(&quot;EUR&quot;, &quot;USD&quot;, Date(&quot;2022-02-18&quot;), 1.13203)
+ ExchangeRate(&quot;EUR&quot;, &quot;USD&quot;, Date(&quot;2022-02-17&quot;), 1.13592)
+julia&gt; get_exchange_rate([&quot;EUR/USD&quot;, &quot;USD/CAD&quot;], from=ref_date-Day(1), to=ref_date)
+# 4-element Vector{ExchangeRate}:
+ ExchangeRate(&quot;EUR&quot;, &quot;USD&quot;, Date(&quot;2022-02-18&quot;), 1.13203)
+ ExchangeRate(&quot;EUR&quot;, &quot;USD&quot;, Date(&quot;2022-02-17&quot;), 1.13592)
+ ExchangeRate(&quot;USD&quot;, &quot;CAD&quot;, Date(&quot;2022-02-18&quot;), 1.2748)
+ ExchangeRate(&quot;USD&quot;, &quot;CAD&quot;, Date(&quot;2022-02-17&quot;), 1.2707)
+# Also works with []Tuple{String, Date} or []Tuple{String, Date, Date}
+julia&gt;get_exchange_rate([
+  (&quot;EUR/USD&quot;, Date(&quot;2022-02-15&quot;), Date(&quot;2022-02-16&quot;)),
+  (&quot;USD/CAD&quot;, Date(&quot;2022-02-14&quot;), Date(&quot;2022-02-15&quot;)),
+])
+4-element Vector{ExchangeRate}:
+...</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/alinski29/Stonks.jl/blob/36201509b29ed5b064e7a40a74bbd455e04d1d59/src/curl.jl#L127-L168">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Stonks.get_income_statement" href="#Stonks.get_income_statement"><code>Stonks.get_income_statement</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">get_income_statement(
+  symbols, [client], [T&lt;:AbstractStonksRecord];
+  [frequency] = missing, [from] = missing, [to] = missing, [kwargs...]
+) -&gt; Union{Vector{T}, Exception}</code></pre><p>Retrieves main information of income (profit and loss) statement.</p><p><strong>Arguments</strong></p><ul><li><code>symbols</code> can be:<ul><li><code>String</code> with one symbol / ticker</li><li><code>Vector{String}</code> with multiple symbols</li><li><code>Vector{Tuple{String, Date}}</code>: tuples of form (symbol, from)</li><li><code>Vector{Tuple{String, Date, Date}}</code>, tuples of form (symbol, from, to)</li></ul></li><li><code>[client::APIClient]</code>: can be ommited if one of the correct environmental variable is set (<code>YAHOOFINANCE_TOKEN</code> or <code>ALPHAVANTAGE_TOKEN</code>)</li><li><code>[T&lt;:AbstractStonksRecord]</code>: data type used for parsing. Change it only if you want to use your custom model. default = <code>IncomeStatement</code></li></ul><p><strong>Keywords</strong></p><ul><li><code>[frequency]</code>: values = [yearly, quarterly]. default = <code>missing</code>, which will include both yearly and quarterly frequencies.</li><li><code>[from]</code>: a Date oject indicating lower date limit. default = <code>missing</code></li><li><code>[to]</code>: a Date objject indicating upper date limit. default = <code>missing</code></li><li><code>[kwargs...]</code>: use it to pass keyword arguments if you have url / query parameters that need to be resolved at runtime.</li></ul><p><strong>Examples</strong></p><pre><code class="language-julia hljs">get_income_statement(&quot;AAPL&quot;)
+get_income_statement([&quot;AAPL&quot;, &quot;IBM&quot;])
+get_income_statement([&quot;AAPL&quot;, &quot;IBM&quot;]; frequency=&quot;yearly&quot;)
+get_income_statement([
+  (&quot;AAPL&quot;, Date(&quot;2020-01-01&quot;), Date(&quot;2020-12-31&quot;)),
+  (&quot;MSFT&quot;, Date(&quot;2020-01-01&quot;), Date(&quot;2020-12-31&quot;)),
+]; frequency=&quot;quarterly&quot;)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/alinski29/Stonks.jl/blob/36201509b29ed5b064e7a40a74bbd455e04d1d59/src/curl.jl#L189-L222">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Stonks.get_balance_sheet" href="#Stonks.get_balance_sheet"><code>Stonks.get_balance_sheet</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">get_balance_sheet(
+  symbols, [client], [T&lt;:AbstractStonksRecord];
+  [frequency] = missing, [from] = missing, [to] = missing, [kwargs...]
+) -&gt; Union{Vector{T}, Exception}</code></pre><p>Retrieves main information from balance sheet statement.</p><p><strong>Arguments</strong></p><ul><li><code>symbols</code> can be:<ul><li><code>String</code> with one symbol / ticker</li><li><code>Vector{String}</code> with multiple symbols</li><li><code>Vector{Tuple{String, Date}}</code>: tuples of form (symbol, from)</li><li><code>Vector{Tuple{String, Date, Date}}</code>, tuples of form (symbol, from, to)</li></ul></li><li><code>[client::APIClient]</code>: can be ommited if one of the correct environmental variable is set (<code>YAHOOFINANCE_TOKEN</code> or <code>ALPHAVANTAGE_TOKEN</code>)</li><li><code>[T&lt;:AbstractStonksRecord]</code>: data type used for parsing. Change it only if you want to use your custom model. default = <code>BalanceSheet</code></li></ul><p><strong>Keywords</strong></p><ul><li><code>[frequency]</code>: values = [yearly, quarterly]. default = <code>missing</code>, which will include both yearly and quarterly frequencies.</li><li><code>[from]</code>: a Date oject indicating lower date limit. default = <code>missing</code></li><li><code>[to]</code>: a Date objject indicating upper date limit. default = <code>missing</code></li><li><code>[kwargs...]</code>: use it to pass keyword arguments if you have url / query parameters that need to be resolved at runtime.</li></ul><p><strong>Examples</strong></p><pre><code class="language-julia hljs">get_balance_sheet(&quot;AAPL&quot;)
+get_balance_sheet([&quot;AAPL&quot;, &quot;IBM&quot;])
+get_balance_sheet([&quot;AAPL&quot;, &quot;IBM&quot;]; frequency=&quot;yearly&quot;)
+get_balance_sheet([
+  (&quot;AAPL&quot;, Date(&quot;2020-01-01&quot;), Date(&quot;2020-12-31&quot;)),
+  (&quot;MSFT&quot;, Date(&quot;2020-01-01&quot;), Date(&quot;2020-12-31&quot;)),
+]; frequency=&quot;quarterly&quot;)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/alinski29/Stonks.jl/blob/36201509b29ed5b064e7a40a74bbd455e04d1d59/src/curl.jl#L237-L270">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Stonks.get_data" href="#Stonks.get_data"><code>Stonks.get_data</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">get_data(resource, symbols; kwargs...) -&gt; Union{Vector{&lt;:AbstractStonksRecord}, Exception}</code></pre><p>Generic function to get data of type resource{T}. Functions such as get<em>price, get</em>info, call this.</p><p><strong>Arguments</strong></p><ul><li><code>resource::APIResource</code>: instance of an <code>APIResource</code>.</li><li><code>symbols::Symbol</code> can be:<ul><li><code>String</code> with one symbol / ticker</li><li><code>Vector{String}</code> with multiple symbols</li><li><code>Vector{Tuple{String, Date}}</code>: tuples of form (symbol, from)</li><li><code>Vector{Tuple{String, Date, Date}}</code>, tuples of form (symbol, from, to)</li><li><code>Vector{UpdatableSymbol}</code>: type Stonks.UpdatableSymbol(symbol; [from], [to])</li></ul></li></ul><p><strong>Keywords</strong></p><ul><li><code>[interval]</code>: values = 1d, 1wk, 1mo. Frequency lower than daily is not supported. default = 1d</li><li><code>[from]</code>: a Date oject indicating lower date limit. default = <code>missing</code></li><li><code>[to]</code>: a Date objject indicating upper date limit. default = <code>missing</code></li><li><code>[kwargs...]</code>: use it to pass keyword arguments if you have url / query parameters that need to be resolved at runtime.</li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/alinski29/Stonks.jl/blob/36201509b29ed5b064e7a40a74bbd455e04d1d59/src/curl.jl#L285-L304">source</a></section></article><hr/><h2 id="DataFrame-conversion"><a class="docs-heading-anchor" href="#DataFrame-conversion">DataFrame conversion</a><a id="DataFrame-conversion-1"></a><a class="docs-heading-anchor-permalink" href="#DataFrame-conversion" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-binding" id="Stonks.to_dataframe" href="#Stonks.to_dataframe"><code>Stonks.to_dataframe</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">to_dataframe(data::Vecotr{&lt;:AbstractStonksRecord}) -&gt; DataFrame</code></pre><p>Converts an object of type <code>Vector{&lt;:AbstractStonksRecord}</code> to a <code>DataFrame</code>. The types of the <code>DataFrame</code> will match the types of <code>T</code>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; data
+4-element Vector{AssetPrice}:
+ AssetPrice(&quot;MSFT&quot;, Date(&quot;2022-02-23&quot;), 280.27, 290.18, 291.7, 280.1, missing, 37811167)
+ AssetPrice(&quot;MSFT&quot;, Date(&quot;2022-02-22&quot;), 287.72, 285.0, 291.54, 284.5, missing, 41569319)
+ AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-23&quot;), 160.07, 165.54, 166.15, 159.75, missing, 90009247)
+ AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-22&quot;), 164.32, 164.98, 166.69, 162.15, missing, 90457637)
+julia&gt; data |&gt; to_dataframe
+4x8 DataFrame
+ Row │ symbol  date        close    open      high      low       close_adjusted  volume   
+     │ String  Date        Float64  Float64?  Float64?  Float64?  Float64?        Int64?   
+─────┼─────────────────────────────────────────────────────────────────────────────────────
+   1 │ MSFT    2022-02-23   280.27    290.18    291.7     280.1          missing  37811167
+   2 │ MSFT    2022-02-22   287.72    285.0     291.54    284.5          missing  41569319
+   3 │ AAPL    2022-02-23   160.07    165.54    166.15    159.75         missing  90009247
+   4 │ AAPL    2022-02-22   164.32    164.98    166.69    162.15         missing  90457637
+
+julia&gt; data
+3-element Vector{ExchangeRate}:
+ ExchangeRate(&quot;EUR&quot;, &quot;USD&quot;, Date(&quot;2022-02-16&quot;), 1.13721)
+ ExchangeRate(&quot;EUR&quot;, &quot;USD&quot;, Date(&quot;2022-02-15&quot;), 1.1358)
+ ExchangeRate(&quot;EUR&quot;, &quot;USD&quot;, Date(&quot;2022-02-14&quot;), 1.13052)
+julia&gt; data |&gt; to_dataframe
+3x4 DataFrame
+ Row │ base    target  date        rate    
+     │ String  String  Date        Float64 
+─────┼─────────────────────────────────────
+   1 │ EUR     USD     2022-02-16  1.13721
+   2 │ EUR     USD     2022-02-15  1.1358
+   3 │ EUR     USD     2022-02-14  1.13052</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/alinski29/Stonks.jl/blob/36201509b29ed5b064e7a40a74bbd455e04d1d59/src/conversions.jl#L4-L42">source</a></section></article><hr/><h2 id="Persisting-data"><a class="docs-heading-anchor" href="#Persisting-data">Persisting data</a><a id="Persisting-data-1"></a><a class="docs-heading-anchor-permalink" href="#Persisting-data" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-binding" id="Stonks.Stores.load" href="#Stonks.Stores.load"><code>Stonks.Stores.load</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">load(ds, [partitions]) -&gt; Union{DataFrame, Exception}</code></pre><p>Read data from an <code>FileStore</code> instance into a DataFrame. If there is no data at <code>ds.path</code>, a file with 0 records and the correct types with be created. </p><p><strong>Arguments</strong></p><ul><li><code>ds::FileStore{&lt;:AbstractStonksRecord}</code>: a <code>FileStore</code> instance</li><li><code>[partitions]::Dict{String, Vector{String}}</code>: a dict of column =&gt; values, used for partition pruning. default = <code>missing</code></li></ul><p><strong>Examples</strong></p><pre><code class="language-julia hljs">dest = joinpath(@__DIR__, &quot;data/prices&quot;)
+ds = FileStore{AssetPrice}(; path=dest, ids=[:symbol], partitions=[:symbol], time_column=&quot;date&quot;)
+df = load(ds)
+show(df[1:2, :]) # types are persisted
+2×8 DataFrame
+ Row │ symbol  date        close    open      high      low       close_adjusted  volume   
+     │ String  Date        Float64  Float64?  Float64?  Float64?  Float64?        Integer? 
+─────┼─────────────────────────────────────────────────────────────────────────────────────
+   1 │ AAPL    2022-03-01   163.2    164.695    166.6     161.97         missing  83474425
+   2 │ AAPL    2022-02-28   165.12   163.06     165.42    162.43         missing  95056629</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/alinski29/Stonks.jl/blob/36201509b29ed5b064e7a40a74bbd455e04d1d59/src/stores/interface.jl#L12-L34">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Stonks.Stores.save" href="#Stonks.Stores.save"><code>Stonks.Stores.save</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">save(ds, data) -&gt; Union{Nothing, Exception}</code></pre><p>Writes data using the information provided in the FileStore (path, format,  partitions, writer) In case of a <code>FileStore</code> with partitions, the partition values where <code>data</code> has records will be overwritten.</p><p><strong>Arguments</strong></p><ul><li><code>ds::FileStore</code></li><li><code>data::Union{AbstractDataFrame, Vector{&lt;:AbstractStonksRecord}}</code></li></ul><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; dest = joinpath(@__DIR__, &quot;data/prices&quot;)
+julia&gt; ds = FileStore{AssetPrice}(; path=dest, ids=[&quot;symbol&quot;], partitions=[&quot;symbol&quot;], time_column=&quot;date&quot;)
+julia&gt; data
+2-element Vector{AssetPrice}:
+ AssetPrice(&quot;MSFT&quot;, Date(&quot;2022-03-04&quot;), 289.86, missing, missing, missing, missing, missing)
+ AssetPrice(&quot;TSLA&quot;, Date(&quot;2022-03-04&quot;), 838.29, missing, missing, missing, missing, missing)
+julia&gt; save(ds, data)
+julia&gt; readdir(ds.path)
+2-element Vector{String}:
+ &quot;symbol=MSFT&quot;
+ &quot;symbol=TSLA&quot;</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/alinski29/Stonks.jl/blob/36201509b29ed5b064e7a40a74bbd455e04d1d59/src/stores/interface.jl#L82-L106">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Stonks.Stores.update" href="#Stonks.Stores.update"><code>Stonks.Stores.update</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">update(ds, [symbols], [client]; [to], [force]) -&gt; Union{Nothing, FileStore}</code></pre><p>Updates or inserts data in the datastore.  If <code>symbols</code> are not provided, the updates will be inferred based on <code>ds.ids</code> and <code>ds.time_column</code>. If <code>symbols</code> are provided, only the symbols will be updated.</p><p><strong>Arguments</strong></p><ul><li><code>ds::FileStore{&lt;:AbstractStonksRecord}</code> </li><li><code>[symbols::Symbol]</code>. Default = missing.  Can be:<ul><li><code>String</code> with one symbol / ticker</li><li><code>Vector{String}</code> with multiple symbols</li><li><code>Vector{Tuple{String, Date}}</code>: tuples of form (symbol, from)</li><li><code>Vector{Tuple{String, Date, Date}}</code>, tuples of form (symbol, from, to)</li></ul></li><li><code>[client::APIClient]</code>: can be omitted if the one of the client can be built from ENV vars</li></ul><p><strong>Keywords</strong></p><ul><li><code>[to::Date]</code>: default = most recent working day. upper date limit.</li><li><code>[force::Bool]</code>: default = <code>false</code>. Indicates how to handle the case when <code>ismissing(ds.time_column) &amp;&amp; ismissing(symbols)</code>:<ul><li><code>false</code> =&gt; does nothing</li><li><code>true</code> =&gt; makes requests for all <code>ds.ids</code> from the min until max <code>ds.time_column</code> and rewrites all data</li></ul></li></ul><p><strong>Examples</strong></p><pre><code class="language-julia-repl hljs">julia&gt; Dates.today()
+Date(&quot;2022-02-04&quot;)
+julia&gt; @chain load(ds) to_dataframe groupby(_, :symbol) combine(_, :date =&gt; maximum) show
+2×2 DataFrame
+ Row │ symbol  date_maximum 
+     │ String  Date         
+─────┼──────────────────────
+   1 │ MSFT    2022-03-02
+   2 │ AAPL    2022-03-02
+julia&gt; update(ds) 
+julia&gt; @chain load(ds) groupby(_, :symbol) combine(_, :date =&gt; maximum) show
+2×2 DataFrame
+ Row │ symbol  date_maximum 
+     │ String  Date         
+─────┼──────────────────────
+   1 │ AAPL    2022-03-04
+   2 │ MSFT    2022-03-04
+julia&gt; update(ds, [&quot;IBM&quot;, &quot;AMD&quot;])
+julia&gt; @chain load(ds) groupby(_, :symbol) combine(_, :date =&gt; maximum) show
+4x2 DataFrame
+ Row │ symbol  date_maximum 
+     │ String  Date         
+─────┼──────────────────────
+   1 │ AAPL    2022-03-04
+   2 │ MSFT    2022-03-04
+   3 │ IBM     2022-03-04
+   3 │ AMD     2022-03-04</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/alinski29/Stonks.jl/blob/36201509b29ed5b064e7a40a74bbd455e04d1d59/src/stores/interface.jl#L133-L185">source</a></section></article><hr/><h2 id="Content-parsers"><a class="docs-heading-anchor" href="#Content-parsers">Content parsers</a><a id="Content-parsers-1"></a><a class="docs-heading-anchor-permalink" href="#Content-parsers" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-binding" id="Stonks.Parsers.parse_content" href="#Stonks.Parsers.parse_content"><code>Stonks.Parsers.parse_content</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia hljs">parse_content(p::AbstractContentParser, c::AbstractString; kwargs...) -&gt; Vector{T&lt;:AbstractStonksRecord}</code></pre><p>Interface for parsing raw data into a data model.  All main functions responsible for getting data from APIs will call <code>parse_content</code> with a concrete subtype of <code>AbstractContentParser</code>.</p><p><strong>Example - Create a custom type and parser</strong></p><pre><code class="language-julia hljs">using Dates, JSON3, Stonks
+
+# Assume we have the following raw data
+julia&gt; content
+{
+  &quot;name&quot;: &quot;Inflation - US Consumer Prices&quot;,
+  &quot;interval&quot;: &quot;annual&quot;,
+  &quot;unit&quot;: &quot;percent&quot;,
+  &quot;data&quot;: [
+    {&quot;date&quot;: &quot;2020-01-01&quot;, &quot;value&quot;: &quot;1.2335&quot;},
+    {&quot;date&quot;: &quot;2019-01-01&quot;, &quot;value&quot;: &quot;1.8122&quot;}
+  ]
+}
+
+# Create your custom type
+struct MacroIndicator &lt;: AbstractStonksRecord
+  name::String
+  date::Date
+  value::Number
+end
+
+# Define a function with the same signature as parse_content.
+function parse_inflation_data(content::AbstractString; kwargs...)
+  js = JSON3.read(content)
+  return map(x -&gt; 
+    MacroIndicator(&quot;Inflation&quot;, tryparse(Date, x[:date]), tryparse(Float64, x[:value])),
+  js[&quot;data&quot;])
+end
+
+# Wrap it around a concrete subtype of AbstractContentParser
+my_parser = Stonks.Parsers.JSONParser(parse_inflation_data)
+julia&gt; parse_content(my_parser, content)
+2-element Vector{MacroIndicator}:
+ MacroIndicator(&quot;Inflation&quot;, Date(&quot;2020-01-01&quot;), 1.2335)
+ MacroIndicator(&quot;Inflation&quot;, Date(&quot;2019-01-01&quot;), 1.8122)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/alinski29/Stonks.jl/blob/36201509b29ed5b064e7a40a74bbd455e04d1d59/src/Parsers.jl#L31-L75">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="api_types.html">« Types</a><a class="docs-footer-nextpage" href="contributing.html">Contributing »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.14 on <span class="colophon-date" title="Monday 14 March 2022 18:59">Monday 14 March 2022</span>. Using Julia version 1.7.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
