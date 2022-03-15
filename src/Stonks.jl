@@ -16,10 +16,10 @@ using Stonks.APIClients
 using Stonks.Stores
 
 export AbstractStonksRecord,
-  AssetInfo, AssetPrice, ExchangeRate, IncomeStatement, BalanceSheet
+  AssetInfo, AssetPrice, ExchangeRate, IncomeStatement, BalanceSheet, Earnings
 export AlphavantageJSONClient, YahooClient
 export get_price,
-  get_info, get_exchange_rate, get_income_statement, get_balance_sheet, get_data
+  get_info, get_exchange_rate, get_income_statement, get_balance_sheet, get_earnings, get_data
 export to_dataframe
 export FileStore, load, save, update
 

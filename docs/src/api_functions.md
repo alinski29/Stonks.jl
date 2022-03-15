@@ -25,6 +25,7 @@ get_info
 get_exchange_rate
 get_income_statement
 get_balance_sheet
+get_earnings
 get_data
 ```
 

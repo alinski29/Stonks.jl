@@ -7,7 +7,7 @@ using Base: @kwdef
 using Dates
 
 export AbstractStonksRecord,
-  AssetInfo, AssetPrice, ExchangeRate, IncomeStatement, BalanceSheet
+  AssetInfo, AssetPrice, ExchangeRate, IncomeStatement, BalanceSheet, Earnings
 
 """
 Abstract type inteded to be subtyped by an data model.
@@ -190,7 +190,7 @@ BalanceSheet(;
   commonStock::Union{Int64,Missing} = missing,
   commonStockSharesOutstanding::Union{Int64,Missing} = missing,
 )
-````
+```
 """
 @kwdef struct BalanceSheet <: AbstractStonksRecord
   symbol::String
@@ -227,6 +227,29 @@ BalanceSheet(;
   retainedEarnings::Union{Int64,Missing} = missing
   commonStock::Union{Int64,Missing} = missing
   commonStockSharesOutstanding::Union{Int64,Missing} = missing
+end
+
+"""
+Stores a datapoint containing earnings (per share) information.
+### Constructors
+```julia
+Earnings(;
+  symbol::String,
+  frequency::String,
+  fiscalDate::Date,
+  currency::Union{String,Missing} = missing,
+  actual::Float16,
+  estimate::Union{Float16,Missing} = missing,
+)
+```
+"""
+@kwdef struct Earnings <: AbstractStonksRecord
+  symbol::String
+  frequency::String
+  fiscalDate::Date
+  currency::Union{String,Missing} = missing
+  actual::Float16
+  estimate::Union{Float16,Missing} = missing
 end
 
 # @kwdef struct EconomicIndicator <: AbstractStonksRecord

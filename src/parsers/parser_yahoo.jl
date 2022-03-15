@@ -3,7 +3,7 @@ using Dates
 using JSON3: JSON3
 
 using Stonks: JSONContent, APIResponseError, ContentParserError
-using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate, IncomeStatement, BalanceSheet
+using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate, IncomeStatement, BalanceSheet, Earnings
 
 function parse_yahoo_info(
   content::AbstractString; kwargs...
@@ -115,7 +115,7 @@ function parse_yahoo_income_statement(
   if !isempty(key_check)
     return ContentParserError("Missing keys: $(join(key_check, ","))")
   end
-  for key in key_check
+  for key in keys_exp
     if !haskey(js[key], :incomeStatementHistory)
       return ContentParserError("Missing keys js[$key][:incomeStatementHistory]")
     end
@@ -184,7 +184,7 @@ function parse_yahoo_balance_sheet(
   if !isempty(key_check)
     return ContentParserError("Missing keys: $(join(key_check, ","))")
   end
-  for key in key_check
+  for key in keys_exp
     if !haskey(js[key], :balanceSheetStatements)
       return ContentParserError("Missing keys js[$key][:balanceSheetStatements]")
     end
@@ -248,6 +248,66 @@ function parse_yahoo_balance_sheet(
     @warn """No datapoints between '$from' and '$to' after filtering.
              Original length: $original_len. Latest date: $latest_date"""
     return BalanceSheet[]
+  end
+  return res
+end
+
+function parse_yahoo_earnings(
+  content::AbstractString; kwargs...
+)::Union{Vector{Earnings},Exception}
+  maybe_js = @chain begin
+    content
+    validate_yahoo_response
+    unpack_quote_summary_response
+  end
+  typeof(maybe_js) <: Exception && return maybe_js
+  js = maybe_js
+  from, to = [get(kwargs, arg, missing) for arg in [:from, :to]]
+  frequency = get(kwargs, :frequency, missing)
+  if !ismissing(frequency) && frequency in ["yearly", "annualy", "year", "annual"]
+    @warn "'$frequency' frequency not available for this resource, only 'quarterly'."
+    return Earnings[]
+  end
+  symbol = get(kwargs, :symbol, missing)
+  keys_exp = [:earningsHistory]
+  currency = extract_currency(js)
+  key_check = setdiff(keys_exp, keys(js))
+  if !isempty(key_check)
+    return ContentParserError("Missing keys: $(join(key_check, ","))")
+  end
+  for key in keys_exp
+    if !haskey(js[key], :history)
+      return ContentParserError("Missing keys js[$key][:history]")
+    end
+  end
+  remaps = Dict(
+    :actual => :epsActual,
+    :estimate => :epsEstimate,
+  )
+  data = Earnings[]
+  for key in keys_exp
+    js_vals = js[key][:history]
+    dvals = map(x -> begin
+      dval = js_to_dict(x)
+      dval[:fiscalDate] = Date(unix2datetime(dval[:quarter]))
+      dval
+    end, js_vals)
+    items = map(
+      obj -> tryparse_js(
+        Earnings, obj;
+        fixed=Dict(:symbol => symbol, :frequency => "quarterly", :currency => currency),
+        remaps=remaps,
+      ),
+      dvals,
+    )
+    append!(data, items)
+  end
+  original_len, latest_date = length(data), maximum(map(x -> x.fiscalDate, data))
+  res = apply_filters(data, "fiscalDate"; from=from, to=to)
+  if isempty(res)
+    @warn """No datapoints between '$from' and '$to' after filtering.
+             Original length: $original_len. Latest date: $latest_date"""
+    return Earnings[]
   end
   return res
 end

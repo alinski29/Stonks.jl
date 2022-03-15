@@ -9,7 +9,7 @@ using Dates
 using Stonks: DataClientError
 using Stonks.Parsers
 using Stonks.Models:
-  AbstractStonksRecord, AssetPrice, AssetInfo, ExchangeRate, IncomeStatement, BalanceSheet
+  AbstractStonksRecord, AssetPrice, AssetInfo, ExchangeRate, IncomeStatement, BalanceSheet, Earnings
 
 export APIClient, APIResource, AlphavantageJSONClient, YahooClient
 
@@ -170,6 +170,7 @@ Contains the following `resources`:
   - exchange => `APIResource{ExchangeRate}`
   - income_statement => `APIResource{IncomeStatement}`
   - balance_sheet => `APIResource{BalanceSheet}`
+  - earnings => `APIResource{Earnings}`
 """
 function YahooClient(api_key::String)::APIClient
   url = "https://yfapi.net"
@@ -221,12 +222,23 @@ function YahooClient(api_key::String)::APIClient
     max_retries=1,
     rank_order=2,
   )
+  earnings = APIResource{Earnings}(;
+    url="$url/v11/finance/quoteSummary/{symbol}",
+    query_params=Dict(
+      "modules" => "price,earningsHistory"
+    ),
+    parser=Parsers.YahooEarningsParser,
+    headers=headers,
+    max_retries=1,
+    rank_order=2,
+  )
   resources = Dict(
     "price" => price,
     "info" => info,
     "exchange" => exchange,
     "income_statement" => income_statement,
     "balance_sheet" => balance_sheet,
+    "earnings" => earnings,
   )
   return APIClient(resources, url)
 end
@@ -241,6 +253,7 @@ Contains the following `resources`:
   - exchange => `APIResource{ExchangeRate}`
   - income_statement => `APIResource{IncomeStatement}`
   - balance_sheet => `APIResource{BalanceSheet}`
+  - earnings => `APIResource{Earnings}`
 """
 function AlphavantageJSONClient(api_key::String)::APIClient
   url = "https://www.alphavantage.co"
@@ -298,12 +311,23 @@ function AlphavantageJSONClient(api_key::String)::APIClient
     max_retries=1,
     rank_order=1,
   )
+  earnings = APIResource{Earnings}(;
+    url="$url/query",
+    query_params=Dict(
+      "function" => "EARNINGS", "symbol" => "{symbol}", "apikey" => api_key
+    ),
+    parser=Parsers.AlphavantageEarningsParser,
+    headers=headers,
+    max_retries=1,
+    rank_order=1,
+  )
   resources = Dict(
     "price" => price,
     "info" => info,
     "exchange" => exchange,
     "income_statement" => income_statement,
     "balance_sheet" => balance_sheet,
+    "earnings" => earnings,
   )
   return APIClient(resources, url)
 end

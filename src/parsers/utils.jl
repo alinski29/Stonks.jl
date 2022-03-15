@@ -40,7 +40,16 @@ end
 
 function parse_jsvalue(js::AbstractDict, key::Symbol, T::Any)
   if haskey(js, key)
-    value = typeof(js[key]) === T ? js[key] : tryparse(T, js[key])
+    val = js[key]
+    value = (
+      if typeof(val) === T 
+        val
+      elseif T <: AbstractFloat && typeof(val) <: AbstractFloat
+        T(val)
+      else
+        tryparse(T, val)
+      end
+    )
     return isnothing(value) ? missing : value
   end
   return missing

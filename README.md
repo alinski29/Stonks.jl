@@ -73,6 +73,9 @@ Stonks.jl is the Julia library that lets you access and store financial data fro
 
 ## **API summary**
 
+The following data models and functions are exposed by the library.
+Typically, Alphavantage client has more historical data.
+
 <table class="tg" style="undefined;table-layout: fixed; width: 896px">
 <colgroup>
 <col style="width: 174px">
@@ -130,6 +133,13 @@ Stonks.jl is the Julia library that lets you access and store financial data fro
     <td class="tg-hfmg" style="text-align:center;vertical-align:middle">&#9989;</td>
   </tr>
   <tr>
+    <td class="tg-psru"><a href="https://alinski29.github.io/Stonks.jl/dev/api_types.html#Stonks.Models.Earnings" target="_blank" rel="noopener noreferrer">Earnings</a></td>
+    <td class="tg-psru"><a href="https://alinski29.github.io/Stonks.jl/dev/api_functions.html#Stonks.get_earnings" target="_blank" rel="noopener noreferrer">get_earnings</a></td>
+    <td class="tg-psru">Historical earnings per share (EPS) data<br></td>
+    <td class="tg-hfmg" style="text-align:center;vertical-align:middle">&#9989;</td>
+    <td class="tg-hfmg" style="text-align:center;vertical-align:middle">&#9989;</td>
+  </tr>
+  <tr>
     <td class="tg-d7ja" colspan="2" style="font-family:inherit;font-size:16px;font-weight:bold;text-align:center;vertical-align:middle">Upcoming</td>
     <td class="tg-otat"></td>
     <td class="tg-6cmx"></td>
@@ -141,13 +151,6 @@ Stonks.jl is the Julia library that lets you access and store financial data fro
     <td class="tg-psru"></td>
     <td class="tg-hfmg"></td>
     <td class="tg-hfmg"></td>
-  </tr>
-  <tr>
-    <td class="tg-otat">Earnings</td>
-    <td class="tg-otat">get_earnings</td>
-    <td class="tg-otat"></td>
-    <td class="tg-6cmx"></td>
-    <td class="tg-6cmx"></td>
   </tr>
 </tbody>
 </table>

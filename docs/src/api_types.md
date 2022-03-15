@@ -16,7 +16,9 @@ AssetPrice
 ExchangeRate
 IncomeStatement
 BalanceSheet
+Earnings
 ```
+
 ---
 ## API Clients
 Stores information required to make requests HTTP APIs.

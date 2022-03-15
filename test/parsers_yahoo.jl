@@ -16,10 +16,12 @@ include("test_utils.jl")
   exchange_content = get_test_data("data/yahoo_exchange.json")
   is_content = get_test_data("data/yahoo_income_statement.json")
   bs_content = get_test_data("data/yahoo_balance_sheet.json")
+  eps_content = get_test_data("data/yahoo_earnings.json")
   price_parser = Parsers.YahooPriceParser
   exchange_parser = Parsers.YahooExchangeRateParser
   is_parser = Parsers.YahooIncomeStatementParser
   bs_parser = Parsers.YahooBalanceSheetParser
+  eps_parser = Parsers.YahooEarningsParser
 
   @testset "Unpack quote summary response" begin
     content = """{
@@ -163,5 +165,25 @@ include("test_utils.jl")
     data = parse_content(bs_parser, bs_content; from=Date("2020-01-01"), symbol="IBM")
     dates = map(x -> x.fiscalDate, data)
     @test minimum(dates) >= Date("2020-01-01")
+  end
+ 
+  @testset "Succesful earnings response" begin
+    data = parse_content(eps_parser, eps_content; symbol="IBM")
+    dates = map(x -> x.fiscalDate, data)
+    @test minimum(dates) == Date("2021-03-31")
+    @test maximum(dates) == Date("2021-12-31")
+    @test isa(data, Vector{Earnings})
+  end
+
+  @testset "Succesful earnings response with from date filter" begin
+    data = parse_content(eps_parser, eps_content; from=Date("2021-06-01"), symbol="IBM")
+    dates = map(x -> x.fiscalDate, data)
+    @test minimum(dates) >= Date("2020-06-30")
+  end
+
+  @testset "Succesful earnings response with yearly frequency (no data)" begin
+    data = parse_content(eps_parser, eps_content; frequency="yearly")
+    @test isa(data, Vector{Earnings})
+    @test length(data) == 0
   end
 end

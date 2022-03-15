@@ -1,0 +1,115 @@
+{
+    "symbol": "IBM",
+    "annualEarnings": [
+        {
+            "fiscalDateEnding": "2021-12-31",
+            "reportedEPS": "9.97"
+        },
+        {
+            "fiscalDateEnding": "2020-12-31",
+            "reportedEPS": "8.67"
+        },
+        {
+            "fiscalDateEnding": "2019-12-31",
+            "reportedEPS": "12.81"
+        }
+    ],
+    "quarterlyEarnings": [
+        {
+            "fiscalDateEnding": "2021-12-31",
+            "reportedDate": "2022-01-24",
+            "reportedEPS": "3.35",
+            "estimatedEPS": "3.3",
+            "surprise": "0.05",
+            "surprisePercentage": "1.5152"
+        },
+        {
+            "fiscalDateEnding": "2021-09-30",
+            "reportedDate": "2021-10-20",
+            "reportedEPS": "2.52",
+            "estimatedEPS": "2.5147",
+            "surprise": "0.0053",
+            "surprisePercentage": "0.2108"
+        },
+        {
+            "fiscalDateEnding": "2021-06-30",
+            "reportedDate": "2021-07-19",
+            "reportedEPS": "2.33",
+            "estimatedEPS": "2.2884",
+            "surprise": "0.0416",
+            "surprisePercentage": "1.8179"
+        },
+        {
+            "fiscalDateEnding": "2021-03-31",
+            "reportedDate": "2021-04-19",
+            "reportedEPS": "1.77",
+            "estimatedEPS": "1.6524",
+            "surprise": "0.1176",
+            "surprisePercentage": "7.1169"
+        },
+        {
+            "fiscalDateEnding": "2020-12-31",
+            "reportedDate": "2021-01-21",
+            "reportedEPS": "2.07",
+            "estimatedEPS": "1.8753",
+            "surprise": "0.1947",
+            "surprisePercentage": "10.3823"
+        },
+        {
+            "fiscalDateEnding": "2020-09-30",
+            "reportedDate": "2020-10-19",
+            "reportedEPS": "2.58",
+            "estimatedEPS": "2.579",
+            "surprise": "0.001",
+            "surprisePercentage": "0.0388"
+        },
+        {
+            "fiscalDateEnding": "2020-06-30",
+            "reportedDate": "2020-07-20",
+            "reportedEPS": "2.18",
+            "estimatedEPS": "2.0851",
+            "surprise": "0.0949",
+            "surprisePercentage": "4.5513"
+        },
+        {
+            "fiscalDateEnding": "2020-03-31",
+            "reportedDate": "2020-04-20",
+            "reportedEPS": "1.84",
+            "estimatedEPS": "1.801",
+            "surprise": "0.039",
+            "surprisePercentage": "2.1655"
+        },
+        {
+            "fiscalDateEnding": "2019-12-31",
+            "reportedDate": "2020-01-21",
+            "reportedEPS": "4.71",
+            "estimatedEPS": "4.6937",
+            "surprise": "0.0163",
+            "surprisePercentage": "0.3473"
+        },
+        {
+            "fiscalDateEnding": "2019-09-30",
+            "reportedDate": "2019-10-16",
+            "reportedEPS": "2.68",
+            "estimatedEPS": "2.6601",
+            "surprise": "0.0199",
+            "surprisePercentage": "0.7481"
+        },
+        {
+            "fiscalDateEnding": "2019-06-30",
+            "reportedDate": "2019-07-17",
+            "reportedEPS": "3.17",
+            "estimatedEPS": "3.0722",
+            "surprise": "0.0978",
+            "surprisePercentage": "3.1834"
+        },
+        {
+            "fiscalDateEnding": "2019-03-31",
+            "reportedDate": "2019-04-16",
+            "reportedEPS": "2.25",
+            "estimatedEPS": "2.2362",
+            "surprise": "0.0138",
+            "surprisePercentage": "0.6171"
+        }
+    ]
+}

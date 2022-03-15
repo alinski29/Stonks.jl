@@ -4,7 +4,7 @@ using JSON3: JSON3
 using Logging: @warn
 
 using Stonks: JSONContent, APIResponseError, ContentParserError
-using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate, IncomeStatement, BalanceSheet
+using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate, IncomeStatement, BalanceSheet, Earnings
 
 function parse_alphavantage_price(
   content::AbstractString; kwargs...
@@ -118,19 +118,19 @@ function parse_alphavantage_financial_statement(
   from::Union{Date,Missing},
   to::Union{Date,Missing},
   remaps::Union{AbstractDict,Missing},
+  keys_default::Vector{Symbol} = [:annualReports, :quarterlyReports],
 )::Union{Vector{T}, Exception} where {T<:AbstractStonksRecord}
   maybe_js = validate_alphavantage_response(content)
   typeof(maybe_js) <: Exception && return maybe_js
   js = maybe_js
   smb = ismissing(symbol) ? get(js, :symbol, missing) : symbol
-  keys_default = [:annualReports, :quarterlyReports]
   keys_exp = (
     if ismissing(frequency)
       keys_default
     elseif frequency in ["annual", "annualy", "year", "yearly"]
-      [:annualReports]
+      [first(keys_default)]
     elseif frequency in ["quarter", "quarterly"]
-      [:quarterlyReports]
+      [last(keys_default)]
     else 
       keys_default
     end
@@ -142,7 +142,7 @@ function parse_alphavantage_financial_statement(
   data = T[]
   for key in keys_exp
     js_vals = js[key]
-    freq = key == :annualReports ? "yearly" : "quarterly"
+    freq = contains(String(key), "annual") ? "yearly" : "quarterly"
     items = map(x -> begin 
       dval = js_to_dict(x)
       tryparse_js(
@@ -194,6 +194,27 @@ function parse_alphavantage_balance_sheet(
     from=get(kwargs, :from, missing),
     to=get(kwargs, :to, missing),
     remaps=remaps,
+  )
+  typeof(maybe_res) <: Exception && return maybe_res
+  return maybe_res
+end
+
+function parse_alphavantage_earnings(
+  content::AbstractString; kwargs...
+)::Union{Vector{Earnings},Exception}
+  remaps = Dict(
+    :fiscalDate => :fiscalDateEnding,
+    :actual => :reportedEPS,
+    :estimate => :estimatedEPS,
+  )
+  maybe_res = parse_alphavantage_financial_statement(
+    Earnings, content; 
+    symbol=get(kwargs, :symbol, missing),
+    frequency=get(kwargs, :frequency, missing),
+    from=get(kwargs, :from, missing),
+    to=get(kwargs, :to, missing),
+    remaps=remaps,
+    keys_default=[:annualEarnings, :quarterlyEarnings]
   )
   typeof(maybe_res) <: Exception && return maybe_res
   return maybe_res
