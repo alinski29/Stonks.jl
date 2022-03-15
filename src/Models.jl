@@ -7,7 +7,13 @@ using Base: @kwdef
 using Dates
 
 export AbstractStonksRecord,
-  AssetInfo, AssetPrice, ExchangeRate, IncomeStatement, BalanceSheet
+  AssetInfo,
+  AssetPrice,
+  ExchangeRate,
+  IncomeStatement,
+  BalanceSheet,
+  CashflowStatement,
+  Earnings
 
 """
 Abstract type inteded to be subtyped by an data model.
@@ -105,47 +111,49 @@ Follows normalized fields mapped to GAAP and IFRS taxonomies of the SEC.
 IncomeStatement(;
   symbol::String,
   frequency::String,
-  fiscalDate::Date,
-  totalRevenue::Int64,
-  costOfRevenue::Int64,
-  grossProfit::Int64,
-  operatingIncome::Int64,
-  sellingGeneralAndAdministrative::Union{Int64,Missing} = missing,
-  researchAndDevelopment::Union{Int64,Missing} = missing,
-  depreciation::Union{Int64,Missing} = missing,
-  depreciationAndAmortization::Union{Int64,Missing} = missing,
-  incomeBeforeTax::Union{Int64,Missing} = missing,
-  incomeTaxExpense::Union{Int64,Missing} = missing,
-  interestAndDebtExpense::Union{Int64,Missing} = missing,
-  comprehensiveIncomeNetOfTax::Union{Int64,Missing} = missing,
+  date::Date,
+  currency::Union{String,Missing} = missing,
+  total_revenue::Int64,
+  cost_of_revenue::Int64,
+  gross_profit::Int64,
+  operating_income::Int64,
+  selling_general_and_administrative::Union{Int64,Missing} = missing,
+  research_and_development::Union{Int64,Missing} = missing,
+  depreciation::Union{Int64,Missing} = missing, # Depreciation, Total 
+  depreciation_and_amortization::Union{Int64,Missing} = missing,
+  income_before_tax::Union{Int64,Missing} = missing,
+  income_tax_expense::Union{Int64,Missing} = missing,
+  interest_expense::Union{Int64,Missing} = missing,
+  interest_and_debt_expense::Union{Int64,Missing} = missing,
   ebit::Union{Int64,Missing} = missing,
   ebitda::Union{Int64,Missing} = missing,
-  netIncome::Int64,
-  netIncomeApplicableToCommonShares::Union{Int64,Missing} = missing,
+  net_income::Int64,
+  net_income_common_shares::Union{Int64,Missing} = missing,
 )
 ```
 """
 @kwdef struct IncomeStatement <: AbstractStonksRecord
   symbol::String
   frequency::String
-  fiscalDate::Date
+  date::Date
   currency::Union{String,Missing} = missing
-  totalRevenue::Int64
-  costOfRevenue::Int64
-  grossProfit::Int64
-  operatingIncome::Int64
-  sellingGeneralAndAdministrative::Union{Int64,Missing} = missing
-  researchAndDevelopment::Union{Int64,Missing} = missing
+  total_revenue::Int64
+  cost_of_revenue::Int64
+  gross_profit::Int64
+  operating_income::Int64
+  selling_general_and_administrative::Union{Int64,Missing} = missing
+  research_and_development::Union{Int64,Missing} = missing
   depreciation::Union{Int64,Missing} = missing # Depreciation, Total 
-  depreciationAndAmortization::Union{Int64,Missing} = missing
-  incomeBeforeTax::Union{Int64,Missing} = missing
-  incomeTaxExpense::Union{Int64,Missing} = missing
-  interestAndDebtExpense::Union{Int64,Missing} = missing
-  comprehensiveIncomeNetOfTax::Union{Int64,Missing} = missing
+  depreciation_and_amortization::Union{Int64,Missing} = missing
+  income_before_tax::Union{Int64,Missing} = missing
+  income_tax_expense::Union{Int64,Missing} = missing
+  interest_expense::Union{Int64,Missing} = missing
+  interest_and_debt_expense::Union{Int64,Missing} = missing
+  #comprehensive_income_net_of_tax::Union{Int64,Missing} = missing
   ebit::Union{Int64,Missing} = missing
   ebitda::Union{Int64,Missing} = missing
-  netIncome::Int64
-  netIncomeApplicableToCommonShares::Union{Int64,Missing} = missing
+  net_income::Int64
+  net_income_common_shares::Union{Int64,Missing} = missing
 end
 
 """
@@ -157,76 +165,143 @@ Follows normalized fields mapped to GAAP and IFRS taxonomies of the SEC.
 BalanceSheet(;
   symbol::String,
   frequency::String,
-  fiscalDate::Date,
+  date::Date,
   currency::Union{String,Missing} = missing,
-  totalAssets::Int64,
-  totalLiabilities::Int64,
-  totalShareholderEquity::Int64,
-  cashAndCashEquivalents::Union{Int64,Missing} = missing,
-  currentNetReceivables::Union{Int64,Missing} = missing,
+  total_assets::Int64,
+  total_liabilities::Int64,
+  total_shareholder_equity::Int64,
+  cash_and_equivalents::Union{Int64,Missing} = missing,
+  current_net_receivables::Union{Int64,Missing} = missing,
   inventory::Union{Int64,Missing} = missing,
-  shortTermInvestments::Union{Int64,Missing} = missing,
-  otherCurrentAssets::Union{Int64,Missing} = missing,
-  totalCurrentAssets::Union{Int64,Missing} = missing,
-  propertyPlantEquipment::Union{Int64,Missing} = missing,
+  short_term_investments::Union{Int64,Missing} = missing,
+  other_current_assets::Union{Int64,Missing} = missing,
+  total_current_assets::Union{Int64,Missing} = missing,
+  property_plant_equipment::Union{Int64,Missing} = missing,
   goodwill::Union{Int64,Missing} = missing,
-  longTermInvestments::Union{Int64,Missing} = missing,
-  intangibleAssets::Union{Int64,Missing} = missing,
-  totalNonCurrentAssets::Union{Int64,Missing} = missing,
-  currentAccountsPayable::Union{Int64,Missing} = missing,
-  deferredRevenue::Union{Int64,Missing} = missing,
-  shortTermDebt::Union{Int64,Missing} = missing,
-  otherCurrentLiabilities::Union{Int64,Missing} = missing,
-  totalCurrentLiabilities::Union{Int64,Missing} = missing,
-  currentDebt::Union{Int64,Missing} = missing,
-  currentLongTermDebt::Union{Int64,Missing} = missing,
-  longTermDebt::Union{Int64,Missing} = missing,
-  longTermDebtNonCurrent::Union{Int64,Missing} = missing,
-  capitalLeaseObligations::Union{Int64,Missing} = missing,
-  otherNonCurrentLiabilities::Union{Int64,Missing} = missing,
-  totalNonCurrentLiabilities::Union{Int64,Missing} = missing,
-  treasuryStock::Union{Int64,Missing} = missing,
-  retainedEarnings::Union{Int64,Missing} = missing,
-  commonStock::Union{Int64,Missing} = missing,
-  commonStockSharesOutstanding::Union{Int64,Missing} = missing,
+  long_term_investments::Union{Int64,Missing} = missing,
+  intangible_assets::Union{Int64,Missing} = missing,
+  total_noncurrent_assets::Union{Int64,Missing} = missing,
+  current_accounts_payable::Union{Int64,Missing} = missing,
+  deferred_revenue::Union{Int64,Missing} = missing,
+  short_term_debt::Union{Int64,Missing} = missing,
+  other_current_liabilities::Union{Int64,Missing} = missing,
+  total_current_liabilities::Union{Int64,Missing} = missing,
+  current_debt::Union{Int64,Missing} = missing,
+  current_long_term_debt::Union{Int64,Missing} = missing,
+  long_term_debt::Union{Int64,Missing} = missing,
+  long_term_debt_noncurrent::Union{Int64,Missing} = missing,
+  capital_lease_obligations::Union{Int64,Missing} = missing,
+  other_noncurrent_liabilities::Union{Int64,Missing} = missing,
+  total_noncurrent_liabilities::Union{Int64,Missing} = missing,
+  treasury_stock::Union{Int64,Missing} = missing,
+  retained_earnings::Union{Int64,Missing} = missing,
+  common_stock::Union{Int64,Missing} = missing,
+  common_stock_shares_outstanding::Union{Int64,Missing} = missing,
 )
-````
+```
 """
 @kwdef struct BalanceSheet <: AbstractStonksRecord
   symbol::String
   frequency::String
-  fiscalDate::Date
+  date::Date
   currency::Union{String,Missing} = missing
-  totalAssets::Int64
-  totalLiabilities::Int64
-  totalShareholderEquity::Int64
-  cashAndCashEquivalents::Union{Int64,Missing} = missing
-  currentNetReceivables::Union{Int64,Missing} = missing
+  total_assets::Int64
+  total_liabilities::Int64
+  total_shareholder_equity::Int64
+  cash_and_equivalents::Union{Int64,Missing} = missing
+  current_net_receivables::Union{Int64,Missing} = missing
   inventory::Union{Int64,Missing} = missing
-  shortTermInvestments::Union{Int64,Missing} = missing
-  otherCurrentAssets::Union{Int64,Missing} = missing
-  totalCurrentAssets::Union{Int64,Missing} = missing
-  propertyPlantEquipment::Union{Int64,Missing} = missing
+  short_term_investments::Union{Int64,Missing} = missing
+  other_current_assets::Union{Int64,Missing} = missing
+  total_current_assets::Union{Int64,Missing} = missing
+  property_plant_equipment::Union{Int64,Missing} = missing
   goodwill::Union{Int64,Missing} = missing
-  longTermInvestments::Union{Int64,Missing} = missing
-  intangibleAssets::Union{Int64,Missing} = missing
-  totalNonCurrentAssets::Union{Int64,Missing} = missing
-  currentAccountsPayable::Union{Int64,Missing} = missing
-  deferredRevenue::Union{Int64,Missing} = missing
-  shortTermDebt::Union{Int64,Missing} = missing
-  otherCurrentLiabilities::Union{Int64,Missing} = missing
-  totalCurrentLiabilities::Union{Int64,Missing} = missing
-  currentDebt::Union{Int64,Missing} = missing
-  currentLongTermDebt::Union{Int64,Missing} = missing
-  longTermDebt::Union{Int64,Missing} = missing
-  longTermDebtNonCurrent::Union{Int64,Missing} = missing
-  capitalLeaseObligations::Union{Int64,Missing} = missing
-  otherNonCurrentLiabilities::Union{Int64,Missing} = missing
-  totalNonCurrentLiabilities::Union{Int64,Missing} = missing
-  treasuryStock::Union{Int64,Missing} = missing
-  retainedEarnings::Union{Int64,Missing} = missing
-  commonStock::Union{Int64,Missing} = missing
-  commonStockSharesOutstanding::Union{Int64,Missing} = missing
+  long_term_investments::Union{Int64,Missing} = missing
+  intangible_assets::Union{Int64,Missing} = missing
+  total_noncurrent_assets::Union{Int64,Missing} = missing
+  current_accounts_payable::Union{Int64,Missing} = missing
+  deferred_revenue::Union{Int64,Missing} = missing
+  short_term_debt::Union{Int64,Missing} = missing
+  other_current_liabilities::Union{Int64,Missing} = missing
+  total_current_liabilities::Union{Int64,Missing} = missing
+  current_debt::Union{Int64,Missing} = missing
+  current_long_term_debt::Union{Int64,Missing} = missing
+  long_term_debt::Union{Int64,Missing} = missing
+  long_term_debt_noncurrent::Union{Int64,Missing} = missing
+  capital_lease_obligations::Union{Int64,Missing} = missing
+  other_noncurrent_liabilities::Union{Int64,Missing} = missing
+  total_noncurrent_liabilities::Union{Int64,Missing} = missing
+  treasury_stock::Union{Int64,Missing} = missing
+  retained_earnings::Union{Int64,Missing} = missing
+  common_stock::Union{Int64,Missing} = missing
+  common_stock_shares_outstanding::Union{Int64,Missing} = missing
+end
+
+"""
+Stores a datapoint containing cashflow statement information.
+
+### Constructors
+```julia
+CashflowStatement(;
+  symbol::String,
+  frequency::String,
+  date::String,
+  currency::String,
+  operating_cashflow::Union{Int64,Missing} = missing,
+  cashflow_investment::Union{Int64,Missing} = missing,
+  cashflow_financing::Union{Int64,Missing} = missing,
+  change_operating_liabilities::Union{Int64,Missing} = missing,
+  change_receivables::Union{Int64,Missing} = missing,
+  change_inventory::Union{Int64,Missing} = missing,
+  change_cash_and_equivalents::Union{Int64,Missing} = missing,
+  depreciation_and_amortization::Union{Int64,Missing} = missing,
+  capital_expenditures::Union{Int64,Missing} = missing,
+  dividend_payout::Union{Int64,Missing} = missing,
+  stock_repurchase::Union{Int64,Missing} = missing,
+  net_income::Union{Int64,Missing} = missing,
+)
+```
+"""
+@kwdef struct CashflowStatement <: AbstractStonksRecord
+  symbol::String
+  frequency::String
+  date::Date
+  currency::String
+  operating_cashflow::Union{Int64,Missing} = missing
+  cashflow_investment::Union{Int64,Missing} = missing
+  cashflow_financing::Union{Int64,Missing} = missing
+  change_operating_liabilities::Union{Int64,Missing} = missing
+  change_receivables::Union{Int64,Missing} = missing
+  change_inventory::Union{Int64,Missing} = missing
+  change_cash_and_equivalents::Union{Int64,Missing} = missing
+  depreciation_and_amortization::Union{Int64,Missing} = missing
+  capital_expenditures::Union{Int64,Missing} = missing
+  dividend_payout::Union{Int64,Missing} = missing
+  stock_repurchase::Union{Int64,Missing} = missing
+  net_income::Union{Int64,Missing} = missing
+end
+
+"""
+Stores a datapoint containing earnings (per share) information.
+### Constructors
+```julia
+Earnings(;
+  symbol::String,
+  frequency::String,
+  date::Date,
+  currency::Union{String,Missing} = missing,
+  actual::Float16,
+  estimate::Union{Float16,Missing} = missing,
+)
+```
+"""
+@kwdef struct Earnings <: AbstractStonksRecord
+  symbol::String
+  frequency::String
+  date::Date
+  currency::Union{String,Missing} = missing
+  actual::Float16
+  estimate::Union{Float16,Missing} = missing
 end
 
 # @kwdef struct EconomicIndicator <: AbstractStonksRecord

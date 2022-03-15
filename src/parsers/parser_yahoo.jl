@@ -3,7 +3,14 @@ using Dates
 using JSON3: JSON3
 
 using Stonks: JSONContent, APIResponseError, ContentParserError
-using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate, IncomeStatement, BalanceSheet
+using Stonks.Models: 
+  AssetPrice,
+  AssetInfo, 
+  ExchangeRate, 
+  IncomeStatement, 
+  BalanceSheet, 
+  CashflowStatement, 
+  Earnings
 
 function parse_yahoo_info(
   content::AbstractString; kwargs...
@@ -115,28 +122,32 @@ function parse_yahoo_income_statement(
   if !isempty(key_check)
     return ContentParserError("Missing keys: $(join(key_check, ","))")
   end
-  for key in key_check
+  for key in keys_exp
     if !haskey(js[key], :incomeStatementHistory)
       return ContentParserError("Missing keys js[$key][:incomeStatementHistory]")
     end
   end
   remaps = Dict(
-    :sellingGeneralAndAdministrative => :sellingGeneralAdministrative,
-    :researchAndDevelopment => :researchDevelopment,
+    :selling_general_and_administrative => :selling_general_administrative,
+    :research_and_development => :research_development,
+    :net_income_common_shares => :net_income_applicable_to_common_shares,
   )
   data = IncomeStatement[]
   for key in keys_exp
     js_vals = js[key][:incomeStatementHistory]
     dvals = map(x -> begin
-      dval = js_to_dict(x)
-      dval[:fiscalDate] = Date(unix2datetime(dval[:endDate]))
+      dval = js_to_dict(x; to_snake_case=true)
+      dval[:date] = Date(unix2datetime(dval[:end_date]))
+      dval[:interest_expense] = abs(get(dval, :interest_expense, missing))
+      if !ismissing(currency) 
+        dval[:currency] = currency
+      end
       dval
     end, js_vals)
     freq = key == :incomeStatementHistory ? "yearly" : "quarterly"
     is = map(
       obj -> tryparse_js(
-        IncomeStatement,
-        obj;
+        IncomeStatement, obj;
         fixed=Dict(:symbol => symbol, :frequency => freq),
         remaps=remaps,
       ),
@@ -144,8 +155,8 @@ function parse_yahoo_income_statement(
     )
     append!(data, is)
   end
-  original_len, latest_date = length(data), maximum(map(x -> x.fiscalDate, data))
-  res = apply_filters(data, "fiscalDate"; from=from, to=to)
+  original_len, latest_date = length(data), maximum(map(x -> x.date, data))
+  res = apply_filters(data, "date"; from=from, to=to)
   if isempty(res)
     @warn """No datapoints between '$from' and '$to' after filtering.
              Original length: $original_len. Latest date: $latest_date"""
@@ -184,34 +195,32 @@ function parse_yahoo_balance_sheet(
   if !isempty(key_check)
     return ContentParserError("Missing keys: $(join(key_check, ","))")
   end
-  for key in key_check
+  for key in keys_exp
     if !haskey(js[key], :balanceSheetStatements)
       return ContentParserError("Missing keys js[$key][:balanceSheetStatements]")
     end
   end
   remaps = Dict(
-    :cashAndCashEquivalents => :cash,
-    :currentNetReceivables => :netReceivables,
-    :goodwill => :goodWill,
-    :currentAccountsPayable => :accountsPayable,
-    :otherCurrentLiabilities => :otherCurrentLiab,
-    :totalLiabilities => :totalLiab,
-    :totalShareholderEquity => :totalStockholderEquity,
+    :cash_and_equivalents => :cash,
+    :current_net_receivables => :net_receivables,
+    :current_accounts_payable => :accounts_payable,
+    :other_current_liabilities => :other_current_liab,
+    :total_liabilities => :total_liab,
+    :total_shareholder_equity => :total_stockholder_equity,
   )
   data = BalanceSheet[]
   for key in keys_exp
     js_vals = js[key][:balanceSheetStatements]
     dvals = map(
       x -> begin
-        dval = js_to_dict(x)
-        dval[:fiscalDate] = Date(unix2datetime(dval[:endDate]))
+        dval = js_to_dict(x; to_snake_case=true)
         ks = [
-          :intangibleAssets,
-          :goodWill,
-          :treasuryStock,
-          :otherStockholderEquity,
-          :longTermDebt,
-          :longTermDebtNonCurrent,
+          :intangible_assets,
+          :goodwill,
+          :treasury_stock,
+          :other_stockholder_equity,
+          :long_term_debt,
+          :long_term_debt_noncurrent,
         ]
         for k in ks
           if haskey(dval, k)
@@ -220,11 +229,13 @@ function parse_yahoo_balance_sheet(
             dval[k] = missing
           end
         end
-        dval[:intangibleAssets] = dval[:intangibleAssets] + dval[:goodWill]
-        dval[:treasuryStock] =
-          abs(dval[:treasuryStock]) - abs(dval[:otherStockholderEquity])
-        dval[:longTermDebtNoncurrent] = dval[:longTermDebt]
-        delete!(dval, :longTermDebt)
+        dval[:date] = Date(unix2datetime(dval[:end_date]))
+        dval[:currency] = currency
+        dval[:intangible_assets] = dval[:intangible_assets] + dval[:goodwill]
+        dval[:treasury_stock] =
+          abs(dval[:treasury_stock]) - abs(dval[:other_stockholder_equity])
+        dval[:long_term_debt_noncurrent] = dval[:long_term_debt]
+        delete!(dval, :long_term_debt)
         [delete!(dval, k) for (k, v) in dval if ismissing(v)]
         dval
       end,
@@ -233,21 +244,176 @@ function parse_yahoo_balance_sheet(
     freq = key == :balanceSheetHistory ? "yearly" : "quarterly"
     bs = map(
       obj -> tryparse_js(
-        BalanceSheet,
-        obj;
-        fixed=Dict(:symbol => symbol, :frequency => freq, :currency => currency),
+        BalanceSheet,obj;
+        fixed=Dict(:symbol => symbol, :frequency => freq),
         remaps=remaps,
       ),
       dvals,
     )
     append!(data, bs)
   end
-  original_len, latest_date = length(data), maximum(map(x -> x.fiscalDate, data))
-  res = apply_filters(data, "fiscalDate"; from=from, to=to)
+  original_len, latest_date = length(data), maximum(map(x -> x.date, data))
+  res = apply_filters(data, "date"; from=from, to=to)
   if isempty(res)
     @warn """No datapoints between '$from' and '$to' after filtering.
              Original length: $original_len. Latest date: $latest_date"""
     return BalanceSheet[]
+  end
+  return res
+end
+
+function parse_yahoo_cashflow_statement(
+  content::AbstractString; kwargs...
+)::Union{Vector{CashflowStatement},Exception}
+  maybe_js = @chain begin
+    content
+    validate_yahoo_response
+    unpack_quote_summary_response
+  end
+  typeof(maybe_js) <: Exception && return maybe_js
+  js = maybe_js
+  from, to = [get(kwargs, arg, missing) for arg in [:from, :to]]
+  frequency = get(kwargs, :frequency, missing)
+  symbol = get(kwargs, :symbol, missing)
+  keys_default = [:cashflowStatementHistory, :cashflowStatementHistoryQuarterly]
+  currency = extract_currency(js)
+  keys_exp = (
+    if ismissing(frequency)
+      keys_default
+    elseif frequency in ["annual", "annualy", "year", "yearly"]
+      [first(keys_default)]
+    elseif frequency in ["quarter", "quarterly"]
+      [last(keys_default)]
+    else
+      keys_default
+    end
+  )
+  key_check = setdiff(keys_exp, keys(js))
+  if !isempty(key_check)
+    return ContentParserError("Missing keys: $(join(key_check, ","))")
+  end
+  for key in keys_exp
+    if !haskey(js[key], :cashflowStatements)
+      return ContentParserError("Missing keys js[$key][:cashflowStatements]")
+    end
+  end
+  remaps = Dict(
+    :operating_cashflow => :total_cash_from_operating_activities,
+    :change_operating_liabilities => :change_to_liabilities,
+    :depreciation_and_amortization => :depreciation,
+    :change_receivables => :change_to_account_receivables,
+    :change_inventory => :change_to_inventory,
+    :cashflow_investment => :total_cashflows_from_investing_activities,
+    :cashflow_financing => :total_cash_from_financing_activities,
+    :dividend_payout => :dividends_paid,
+    :stock_repurchase => :repurchase_of_stock,
+  )
+  data = CashflowStatement[]
+  for key in keys_exp
+    js_vals = js[key][:cashflowStatements]
+    dvals = map(x -> begin
+      dval = js_to_dict(x; to_snake_case=true)
+      ks = [
+        :change_in_cash,
+        :effect_of_exchange_rate,
+        :capital_expenditures,
+        :change_to_account_receivables,
+        :change_to_inventory, 
+        :dividends_paid
+      ]
+      for k in ks
+        if haskey(dval, k)
+          dval[k] = !isa(dval[k], Int64) ? tryparse(Int64, dval[k]) : dval[k]
+        else 
+          dval[k] = missing
+        end
+      end
+      dval[:date] = Date(unix2datetime(dval[:end_date]))
+      dval[:currency] = currency
+      dval[:change_cash_and_equivalents] = dval[ks[1]] - dval[ks[2]]
+      inv_sign = [:capital_expenditures, :change_to_account_receivables,
+                  :change_to_inventory, :dividends_paid]
+      [dval[k] = -dval[k] for k in inv_sign]
+      dval
+    end, js_vals)
+    freq = key == first(keys_default) ? "yearly" : "quarterly"
+    items = map(
+      obj -> tryparse_js(
+        CashflowStatement, obj;
+        fixed=Dict(:symbol => symbol, :frequency => freq),
+        remaps=remaps,
+      ),
+    dvals,
+    )
+    append!(data, items)
+  end
+  original_len, latest_date = length(data), maximum(map(x -> x.date, data))
+  res = apply_filters(data, "date"; from=from, to=to)
+  if isempty(res)
+    @warn """No datapoints between '$from' and '$to' after filtering.
+             Original length: $original_len. Latest date: $latest_date"""
+    return CashflowStatement[]
+  end
+  return res
+end
+
+function parse_yahoo_earnings(
+  content::AbstractString; kwargs...
+)::Union{Vector{Earnings},Exception}
+  maybe_js = @chain begin
+    content
+    validate_yahoo_response
+    unpack_quote_summary_response
+  end
+  typeof(maybe_js) <: Exception && return maybe_js
+  js = maybe_js
+  from, to = [get(kwargs, arg, missing) for arg in [:from, :to]]
+  frequency = get(kwargs, :frequency, missing)
+  if !ismissing(frequency) && frequency in ["yearly", "annualy", "year", "annual"]
+    @warn "'$frequency' frequency not available for this resource, only 'quarterly'."
+    return Earnings[]
+  end
+  symbol = get(kwargs, :symbol, missing)
+  keys_exp = [:earningsHistory]
+  currency = extract_currency(js)
+  key_check = setdiff(keys_exp, keys(js))
+  if !isempty(key_check)
+    return ContentParserError("Missing keys: $(join(key_check, ","))")
+  end
+  for key in keys_exp
+    if !haskey(js[key], :history)
+      return ContentParserError("Missing keys js[$key][:history]")
+    end
+  end
+  remaps = Dict(
+    :actual => :eps_actual,
+    :estimate => :eps_estimate,
+  )
+  data = Earnings[]
+  for key in keys_exp
+    js_vals = js[key][:history]
+    dvals = map(x -> begin
+      dval = js_to_dict(x; to_snake_case=true)
+      dval[:date] = Date(unix2datetime(dval[:quarter]))
+      dval[:currency] = currency
+      dval
+    end, js_vals)
+    items = map(
+      obj -> tryparse_js(
+        Earnings, obj;
+        fixed=Dict(:symbol => symbol, :frequency => "quarterly"),
+        remaps=remaps,
+      ),
+    dvals,
+    )
+    append!(data, items)
+  end
+  original_len, latest_date = length(data), maximum(map(x -> x.date, data))
+  res = apply_filters(data, "date"; from=from, to=to)
+  if isempty(res)
+    @warn """No datapoints between '$from' and '$to' after filtering.
+             Original length: $original_len. Latest date: $latest_date"""
+    return Earnings[]
   end
   return res
 end

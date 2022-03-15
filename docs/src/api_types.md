@@ -16,7 +16,10 @@ AssetPrice
 ExchangeRate
 IncomeStatement
 BalanceSheet
+CashflowStatement
+Earnings
 ```
+
 ---
 ## API Clients
 Stores information required to make requests HTTP APIs.

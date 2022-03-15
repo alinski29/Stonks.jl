@@ -1,0 +1,205 @@
+{
+	"quoteSummary": {
+		"result": [{
+			"price": {
+				"maxAge": 1,
+				"preMarketChangePercent": {
+					"raw": -0.006535462,
+					"fmt": "-0.65%"
+				},
+				"preMarketChange": {
+					"raw": -0.8100052,
+					"fmt": "-0.81"
+				},
+				"preMarketTime": 1647335644,
+				"preMarketPrice": {
+					"raw": 123.13,
+					"fmt": "123.13"
+				},
+				"preMarketSource": "DELAYED",
+				"postMarketChangePercent": {
+					"raw": 0.0057285703,
+					"fmt": "0.57%"
+				},
+				"postMarketChange": {
+					"raw": 0.709999,
+					"fmt": "0.71"
+				},
+				"postMarketTime": 1647302370,
+				"postMarketPrice": {
+					"raw": 124.65,
+					"fmt": "124.65"
+				},
+				"postMarketSource": "FREE_REALTIME",
+				"regularMarketChangePercent": {
+					"raw": -0.00016131527,
+					"fmt": "-0.02%"
+				},
+				"regularMarketChange": {
+					"raw": -0.019996643,
+					"fmt": "-0.02"
+				},
+				"regularMarketTime": 1647288001,
+				"priceHint": {
+					"raw": 2,
+					"fmt": "2",
+					"longFmt": "2"
+				},
+				"regularMarketPrice": {
+					"raw": 123.94,
+					"fmt": "123.94"
+				},
+				"regularMarketDayHigh": {
+					"raw": 125.16,
+					"fmt": "125.16"
+				},
+				"regularMarketDayLow": {
+					"raw": 122.685,
+					"fmt": "122.68"
+				},
+				"regularMarketVolume": {
+					"raw": 3218242,
+					"fmt": "3.22M",
+					"longFmt": "3,218,242.00"
+				},
+				"averageDailyVolume10Day": {},
+				"averageDailyVolume3Month": {},
+				"regularMarketPreviousClose": {
+					"raw": 123.96,
+					"fmt": "123.96"
+				},
+				"regularMarketSource": "DELAYED",
+				"regularMarketOpen": {
+					"raw": 124.45,
+					"fmt": "124.45"
+				},
+				"strikePrice": {},
+				"openInterest": {},
+				"exchange": "NYQ",
+				"exchangeName": "NYSE",
+				"exchangeDataDelayedBy": 0,
+				"marketState": "PRE",
+				"quoteType": "EQUITY",
+				"symbol": "IBM",
+				"underlyingSymbol": null,
+				"shortName": "International Business Machines",
+				"longName": "International Business Machines Corporation",
+				"currency": "USD",
+				"quoteSourceName": "Delayed Quote",
+				"currencySymbol": "$",
+				"fromCurrency": null,
+				"toCurrency": null,
+				"lastMarket": null,
+				"volume24Hr": {},
+				"volumeAllCurrencies": {},
+				"circulatingSupply": {},
+				"marketCap": {
+					"raw": 111089901568,
+					"fmt": "111.09B",
+					"longFmt": "111,089,901,568.00"
+				}
+			},
+			"earningsHistory": {
+				"history": [{
+						"maxAge": 1,
+						"epsActual": {
+							"raw": 1.77,
+							"fmt": "1.77"
+						},
+						"epsEstimate": {
+							"raw": 1.63,
+							"fmt": "1.63"
+						},
+						"epsDifference": {
+							"raw": 0.14,
+							"fmt": "0.14"
+						},
+						"surprisePercent": {
+							"raw": 0.086,
+							"fmt": "8.60%"
+						},
+						"quarter": {
+							"raw": 1617148800,
+							"fmt": "2021-03-31"
+						},
+						"period": "-4q"
+					},
+					{
+						"maxAge": 1,
+						"epsActual": {
+							"raw": 2.33,
+							"fmt": "2.33"
+						},
+						"epsEstimate": {
+							"raw": 2.29,
+							"fmt": "2.29"
+						},
+						"epsDifference": {
+							"raw": 0.04,
+							"fmt": "0.04"
+						},
+						"surprisePercent": {
+							"raw": 0.017,
+							"fmt": "1.70%"
+						},
+						"quarter": {
+							"raw": 1625011200,
+							"fmt": "2021-06-30"
+						},
+						"period": "-3q"
+					},
+					{
+						"maxAge": 1,
+						"epsActual": {
+							"raw": 2.52,
+							"fmt": "2.52"
+						},
+						"epsEstimate": {
+							"raw": 2.5,
+							"fmt": "2.5"
+						},
+						"epsDifference": {
+							"raw": 0.02,
+							"fmt": "0.02"
+						},
+						"surprisePercent": {
+							"raw": 0.008,
+							"fmt": "0.80%"
+						},
+						"quarter": {
+							"raw": 1632960000,
+							"fmt": "2021-09-30"
+						},
+						"period": "-2q"
+					},
+					{
+						"maxAge": 1,
+						"epsActual": {
+							"raw": 3.35,
+							"fmt": "3.35"
+						},
+						"epsEstimate": {
+							"raw": 3.3,
+							"fmt": "3.3"
+						},
+						"epsDifference": {
+							"raw": 0.05,
+							"fmt": "0.05"
+						},
+						"surprisePercent": {
+							"raw": 0.015,
+							"fmt": "1.50%"
+						},
+						"quarter": {
+							"raw": 1640908800,
+							"fmt": "2021-12-31"
+						},
+						"period": "-1q"
+					}
+				],
+				"maxAge": 86400
+			}
+		}],
+		"error": null
+	}
+}

@@ -4,7 +4,14 @@ using JSON3: JSON3
 using Logging: @warn
 
 using Stonks: JSONContent, APIResponseError, ContentParserError
-using Stonks.Models: AssetPrice, AssetInfo, ExchangeRate, IncomeStatement, BalanceSheet
+using Stonks.Models: 
+  AssetPrice,
+  AssetInfo,
+  ExchangeRate,
+  IncomeStatement,
+  BalanceSheet,
+  CashflowStatement,
+  Earnings
 
 function parse_alphavantage_price(
   content::AbstractString; kwargs...
@@ -118,19 +125,19 @@ function parse_alphavantage_financial_statement(
   from::Union{Date,Missing},
   to::Union{Date,Missing},
   remaps::Union{AbstractDict,Missing},
+  keys_default::Vector{Symbol} = [:annualReports, :quarterlyReports],
 )::Union{Vector{T}, Exception} where {T<:AbstractStonksRecord}
   maybe_js = validate_alphavantage_response(content)
   typeof(maybe_js) <: Exception && return maybe_js
   js = maybe_js
   smb = ismissing(symbol) ? get(js, :symbol, missing) : symbol
-  keys_default = [:annualReports, :quarterlyReports]
   keys_exp = (
     if ismissing(frequency)
       keys_default
     elseif frequency in ["annual", "annualy", "year", "yearly"]
-      [:annualReports]
+      [first(keys_default)]
     elseif frequency in ["quarter", "quarterly"]
-      [:quarterlyReports]
+      [last(keys_default)]
     else 
       keys_default
     end
@@ -142,9 +149,9 @@ function parse_alphavantage_financial_statement(
   data = T[]
   for key in keys_exp
     js_vals = js[key]
-    freq = key == :annualReports ? "yearly" : "quarterly"
+    freq = contains(String(key), "annual") ? "yearly" : "quarterly"
     items = map(x -> begin 
-      dval = js_to_dict(x)
+      dval = js_to_dict(x; to_snake_case=true)
       tryparse_js(
         T, dval; 
         fixed=Dict(:symbol => smb, :frequency => freq),
@@ -153,8 +160,8 @@ function parse_alphavantage_financial_statement(
     end, js_vals)
     append!(data, items)
   end
-  original_len, latest_date = length(data), maximum(map(x -> x.fiscalDate, data))
-  res = apply_filters(data, "fiscalDate"; from=from, to=to)
+  original_len, latest_date = length(data), maximum(map(x -> x.date, data))
+  res = apply_filters(data, "date"; from=from, to=to)
   if isempty(res) 
     @warn """No datapoints between '$from' and '$to' after filtering.
              Original length: $original_len. Latest date: $latest_date"""
@@ -166,7 +173,11 @@ end
 function parse_alphavantage_income_statement(
   content::AbstractString; kwargs...
 )::Union{Vector{IncomeStatement},Exception}
-  remaps = Dict(:fiscalDate => :fiscalDateEnding, :currency => :reportedCurrency)
+  remaps = Dict(
+    :date => :fiscal_date_ending,
+    :currency => :reported_currency,
+    :net_income_common_shares => :net_income_applicable_to_common_shares
+  )
   maybe_res = parse_alphavantage_financial_statement(
     IncomeStatement, content; 
     symbol=get(kwargs, :symbol, missing),
@@ -183,9 +194,13 @@ function parse_alphavantage_balance_sheet(
   content::AbstractString; kwargs...
 )::Union{Vector{BalanceSheet},Exception}
   remaps = Dict(
-    :fiscalDate => :fiscalDateEnding,
-    :currency => :reportedCurrency,
-    :cashAndCashEquivalents => :cashAndCashEquivalentsAtCarryingValue,
+    :date => :fiscal_date_ending,
+    :currency => :reported_currency,
+    :cash_and_equivalents => :cash_and_cash_equivalents_at_carrying_value,
+    :total_noncurrent_assets => :total_non_current_assets,
+    :long_term_debt_noncurrent => :long_term_debt_non_current,
+    :other_noncurrent_liabilities => :other_non_current_liabilities,
+    :total_noncurrent_liabilities => :total_non_current_liabilities,    
   )
   maybe_res = parse_alphavantage_financial_statement(
     BalanceSheet, content; 
@@ -199,6 +214,53 @@ function parse_alphavantage_balance_sheet(
   return maybe_res
 end
 
+function parse_alphavantage_cashflow_statement(
+  content::AbstractString; kwargs...
+)::Union{Vector{CashflowStatement},Exception}
+  remaps = Dict(
+    :date => :fiscal_date_ending,
+    :currency => :reported_currency,
+    :cashflow_investment => :cashflow_from_investment,
+    :cashflow_financing => :cashflow_from_financing,
+    :change_operating_liabilities => :change_in_operating_liabilities,
+    :change_receivables => :change_in_receivables,
+    :change_inventory => :change_in_inventory,
+    :change_cash_and_equivalents => :change_in_cash_and_cash_equivalents,
+    :depreciation_and_amortization => :depreciation_depletion_and_amortization,
+    :stock_repurchase => :proceeds_from_repurchase_of_equity,
+  )
+  maybe_res = parse_alphavantage_financial_statement(
+    CashflowStatement, content; 
+    symbol=get(kwargs, :symbol, missing),
+    frequency=get(kwargs, :frequency, missing),
+    from=get(kwargs, :from, missing),
+    to=get(kwargs, :to, missing),
+    remaps=remaps,
+  )
+  typeof(maybe_res) <: Exception && return maybe_res
+  return maybe_res
+end
+
+function parse_alphavantage_earnings(
+  content::AbstractString; kwargs...
+)::Union{Vector{Earnings},Exception}
+  remaps = Dict(
+    :date => :fiscal_date_ending,
+    :actual => :reported_e_p_s,
+    :estimate => :estimated_e_p_s,
+  )
+  maybe_res = parse_alphavantage_financial_statement(
+    Earnings, content; 
+    symbol=get(kwargs, :symbol, missing),
+    frequency=get(kwargs, :frequency, missing),
+    from=get(kwargs, :from, missing),
+    to=get(kwargs, :to, missing),
+    remaps=remaps,
+    keys_default=[:annualEarnings, :quarterlyEarnings]
+  )
+  typeof(maybe_res) <: Exception && return maybe_res
+  return maybe_res
+end
 
 function validate_alphavantage_response(
   content::AbstractString
