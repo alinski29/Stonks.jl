@@ -84,6 +84,7 @@ YahooInfoParser = JSONParser(parse_yahoo_info)
 YahooExchangeRateParser = JSONParser(parse_yahoo_exchange_rate)
 YahooIncomeStatementParser = JSONParser(parse_yahoo_income_statement)
 YahooBalanceSheetParser = JSONParser(parse_yahoo_balance_sheet)
+YahooCashflowParser = JSONParser(parse_yahoo_cashflow_statement)
 YahooEarningsParser = JSONParser(parse_yahoo_earnings)
 
 AlphavantagePriceParser = JSONParser(parse_alphavantage_price)
@@ -91,6 +92,7 @@ AlphavantageInfoParser = JSONParser(parse_alphavantage_info)
 AlphavantageExchangeRateParser = JSONParser(parse_alphavantage_exchange_rate)
 AlphavantageIncomeStatementParser = JSONParser(parse_alphavantage_income_statement)
 AlphavantageBalanceSheetParser = JSONParser(parse_alphavantage_balance_sheet)
+AlphavantageCashflowParser = JSONParser(parse_alphavantage_cashflow_statement)
 AlphavantageEarningsParser = JSONParser(parse_alphavantage_earnings)
 
 end

@@ -9,7 +9,14 @@ using Dates
 using Stonks: DataClientError
 using Stonks.Parsers
 using Stonks.Models:
-  AbstractStonksRecord, AssetPrice, AssetInfo, ExchangeRate, IncomeStatement, BalanceSheet, Earnings
+  AbstractStonksRecord,
+  AssetPrice,
+  AssetInfo,
+  ExchangeRate,
+  IncomeStatement,
+  BalanceSheet,
+  CashflowStatement,
+  Earnings
 
 export APIClient, APIResource, AlphavantageJSONClient, YahooClient
 
@@ -170,6 +177,7 @@ Contains the following `resources`:
   - exchange => `APIResource{ExchangeRate}`
   - income_statement => `APIResource{IncomeStatement}`
   - balance_sheet => `APIResource{BalanceSheet}`
+  - cashflow_statement => `APIResource{CashflowStatement}`
   - earnings => `APIResource{Earnings}`
 """
 function YahooClient(api_key::String)::APIClient
@@ -222,11 +230,19 @@ function YahooClient(api_key::String)::APIClient
     max_retries=1,
     rank_order=2,
   )
-  earnings = APIResource{Earnings}(;
+  cashflow_statement = APIResource{CashflowStatement}(;
     url="$url/v11/finance/quoteSummary/{symbol}",
     query_params=Dict(
-      "modules" => "price,earningsHistory"
+      "modules" => "price,cashflowStatementHistory,cashflowStatementHistoryQuarterly"
     ),
+    parser=Parsers.YahooCashflowParser,
+    headers=headers,
+    max_retries=1,
+    rank_order=2,
+  )
+  earnings = APIResource{Earnings}(;
+    url="$url/v11/finance/quoteSummary/{symbol}",
+    query_params=Dict("modules" => "price,earningsHistory"),
     parser=Parsers.YahooEarningsParser,
     headers=headers,
     max_retries=1,
@@ -238,6 +254,7 @@ function YahooClient(api_key::String)::APIClient
     "exchange" => exchange,
     "income_statement" => income_statement,
     "balance_sheet" => balance_sheet,
+    "cashflow_statement" => cashflow_statement,
     "earnings" => earnings,
   )
   return APIClient(resources, url)
@@ -253,6 +270,7 @@ Contains the following `resources`:
   - exchange => `APIResource{ExchangeRate}`
   - income_statement => `APIResource{IncomeStatement}`
   - balance_sheet => `APIResource{BalanceSheet}`
+  - cashflow_statement => `APIResource{CashflowStatement}`
   - earnings => `APIResource{Earnings}`
 """
 function AlphavantageJSONClient(api_key::String)::APIClient
@@ -311,6 +329,16 @@ function AlphavantageJSONClient(api_key::String)::APIClient
     max_retries=1,
     rank_order=1,
   )
+  cashflow_statement = APIResource{CashflowStatement}(;
+    url="$url/query",
+    query_params=Dict(
+      "function" => "CASH_FLOW", "symbol" => "{symbol}", "apikey" => api_key
+    ),
+    parser=Parsers.AlphavantageCashflowParser,
+    headers=headers,
+    max_retries=1,
+    rank_order=1,
+  )
   earnings = APIResource{Earnings}(;
     url="$url/query",
     query_params=Dict(
@@ -327,6 +355,7 @@ function AlphavantageJSONClient(api_key::String)::APIClient
     "exchange" => exchange,
     "income_statement" => income_statement,
     "balance_sheet" => balance_sheet,
+    "cashflow_statement" => cashflow_statement,
     "earnings" => earnings,
   )
   return APIClient(resources, url)

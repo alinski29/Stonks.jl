@@ -49,6 +49,7 @@ Stonks.jl is the Julia library that lets you access and store financial data fro
   - [Get price time series](#get-price-time-series)
   - [Get asset information](#get-asset-information)
   - [Get exchange rates](#get-exchange-rates)
+  - [Get financial statements](#get-financial-statements)
   - [DataFrames integration](#dataframes-integration)
   - [Persisting data](#persisting-data)
 - [Advanced usage](#advanced-usage)
@@ -133,6 +134,13 @@ Typically, Alphavantage client has more historical data.
     <td class="tg-hfmg" style="text-align:center;vertical-align:middle">&#9989;</td>
   </tr>
   <tr>
+    <td class="tg-psru"><a href="https://alinski29.github.io/Stonks.jl/dev/api_types.html#Stonks.Models.CashflowStatement" target="_blank" rel="noopener noreferrer">CashflowStatement</a></td>
+    <td class="tg-psru"><a href="https://alinski29.github.io/Stonks.jl/dev/api_functions.html#Stonks.get_cashflow_statement" target="_blank" rel="noopener noreferrer">get_cashflow_statement</a></td>
+    <td class="tg-psru">Historical cashflow statement data<br></td>
+    <td class="tg-hfmg" style="text-align:center;vertical-align:middle">&#9989;</td>
+    <td class="tg-hfmg" style="text-align:center;vertical-align:middle">&#9989;</td>
+  </tr>
+  <tr>
     <td class="tg-psru"><a href="https://alinski29.github.io/Stonks.jl/dev/api_types.html#Stonks.Models.Earnings" target="_blank" rel="noopener noreferrer">Earnings</a></td>
     <td class="tg-psru"><a href="https://alinski29.github.io/Stonks.jl/dev/api_functions.html#Stonks.get_earnings" target="_blank" rel="noopener noreferrer">get_earnings</a></td>
     <td class="tg-psru">Historical earnings per share (EPS) data<br></td>
@@ -146,8 +154,8 @@ Typically, Alphavantage client has more historical data.
     <td class="tg-6cmx"></td>
   </tr>
   <tr>
-    <td class="tg-psru">CashFlowStatement</td>
-    <td class="tg-psru">get_cash_flows</td>
+    <td class="tg-psru">EarningsCalendar</td>
+    <td class="tg-psru">get_earnings_calendar</td>
     <td class="tg-psru"></td>
     <td class="tg-hfmg"></td>
     <td class="tg-hfmg"></td>
@@ -234,8 +242,47 @@ julia>get_exchange_rate([
 4-element Vector{ExchangeRate}:
 ...
 ```
----
 
+---
+### **Get financial statements**
+```julia
+symbol, from_date = "AAPL", Date("2020-01-01")
+financials = Dict()
+financials[:balance_sheet] = get_balance_sheet(symbol; from=from_date)
+financials[:income_statement] = get_income_statement(symbol; from=from_date)
+financials[:cashflow_statement] = get_cashflow_statement(symbol; from=from_date)
+financials[:earnings] = get_earnings(symbol; from=from_date)
+
+julia> map(x -> (x.date, x.total_revenue, x.net_income), financials[:income_statement])
+10-element Vector{Tuple{Date, Int64, Int64}}:
+ (Date("2021-09-30"), 363172000000, 94680000000)
+ (Date("2020-09-30"), 271642000000, 57411000000)
+ (Date("2021-12-31"), 123251000000, 34630000000)
+
+julia> financials[:balance_sheet] |> to_dataframe |> df -> df[1:3, 1:7]
+3×7 DataFrame
+ Row │ symbol  frequency  date        currency  total_assets  total_liabilities  total_shareholder_equity 
+     │ String  String     Date        String?   Int64         Int64              Int64                    
+─────┼────────────────────────────────────────────────────────────────────────────────────────────────────
+   1 │ AAPL    yearly     2021-09-30  USD       351002000000       287912000000               63090000000
+   2 │ AAPL    yearly     2020-09-30  USD       323888000000       258549000000               65339000000
+   3 │ AAPL    quarterly  2021-12-31  USD       381191000000       309259000000               71932000000
+
+julia> financials[:earnings] |>
+   to_dataframe |>
+   df -> filter(x -> x.frequency == "quarterly", df) |> 
+   df -> df[1:3, :]
+3×6 DataFrame
+ Row │ symbol  frequency  date        currency  actual   estimate 
+     │ String  String     Date        String?   Float16  Float16? 
+─────┼────────────────────────────────────────────────────────────
+   1 │ AAPL    quarterly  2021-12-31  missing      2.1      1.89
+   2 │ AAPL    quarterly  2021-09-30  missing      1.24     1.238
+   3 │ AAPL    quarterly  2021-06-30  missing      1.3      1.015
+
+```
+
+---
 ### **DataFrames integration**
 The types of the `DataFrame` will match the types of any type model, `T<:AbstractStonksRecord`.
 Currently only tested with flat data types.

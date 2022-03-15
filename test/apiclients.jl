@@ -9,7 +9,7 @@ using Stonks.APIClients:
   get_resource_from_clients,
   build_clients_from_env
 using Stonks.Models:
-  AbstractStonksRecord, AssetInfo, AssetPrice, ExchangeRate, IncomeStatement, BalanceSheet
+  AbstractStonksRecord, AssetInfo, AssetPrice, ExchangeRate, IncomeStatement, BalanceSheet, CashflowStatement, Earnings
 
 @testset "Client building utilities" begin
   test_client = YahooClient("abc")
@@ -29,7 +29,7 @@ using Stonks.Models:
   @testset "Get supported types" begin
     types = get_supported_types(test_client)
     @test isempty(
-      setdiff(types, [ExchangeRate, AssetPrice, AssetInfo, IncomeStatement, BalanceSheet])
+      setdiff(types, [ExchangeRate, AssetPrice, AssetInfo, IncomeStatement, BalanceSheet, CashflowStatement, Earnings])
     )
   end
 

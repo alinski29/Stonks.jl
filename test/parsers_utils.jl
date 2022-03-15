@@ -4,7 +4,7 @@ using Test
 
 using Stonks: to_dataframe
 using Stonks.Models: ExchangeRate, AssetInfo
-using Stonks.Parsers: tryparse_js, js_to_dict, apply_filters, JSONParser
+using Stonks.Parsers: tryparse_js, js_to_dict, apply_filters, snake_case, JSONParser
 
 include("test_utils.jl")
 
@@ -85,5 +85,11 @@ include("test_utils.jl")
     p_filt = apply_filters(prices, "date"; from=min + Day(3))
     p_min, p_max = get_minmax(p_filt)
     @test p_min == min + Day(3) && p_max == max
+  end
+
+  @testset "Converting camelCase to snake_case" begin
+    snake_case("timeStamp")
+    snake_case("askBestVolume")
+    snake_case("askBest30MWPrice") 
   end
 end

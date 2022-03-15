@@ -16,6 +16,7 @@ AssetPrice
 ExchangeRate
 IncomeStatement
 BalanceSheet
+CashflowStatement
 Earnings
 ```
 

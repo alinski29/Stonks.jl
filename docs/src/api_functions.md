@@ -23,8 +23,9 @@ You can omit the `client` parameter in all functions IF you set an environment v
 get_price
 get_info
 get_exchange_rate
-get_income_statement
 get_balance_sheet
+get_income_statement
+get_cashflow_statement
 get_earnings
 get_data
 ```

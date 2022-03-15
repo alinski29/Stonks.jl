@@ -6,9 +6,17 @@ using Base: @kwdef
 using Stonks: JSONContent, ContentParserError
 using Stonks.Models: AbstractStonksRecord
 
-function js_to_dict(js::JSON3.Object; key::Symbol=:raw)
+function snake_case(s::Union{String,Symbol})
+  string = replace(String(s), r"[\-\.\s]" => "_")
+  words = lowercase.(split(string, r"(?=[A-Z])"))
+  res = join([i == 1 ? word : "_$word" for (i, word) in enumerate(words)])
+  return isa(s, Symbol) ? Symbol(res) : res
+end
+
+function js_to_dict(js::JSON3.Object; key::Symbol=:raw, to_snake_case::Bool=false)
   vals = Dict{Symbol,Any}()
-  for (k, v) in js
+  for (k_raw, v) in js
+    k = to_snake_case ? snake_case(k_raw) : k_raw
     if isa(v, JSON3.Object)
       vals[k] = get(v, Symbol(key), missing)
     else
@@ -42,10 +50,14 @@ function parse_jsvalue(js::AbstractDict, key::Symbol, T::Any)
   if haskey(js, key)
     val = js[key]
     value = (
-      if typeof(val) === T 
+      if typeof(val) === T
         val
       elseif T <: AbstractFloat && typeof(val) <: AbstractFloat
         T(val)
+      elseif T === Date && isa(val, Date)
+        val
+      elseif T == String && isa(val, Date)
+        val
       else
         tryparse(T, val)
       end

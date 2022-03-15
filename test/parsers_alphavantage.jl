@@ -14,12 +14,14 @@ include("test_utils.jl")
   exchange_content = get_test_data("data/alphavantage_exchange.json")
   is_content = get_test_data("data/alphavantage_income_statement.json")
   bs_content = get_test_data("data/alphavantage_balance_sheet.json")
+  cf_content = get_test_data("data/alphavantage_cashflow.json")
   eps_content = get_test_data("data/alphavantage_earnings.json")
   price_parser = Parsers.AlphavantagePriceParser
   info_parser = Parsers.AlphavantageInfoParser
   exchange_parser = Parsers.AlphavantageExchangeRateParser
   is_parser = Parsers.AlphavantageIncomeStatementParser
   bs_parser = Parsers.AlphavantageBalanceSheetParser
+  cf_parser = Parsers.AlphavantageCashflowParser
   eps_parser = Parsers.AlphavantageEarningsParser
 
   @testset "Succesful price response" begin
@@ -87,7 +89,7 @@ include("test_utils.jl")
 
   @testset "Successful income statement response" begin
     data = parse_content(is_parser, is_content)
-    dates = map(x -> x.fiscalDate, data)
+    dates = map(x -> x.date, data)
     @test isa(data, Vector{Models.IncomeStatement})
     @test length(data) == 25
     @test first(data).symbol == "IBM"
@@ -106,7 +108,7 @@ include("test_utils.jl")
   @testset "Successful income statement response with date filters" begin
     date_min, date_max = Date("2020-01-01"), Date("2020-12-31")
     data = parse_content(is_parser, is_content; from=date_min, to=date_max)
-    dates = map(x -> x.fiscalDate, data)
+    dates = map(x -> x.date, data)
     @test minimum(dates) >= date_min && maximum(dates) <= date_max
   end
 
@@ -117,7 +119,7 @@ include("test_utils.jl")
 
   @testset "Successful balance sheet response" begin
     data = parse_content(bs_parser, bs_content)
-    dates = map(x -> x.fiscalDate, data)
+    dates = map(x -> x.date, data)
     @test isa(data, Vector{Models.BalanceSheet})
     @test length(data) == 25
     @test first(data).symbol == "IBM"
@@ -131,7 +133,7 @@ include("test_utils.jl")
   @testset "Successful balance sheet response with date filters" begin
     date_min, date_max = Date("2020-01-01"), Date("2020-12-31")
     data = parse_content(bs_parser, bs_content; from=date_min, to=date_max)
-    dates = map(x -> x.fiscalDate, data)
+    dates = map(x -> x.date, data)
     @test minimum(dates) >= date_min && maximum(dates) <= date_max
   end
 
@@ -142,7 +144,7 @@ include("test_utils.jl")
 
   @testset "Successful earnings response" begin
     data = parse_content(eps_parser, eps_content)
-    dates = map(x -> x.fiscalDate, data)
+    dates = map(x -> x.date, data)
     @test isa(data, Vector{Models.Earnings})
     @test length(data) == 15
     @test first(data).symbol == "IBM"
@@ -157,7 +159,28 @@ include("test_utils.jl")
   @testset "Successful earnings response with date filters" begin
     date_min, date_max = Date("2020-01-01"), Date("2020-12-31")
     data = parse_content(eps_parser, eps_content; from=date_min, to=date_max)
-    dates = map(x -> x.fiscalDate, data)
+    dates = map(x -> x.date, data)
+    @test minimum(dates) >= date_min && maximum(dates) <= date_max
+  end
+
+  @testset "Successful cashflow statement response" begin
+    data = parse_content(cf_parser, cf_content)
+    dates = map(x -> x.date, data)
+    @test isa(data, Vector{Models.CashflowStatement})
+    @test length(data) == 11
+    @test first(data).symbol == "IBM"
+  end
+
+  @testset "Successful cash flow response with quarterly frequency" begin
+    data = parse_content(cf_parser, cf_content; frequency="quarterly")
+    @test length(data) == 8
+    @test unique(map(x -> x.frequency, data)) == ["quarterly"]
+  end
+
+  @testset "Successful cash flow response with date filters" begin
+    date_min, date_max = Date("2020-01-01"), Date("2020-12-31")
+    data = parse_content(cf_parser, cf_content; from=date_min, to=date_max)
+    dates = map(x -> x.date, data)
     @test minimum(dates) >= date_min && maximum(dates) <= date_max
   end
 
