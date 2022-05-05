@@ -1,9 +1,10 @@
 using DataFrames
 using Dates
 using Test
+using Tables
 
-using Stonks: to_dataframe
-using Stonks.Models: AssetInfo, AssetPrice
+using Stonks: to_dataframe, to_dict, to_namedtuple
+using Stonks.Models: AssetInfo, AssetPrice, AbstractStonksRecord
 
 include("test_utils.jl")
 

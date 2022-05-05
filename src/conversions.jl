@@ -1,4 +1,6 @@
+using Chain
 using DataFrames
+using Tables
 using Stonks.Models: AbstractStonksRecord
 
 """
@@ -54,3 +56,16 @@ end
 function to_dict(x::Vector{T}) where {T<:AbstractStonksRecord}
   return Dict([name => map(item -> getfield(item, name), x) for name in fieldnames(T)])
 end
+
+function to_namedtuple(data::Vector{T}) where {T<:AbstractStonksRecord}
+  pairs = @chain fieldnames(T) begin 
+    map(field -> (field => map(row -> getfield(row, field), data)), _)
+    NamedTuple
+  end
+  return NamedTuple{fieldnames(T), Tuple{map(type -> Vector{type}, T.types)...}}(pairs)
+end
+
+function to_table(data::Vector{T}) where {T<:AbstractStonksRecord}
+  return Tables.rows(to_namedtuple(data))
+end
+
