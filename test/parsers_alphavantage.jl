@@ -3,7 +3,7 @@ using Dates
 using Test
 
 using Stonks
-using Stonks: JSONContent, APIResponseError, ContentParserError
+using Stonks: JSONContent, APIResponseError, APIDeniedResourceAccessError, ContentParserError
 using Stonks.Models
 using Stonks.Parsers
 
@@ -57,6 +57,16 @@ include("test_utils.jl")
     }""" |> c-> replace(c, "\n" => "")
     data = parse_content(price_parser, content)
     @test isa(data, APIResponseError)
+  end
+
+  @testset "Error response when API key is not eligible for the endpoint" begin
+    content = """{
+      "Information": "Thank you for using Alpha Vantage! This is a premium endpoint.
+       You may subscribe to any of the premium plans at https://www.alphavantage.co/premium/
+       to instantly unlock all premium endpoints"
+      }""" |> c-> replace(c, "\n" => "")
+    data = parse_content(price_parser, content)
+    @test isa(data, APIDeniedResourceAccessError)
   end
 
   @testset "Succesful overview (info) response" begin

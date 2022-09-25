@@ -3,7 +3,7 @@ using Dates
 using JSON3: JSON3
 using Logging: @warn
 
-using Stonks: JSONContent, APIResponseError, ContentParserError
+using Stonks: JSONContent, APIResponseError, APIDeniedResourceAccessError, ContentParserError
 using Stonks.Models: 
   AssetPrice,
   AssetInfo,
@@ -268,7 +268,12 @@ function validate_alphavantage_response(
   maybe_js = JSON3.read(content)
   maybe_js === nothing && return ContentParserError("Content could not be parsed as JSON")
   js = maybe_js
-  error_idx = findfirst(x -> contains(lowercase(x), "error"), [String(k) for k in keys(js)])
+  js_keys = [lowercase(String(k)) for k in keys(js)]
+  if js_keys == ["information"]
+    error_msg = first([String(v) for (k, v) in js])
+    return APIDeniedResourceAccessError(error_msg)
+  end
+  error_idx = findfirst(k -> contains(k, "error"), js_keys)
   error_in_response = error_idx !== nothing
   if error_in_response
     error_msg = [String(v) for (k, v) in js][error_idx]

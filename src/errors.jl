@@ -18,6 +18,10 @@ struct APIRateExceeded <: Exception
   msg::String
 end
 
+struct APIDeniedResourceAccessError <: Exception 
+  msg::String
+end
+
 struct SchemaValidationError <: Exception
   msg::String
 end
