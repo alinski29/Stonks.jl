@@ -392,21 +392,16 @@ function parse_yahoo_earnings(
   data = Earnings[]
   for key in keys_exp
     js_vals = js[key][:history]
-    dvals = map(x -> begin
-      dval = js_to_dict(x; to_snake_case=true)
-      dval[:date] = Date(unix2datetime(dval[:quarter]))
-      dval[:currency] = currency
-      dval
-    end, js_vals)
-    items = map(
-      obj -> tryparse_js(
-        Earnings, obj;
-        fixed=Dict(:symbol => symbol, :frequency => "quarterly"),
-        remaps=remaps,
-      ),
-    dvals,
-    )
-    append!(data, items)
+    dvals = filter(j -> !ismissing(j) ,map(x -> begin
+        dval = js_to_dict(x; to_snake_case=true)
+        dval[:date] = !ismissing(dval[:quarter]) ? Date(unix2datetime(dval[:quarter])) : missing
+        dval[:currency] = currency
+        ismissing(dval[:date]) ? missing : dval
+      end, js_vals))
+    if !isempty(dvals)
+      items = [tryparse_js(Earnings, obj; fixed=Dict(:symbol => symbol, :frequency => "quarterly"), remaps = remaps) for obj in dvals]  
+      append!(data, items)
+    end 
   end
   original_len, latest_date = length(data), maximum(map(x -> x.date, data))
   res = apply_filters(data, "date"; from=from, to=to)
