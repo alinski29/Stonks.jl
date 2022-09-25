@@ -50,13 +50,17 @@ function parse_jsvalue(js::AbstractDict, key::Symbol, T::Any)
   if haskey(js, key)
     val = js[key]
     value = (
-      if typeof(val) === T
+      if ismissing(val) || isnothing(val)
+        nothing
+      elseif typeof(val) === T
         val
       elseif T <: AbstractFloat && typeof(val) <: AbstractFloat
         T(val)
+      elseif T <: Int && typeof(val) <: Int
+        T(val) 
       elseif T === Date && isa(val, Date)
         val
-      elseif T == String && isa(val, Date)
+      elseif T === String && isa(val, Date)
         val
       else
         tryparse(T, val)
