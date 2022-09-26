@@ -2,7 +2,7 @@ using Chain: @chain
 using Dates
 using JSON3: JSON3
 
-using Stonks: JSONContent, APIResponseError, ContentParserError
+using Stonks: JSONContent, APIResponseError, APIRateExceeded, ContentParserError
 using Stonks.Models: 
   AssetPrice,
   AssetInfo, 
@@ -145,24 +145,18 @@ function parse_yahoo_income_statement(
       dval
     end, js_vals)
     freq = key == :incomeStatementHistory ? "yearly" : "quarterly"
-    is = map(
-      obj -> tryparse_js(
-        IncomeStatement, obj;
-        fixed=Dict(:symbol => symbol, :frequency => freq),
-        remaps=remaps,
-      ),
-      dvals,
-    )
-    append!(data, is)
+
+    items = @chain dvals begin 
+      map(obj -> tryparse_js(IncomeStatement, obj; fixed=Dict(:symbol => symbol, :frequency => freq), remaps = remaps), _)
+      filter(x -> !(typeof(x) <: Exception) ,_)
+    end 
+    if !isempty(items)
+      append!(data, items)
+    end
   end
-  original_len, latest_date = length(data), maximum(map(x -> x.date, data))
-  res = apply_filters(data, "date"; from=from, to=to)
-  if isempty(res)
-    @warn """No datapoints between '$from' and '$to' after filtering.
-             Original length: $original_len. Latest date: $latest_date"""
-    return IncomeStatement[]
-  end
-  return res
+
+  handle_data_response(data, from, to)
+
 end
 
 function parse_yahoo_balance_sheet(
@@ -242,24 +236,17 @@ function parse_yahoo_balance_sheet(
       js_vals,
     )
     freq = key == :balanceSheetHistory ? "yearly" : "quarterly"
-    bs = map(
-      obj -> tryparse_js(
-        BalanceSheet,obj;
-        fixed=Dict(:symbol => symbol, :frequency => freq),
-        remaps=remaps,
-      ),
-      dvals,
-    )
-    append!(data, bs)
+    items = @chain dvals begin 
+      map(obj -> tryparse_js(BalanceSheet, obj; fixed=Dict(:symbol => symbol, :frequency => freq), remaps = remaps), _)
+      filter(x -> !(typeof(x) <: Exception) ,_)
+    end 
+    if !isempty(items)
+      append!(data, items)
+    end
   end
-  original_len, latest_date = length(data), maximum(map(x -> x.date, data))
-  res = apply_filters(data, "date"; from=from, to=to)
-  if isempty(res)
-    @warn """No datapoints between '$from' and '$to' after filtering.
-             Original length: $original_len. Latest date: $latest_date"""
-    return BalanceSheet[]
-  end
-  return res
+
+  handle_data_response(data, from, to)
+
 end
 
 function parse_yahoo_cashflow_statement(
@@ -337,24 +324,17 @@ function parse_yahoo_cashflow_statement(
       dval
     end, js_vals)
     freq = key == first(keys_default) ? "yearly" : "quarterly"
-    items = map(
-      obj -> tryparse_js(
-        CashflowStatement, obj;
-        fixed=Dict(:symbol => symbol, :frequency => freq),
-        remaps=remaps,
-      ),
-    dvals,
-    )
-    append!(data, items)
+    items = @chain dvals begin 
+      map(obj -> tryparse_js(CashflowStatement, obj, fixed=Dict(:symbol => symbol, :frequency => freq)), _)
+      filter(x -> !(typeof(x) <: Exception) ,_)
+    end 
+    if !isempty(items)
+      append!(data, items)
+    end 
   end
-  original_len, latest_date = length(data), maximum(map(x -> x.date, data))
-  res = apply_filters(data, "date"; from=from, to=to)
-  if isempty(res)
-    @warn """No datapoints between '$from' and '$to' after filtering.
-             Original length: $original_len. Latest date: $latest_date"""
-    return CashflowStatement[]
-  end
-  return res
+
+  handle_data_response(data, from, to)
+  
 end
 
 function parse_yahoo_earnings(
@@ -399,18 +379,18 @@ function parse_yahoo_earnings(
         ismissing(dval[:date]) ? missing : dval
       end, js_vals))
     if !isempty(dvals)
-      items = [tryparse_js(Earnings, obj; fixed=Dict(:symbol => symbol, :frequency => "quarterly"), remaps = remaps) for obj in dvals]  
-      append!(data, items)
+      items = @chain dvals begin 
+        map(obj -> tryparse_js(Earnings, obj; fixed=Dict(:symbol => symbol, :frequency => "quarterly"), remaps = remaps), _)
+        filter(x -> !(typeof(x) <: Exception) ,_)
+      end 
+      if !isempty(items)
+        append!(data, items)
+      end 
     end 
   end
-  original_len, latest_date = length(data), maximum(map(x -> x.date, data))
-  res = apply_filters(data, "date"; from=from, to=to)
-  if isempty(res)
-    @warn """No datapoints between '$from' and '$to' after filtering.
-             Original length: $original_len. Latest date: $latest_date"""
-    return Earnings[]
-  end
-  return res
+
+  handle_data_response(data, from, to)
+
 end
 
 function extract_currency(js::JSONContent)
@@ -463,6 +443,9 @@ function validate_yahoo_response(content::AbstractString)::Union{JSONContent,Exc
   maybe_js = JSON3.read(content)
   maybe_js === nothing && return error("Content could not be parsed as JSON")
   js_keys = keys(maybe_js)
+  if contains(String(first(js_keys)), "Code: 429")
+    return APIRateExceeded(maybe_js[first(js_keys)])
+  end
   js = length(js_keys) == 1 ? maybe_js[first(js_keys)] : maybe_js
   error_idx = findfirst(x -> contains(lowercase(x), "error"), [String(k) for k in keys(js)])
   error_in_response = error_idx !== nothing ? isa(js["error"], JSON3.Object) : false
