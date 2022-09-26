@@ -190,7 +190,7 @@ function update(
   interval::String="1d",
   to::Date=last_workday(),
   force::Bool=false,
-)::Union{FileStore{T},ErrorException} where {T<:AbstractStonksRecord}
+)::Union{FileStore{T},Exception} where {T<:AbstractStonksRecord}
   # Must implement for partitioned data as well
   df = (
     if !isnothing(symbols) && length(ds.ids) == 1
