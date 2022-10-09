@@ -1,5 +1,4 @@
 using Chain
-using DataFrames
 using Dates
 using Test
 
@@ -12,25 +11,17 @@ using Stonks:
   last_workday,
   build_fx_pair
 
+
 function fake_stock_data(days=30, ref_date=today(), symbols=["AAPL", "IBM", "TSLA"])
-  dates = @chain begin
-    [ref_date - Day(i) for i in reverse(0:(days - 1))]
-    filter(x -> is_weekday(x), _)
+  dates = filter(x -> is_weekday(x), [ref_date - Day(i) for i in reverse(0:(days - 1))])
+  n = length(dates)
+  @chain symbols begin 
+    map(s -> (symbol = repeat([s], n), date=dates, close=[100 + (rand(-8:10) * 0.1) for i in 1:n]), _)
+    map(x -> [AssetPrice(; symbol = x.symbol[i], date = x.date[i], close = x.close[i]) for i in 1:n], _)
+    vcat(_...)  
   end
-  nrows = length(dates)
-  return @chain begin
-    symbols
-    map(
-      t -> DataFrame(;
-        symbol=repeat([t], nrows),
-        date=dates,
-        close=[100 + (rand(-8:10) * 0.1) for i in 1:nrows],
-      ),
-      _,
-    )
-    vcat(_...)
-  end
-end
+end 
+
 
 function fake_price_data(
   days=30, ref_date=today(), symbols=["AAPL", "IBM", "TSLA"]

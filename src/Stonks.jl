@@ -32,7 +32,8 @@ export get_price,
   get_cashflow_statement,
   get_earnings,
   get_data
-export to_dataframe
+  to_dict,
+  to_table
 export FileStore, load, save, update
 
 end

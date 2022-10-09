@@ -1,8 +1,7 @@
-using DataFrames
 using Dates
 using Test
 
-using Stonks: to_dataframe
+using Stonks: to_table, to_dict
 using Stonks.Models: AssetInfo, AssetPrice
 
 include("test_utils.jl")
@@ -10,25 +9,17 @@ include("test_utils.jl")
 @testset "Conversions" begin
 
   prices = test_price_data()
-  info = test_info_data()
 
-  @testset "Vector{AssetInfo} to DataFrame" begin
-    df = to_dataframe(info)
-    model_types = [
-      (String(name), T) for (name, T) in zip(fieldnames(AssetInfo), AssetInfo.types)
-    ]
-    df_types = [(name, eltype(x)) for (name, x) in zip(names(df), eachcol(df))]
-    @test length(info) == nrow(df)
-    @test model_types == df_types
+  @testset "Vector{AssetPrice} to dict" begin
+    dct = to_dict(prices)
+    exp_names = [x for x in fieldnames(AssetPrice)]
+    @test all(x -> x[1] in exp_names && x[2] == length(prices), [(k, length(vals)) for (k, vals) in dct])
+  end
+  
+  @testset "Vector{AssetPrice} to table interface - named tuples" begin
+    tbl = to_table(prices)
+    exp_names = [x for x in fieldnames(AssetPrice)]
+    @test all(col -> length(getfield(tbl, col)) == length(prices), exp_names)
   end
 
-  @testset "Vector{AssetPrice} to DataFrame" begin
-    df = to_dataframe(prices)
-    model_types = [
-      (String(name), T) for (name, T) in zip(fieldnames(AssetPrice), AssetPrice.types)
-    ]
-    df_types = [(name, eltype(x)) for (name, x) in zip(names(df), eachcol(df))]
-    @test length(prices) == nrow(df)
-    @test model_types == df_types
-  end
 end

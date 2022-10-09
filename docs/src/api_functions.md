@@ -31,9 +31,9 @@ get_data
 ```
 
 ---
-## DataFrame conversion
+## Tables.jl conversion
 ```@docs
-to_dataframe
+to_table
 ```
 
 ---

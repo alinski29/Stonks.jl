@@ -10,4 +10,5 @@ using Test
   include("stores_atomic_write.jl")
   include("stores.jl")
   include("stores_updates.jl")
+  include("grouping_utils.jl")
 end

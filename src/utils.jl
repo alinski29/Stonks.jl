@@ -1,5 +1,6 @@
 using Chain: @chain
 using Dates
+using IterTools
 using JSON3: JSON3
 
 JSONContent = Union{JSON3.Object,JSON3.Array}
@@ -115,4 +116,45 @@ end
 function last_workday()
   td = Dates.today()
   @chain [td - Dates.Day(i) for i in 1:3] _[findfirst(is_weekday, _)]
+end
+
+extract_cols(item::Any, cols::Vector{Symbol}) = NamedTuple(col => getfield(item, col) for col in cols) 
+
+function groupby(values::AbstractVector{T}, cols::Vector{Symbol}) where {T}
+  isempty(values) && return nothing
+  groupingFn = x -> NamedTuple(Symbol(col) => getfield(x, Symbol(String(col))) for col in cols)
+  itt = ( extract_cols(first(grouped), cols) => grouped for grouped in IterTools.groupby(groupingFn, values) )
+  Dict(group => (v for v in values) for (group, values) in itt)
+end 
+
+function aggregate(grouped::Union{AbstractDict, Nothing}, functions::Union{Tuple{Vararg{Any}}, AbstractVector{<:T}} where T)
+  isnothing(grouped) && return nothing
+
+  extract_field(name::Symbol, values::Base.Generator) = map(v -> getfield(v, Symbol(String(name))), values)
+  
+  result = Channel(length(grouped))
+  @sync for (group, values) in grouped 
+    Threads.@spawn begin 
+      put!(result, merge(group, (NamedTuple( name => fn(extract_field(col, values))  for (col, (fn, name)) in functions))))
+    end
+  end 
+  close(result)
+
+  return vcat(result...)
+end 
+
+function select(data::AbstractVector{T}, fields::Vector{Symbol}) where {T}
+  map(row -> NamedTuple(Symbol(field) => getfield(row, field) for field in fields), data)
+end
+
+function transform(data::AbstractVector{T}, functions::AbstractDict) where {T}
+  result = Channel(length(data))
+  @sync for row in select(data, [x for x in fieldnames(T)]) 
+    Threads.@spawn begin 
+      tf = (NamedTuple( name => fn(row)  for (name, fn) in functions))
+      put!(result, merge(row, tf))
+    end 
+  end 
+  close(result)
+  return vcat(result...)
 end

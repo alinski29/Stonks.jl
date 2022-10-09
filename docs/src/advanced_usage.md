@@ -6,16 +6,21 @@ The [`FileStore`](@ref) uses CSV as the default format for reading and writing d
 If you wish more performance, you are free to use it with any format you like. 
 You just need to provide functions for reading and writing data with your format. 
 Here's an example using the [Arrow](https://github.com/apache/arrow-julia) file format.
-```julia
-using Arrow, Dates, DataFrames
-using Stonks
 
-function write_arrow(df::AbstractDataFrame, path::String)
+```julia
+using Arrow, Dates, Tables
+using Stonks
+using Stonks.Stores: apply_schema
+
+function write_arrow(data::Vector{T}, path::String) where {T<:AbstractStonksRecord}
   open(path, "w") do io
-    Arrow.write(io, df)
+    Arrow.write(io, to_table(data))
   end
 end
-read_arrow(path::String) = DataFrame(Arrow.Table(path))
+
+function read_arrow(path::String, ::Type{T}) where {T<:AbstractStonksRecord}
+  apply_schema(collect(Tables.rows(Arrow.Table(path))), T)
+end
 
 ds = FileStore{AssetPrice}(;
   path=joinpath(@__DIR__, "data/arrow"),
@@ -35,21 +40,16 @@ data = [
 
 save(ds, data)
 readdir(ds.path)
-1-element Vector{String}:
+# 1-element Vector{String}:
  "data.arrow"
 
-df = load(ds)
-show(df)
-4×8 DataFrame
- Row │ symbol  date        close    open      high      low       close_adjusted  volume   
-     │ String  Date        Float64  Float64?  Float64?  Float64?  Float64?        Integer? 
-─────┼─────────────────────────────────────────────────────────────────────────────────────
-   1 │ MSFT    2022-02-16   299.5    missing   missing   missing         missing   missing 
-   2 │ MSFT    2022-02-17   290.73   missing   missing   missing         missing   missing 
-   3 │ AAPL    2022-02-17   168.88   missing   missing   missing         missing   missing 
-   4 │ AAPL    2022-02-18   167.3    missing   missing   missing         missing   missing 
+load(ds)
+# 4-element Vector{AssetPrice}:
+ AssetPrice("MSFT", Date("2022-02-16"), 299.5, missing, missing, missing, missing, missing)
+ AssetPrice("MSFT", Date("2022-02-17"), 290.73, missing, missing, missing, missing, missing)
+ AssetPrice("AAPL", Date("2022-02-17"), 168.88, missing, missing, missing, missing, missing)
+ AssetPrice("AAPL", Date("2022-02-18"), 167.3, missing, missing, missing, missing, missing)
 ```
-
 ---
 ## Create API resources for your custom models
 Assume we'll receive the following content from an API.
@@ -95,7 +95,7 @@ end
 # [Stonks.Parsers.JSONParser, Stonks.Parsers.CSVParser]
 my_resource = APIResource{MacroIndicator}(;
   url="https://www.alphavantage.co/query",
-  headers=Dict("accept" => "application/json"),prices
+  headers=Dict("accept" => "application/json"),
   query_params=Dict("function" => "INFLATION", "apikey" => "demo"),
   parser=Stonks.JSONParser(parse_inflation_data),
 )
@@ -104,15 +104,6 @@ data = get_data(my_resource; from=Date("2019-01-01"))
 foreach(println, data)
 MacroIndicator("US Consumer Prices", Date("2020-01-01"), 1.23358439630637)
 MacroIndicator("US Consumer Prices", Date("2019-01-01"), 1.81221007526015)
-
-# convert it to a dataframe - types are preserved.
-to_dataframe(data)
-2×3 DataFrame
- Row │ name       date        value   
-     │ String     Date        Number  
-─────┼────────────────────────────────
-   1 │ US Consumer Prices  2020-01-01  1.23358
-   2 │ US Consumer Prices  2019-01-01  1.81221
 ```
 
 ---
@@ -130,7 +121,7 @@ my_client = Stonks.APIClient(Dict(
   # ... + your own custom resources
 ))
 Stonks.APIClients.get_supported_types(my_client)
-3-element Vector{DataType}:
+# 3-element Vector{DataType}:
  ExchangeRate
  AssetPrice
  AssetInfo

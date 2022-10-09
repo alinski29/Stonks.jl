@@ -160,14 +160,9 @@ function parse_alphavantage_financial_statement(
     end, js_vals)
     append!(data, items)
   end
-  original_len, latest_date = length(data), maximum(map(x -> x.date, data))
-  res = apply_filters(data, "date"; from=from, to=to)
-  if isempty(res) 
-    @warn """No datapoints between '$from' and '$to' after filtering.
-             Original length: $original_len. Latest date: $latest_date"""
-    return T[]
-  end
-  return res
+
+  handle_data_response(data, from, to)
+
 end
 
 function parse_alphavantage_income_statement(

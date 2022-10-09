@@ -38,6 +38,20 @@ function apply_filters(
   end
 end
 
+function handle_data_response(data::Vector{T}, from::Union{Date, Missing}, to::Union{Date, Missing}) where {T<:AbstractStonksRecord}
+  if !isempty(data)
+    latest_date = maximum(map(x -> x.date, data))
+    res = apply_filters(data, "date"; from=from, to=to)
+    if isempty(res)
+      @warn "No datapoints between '$from' and '$to' after filtering.  Original length: $(length(data)). Latest date: $latest_date"
+    end
+    return res
+  else 
+    @warn "No datapoints retrieved for $symbol" * (ismissing(from) ? "" : "between '$from' and '$to'")
+    return data
+  end
+end
+
 function get_remap(remaps::Union{Dict{Symbol,Symbol},Missing}, key::Symbol)
   if !ismissing(remaps)
     haskey(remaps, key) ? remaps[key] : key
@@ -54,7 +68,7 @@ function parse_jsvalue(js::AbstractDict, key::Symbol, T::Any)
         nothing
       elseif typeof(val) === T
         val
-      elseif T <: AbstractFloat && typeof(val) <: AbstractFloat
+      elseif T <: AbstractFloat && typeof(val) <: Number
         T(val)
       elseif T <: Int && typeof(val) <: Int
         T(val) 

@@ -164,14 +164,14 @@ julia> ref_date = Date("2022-02-18") # just for reproducible results, you can om
 
 # 'to' can be ommited, defaults to current day.
 julia> get_price("AAPL", client; from=ref_date-Day(1), to=ref_date)
-2-element Vector{AssetPrice}:
+# 2-element Vector{AssetPrice}:
  AssetPrice("AAPL", Date("2022-02-18"), 167.3, 169.82, 170.5413, 166.19, missing, 82772674)
  AssetPrice("AAPL", Date("2022-02-17"), 168.88, 171.03, 171.91, 168.47, missing, 69589344)
  # you can omit the client if you have the correct environment variables set
 julia> length(ENV["ALPHAVANTAGE_TOKEN"]) # ENV["YAHOOFINANCE_TOKEN"] works as well
 16
 julia> prices = get_price(["AAPL", "MSFT"]; from=ref_date-Day(2), to=ref_date) 
-6-element Vector{AssetPrice}:
+# 6-element Vector{AssetPrice}:
  AssetPrice("AAPL", Date("2022-02-18"), 167.3, 169.82, 170.5413, 166.19, missing, 82772674)
  AssetPrice("AAPL", Date("2022-02-17"), 168.88, 171.03, 171.91, 168.47, missing, 69589344)
  AssetPrice("AAPL", Date("2022-02-16"), 172.55, 171.85, 173.34, 170.05, missing, 61177398)
@@ -183,7 +183,7 @@ julia> prices = get_price([
   ("AAPL", Date("2022-02-15"), Date("2022-02-16")),
   ("MSFT", Date("2022-02-14"), Date("2022-02-15")),
 ])
-4-element Vector{AssetPrice}:
+# 4-element Vector{AssetPrice}:
  AssetPrice("MSFT", Date("2022-02-15"), 300.47, 300.008, 300.8, 297.02, missing, 27379488)
  AssetPrice("MSFT", Date("2022-02-14"), 295.0, 293.77, 296.76, 291.35, missing, 36359487)
  AssetPrice("AAPL", Date("2022-02-16"), 172.55, 171.85, 173.34, 170.05, missing, 61177398)
@@ -194,11 +194,11 @@ julia> prices = get_price([
 ## Get asset information
 ```julia
 julia> get_info("AAPL")
-1-element Vector{AssetInfo}:
+# 1-element Vector{AssetInfo}:
  AssetInfo("AAPL", "USD", "Apple Inc", "Common Stock", "NASDAQ", "USA", "Electronic Computers", "Technology", missing, missing)
 
 julia> get_info(["AAPL", "MSFT"])
-2-element Vector{AssetInfo}:
+# 2-element Vector{AssetInfo}:
  AssetInfo("MSFT", "USD", "Microsoft Corporation", "Common Stock", "NASDAQ", "USA", "Services-Prepackaged Software", "Technology", missing, missing)
  AssetInfo("AAPL", "USD", "Apple Inc", "Common Stock", "NASDAQ", "USA", "Electronic Computers", "Technology", missing, missing)
 ```
@@ -210,7 +210,7 @@ julia> get_info(["AAPL", "MSFT"])
 # each consisting of exactly 3 characters.
 julia> ref_date = Date("2022-02-18")
 julia> get_exchange_rate("EUR/USD", from=ref_date-Day(1), to=ref_date)
-3-element Vector{ExchangeRate}:
+# 3-element Vector{ExchangeRate}:
  ExchangeRate("EUR", "USD", Date("2022-02-18"), 1.13203)
  ExchangeRate("EUR", "USD", Date("2022-02-17"), 1.13592)
 julia> get_exchange_rate(["EUR/USD", "USD/CAD"], from=ref_date-Day(1), to=ref_date)
@@ -224,7 +224,7 @@ julia>get_exchange_rate([
   ("EUR/USD", Date("2022-02-15"), Date("2022-02-16")),
   ("USD/CAD", Date("2022-02-14"), Date("2022-02-15")),
 ])
-4-element Vector{ExchangeRate}:
+# 4-element Vector{ExchangeRate}:
 ...
 ```
 
@@ -239,50 +239,52 @@ financials[:cashflow_statement] = get_cashflow_statement(symbol; from=from_date)
 financials[:earnings] = get_earnings(symbol; from=from_date)
 
 julia> map(x -> (x.date, x.total_revenue, x.net_income), financials[:income_statement])
-10-element Vector{Tuple{Date, Int64, Int64}}:
+# 10-element Vector{Tuple{Date, Int64, Int64}}:
  (Date("2021-09-30"), 363172000000, 94680000000)
  (Date("2020-09-30"), 271642000000, 57411000000)
  (Date("2021-12-31"), 123251000000, 34630000000)
 
-julia> financials[:balance_sheet] |> to_dataframe |> df -> df[1:3, 1:7]
-3×7 DataFrame
- Row │ symbol  frequency  date        currency  total_assets  total_liabilities  total_shareholder_equity 
-     │ String  String     Date        String?   Int64         Int64              Int64                    
-─────┼────────────────────────────────────────────────────────────────────────────────────────────────────
-   1 │ AAPL    yearly     2021-09-30  USD       351002000000       287912000000               63090000000
-   2 │ AAPL    yearly     2020-09-30  USD       323888000000       258549000000               65339000000
-   3 │ AAPL    quarterly  2021-12-31  USD       381191000000       309259000000               71932000000
+julia> financials[:balance_sheet][1:2]
+# 6-element Vector{BalanceSheet}:
+ BalanceSheet("AAPL", "yearly", Date("2021-09-25"), "USD", 351002000000, 287912000000, 63090000000, 34940000000, 51506000000, 6580000000, 27699000000, 14111000000, 134836000000, 49527000000, missing, 127877000000, missing, missing, 54763000000, missing, missing, 53577000000, 125481000000, missing, missing, missing, 109106000000, missing, missing, missing, 0, 5562000000, 57365000000, missing)
+ BalanceSheet("AAPL", "yearly", Date("2020-09-26"), "USD", 323888000000, 258549000000, 65339000000, 38016000000, 37445000000, 4061000000, 52927000000, 11264000000, 143713000000, 45336000000, missing, 100887000000, missing, missing, 42296000000, missing, missing, 47867000000, 105392000000, missing, missing, missing, 98667000000, missing, missing, missing, 0, 14966000000, 50779000000, missing)
 
-julia> financials[:earnings] |>
-   to_dataframe |>
-   df -> filter(x -> x.frequency == "quarterly", df) |> 
-   df -> df[1:3, :]
-3×6 DataFrame
- Row │ symbol  frequency  date        currency  actual   estimate 
-     │ String  String     Date        String?   Float16  Float16? 
-─────┼────────────────────────────────────────────────────────────
-   1 │ AAPL    quarterly  2021-12-31  missing      2.1      1.89
-   2 │ AAPL    quarterly  2021-09-30  missing      1.24     1.238
-   3 │ AAPL    quarterly  2021-06-30  missing      1.3      1.015
+julia> financials[:earnings] |> data -> filter(x -> x.frequency == "quarterly", data)
+# 4-element Vector{Earnings}:
+ Earnings("AAPL", "quarterly", Date("2021-09-30"), "USD", Float16(1.24), Float16(1.24))
+ Earnings("AAPL", "quarterly", Date("2021-12-31"), "USD", Float16(2.1), Float16(1.89))
+ Earnings("AAPL", "quarterly", Date("2022-03-31"), "USD", Float16(1.52), Float16(1.43))
+ Earnings("AAPL", "quarterly", Date("2022-06-30"), "USD", Float16(1.2), Float16(1.16))
 
+
+symbol, from_date = "AAPL", Date("2020-01-01")
+financials = Dict()
+financials[:balance_sheet] = get_balance_sheet(symbol; from=from_date)
+financials[:income_statement] = get_income_statement(symbol; from=from_date)
+financials[:cashflow_statement] = get_cashflow_statement(symbol; from=from_date)
+financials[:earnings] = get_earnings(symbol; from=from_date)
 ```
 
 ---
-## DataFrames integration
-The types of the `DataFrame` will match the types of any type model, `T<:AbstractStonksRecord`.
+## Tables.j; integration
+All types inheriting from `AbstractStonksRecord` can be converted to a Tables.jl interface of named tuples, using `to_table`. Types from the original model are persisted.
 Currently only tested with flat data types.
 ```julia
 julia> data
-4-element Vector{AssetPrice}:
+# 4-element Vector{AssetPrice}:
  AssetPrice("MSFT", Date("2022-02-23"), 280.27, 290.18, 291.7, 280.1, missing, 37811167)
  AssetPrice("AAPL", Date("2022-02-23"), 160.07, 165.54, 166.15, 159.75, missing, 90009247)
-julia> data |> to_dataframe
-4x8 DataFrame
- Row │ symbol  date        close    open      high      low       close_adjusted  volume   
-     │ String  Date        Float64  Float64?  Float64?  Float64?  Float64?        Int64?   
-─────┼─────────────────────────────────────────────────────────────────────────────────────
-   1 │ MSFT    2022-02-23   280.27    290.18    291.7     280.1          missing  37811167
-   3 │ AAPL    2022-02-23   160.07    165.54    166.15    159.75         missing  90009247
+julia> data |> to_table
+(
+  symbol = ["MSFT", "MSFT", "AAPL", "AAPL"], 
+  date = [Date("2022-02-23"), Date("2022-02-22"), Date("2022-02-23"), Date("2022-02-22")],
+  close = [280.27, 287.72, 160.07, 164.32], 
+  open = Union{Missing, Float64}[290.18, 285.0, 165.54, 164.98], 
+  high = Union{Missing, Float64}[291.7, 291.54, 166.15, 166.69], 
+  low = Union{Missing, Float64}[280.1, 284.5, 159.75, 162.15], 
+  close_adjusted = Union{Missing, Float64}[missing, missing, missing, missing], 
+  volume = Union{Missing, Integer}[37811167, 41569319, 90009247, 90457637]
+)
 ```
 
 ---
@@ -290,7 +292,7 @@ julia> data |> to_dataframe
 Using a [`FileStore`](@ref), you can easily persist and incrementaly update data having at least one identifier and one time dimension.
 Default file format is CSV, but you can plug in any format you wish. See [example for custom file formats](advanced_usage.html#create-api-resources-for-your-custom-models).
 ```julia
-using Chain, Dates, DataFrames
+using Chain, Dates
 using Stonks
 
 dest = joinpath(@__DIR__, "data/prices")
@@ -304,53 +306,47 @@ data = get_price(symbols; from=d_end-Day(7), to=d_end-Day(5))
 save(ds, data)
 println(readdir(dest))
 ["symbol=AAPL", "symbol=MSFT"] #data stored in partitions
-df = load(ds)
-show(df[1:2, :]) # types are persisted
-2×8 DataFrame
- Row │ symbol  date        close    open      high      low       close_adjusted  volume   
-     │ String  Date        Float64  Float64?  Float64?  Float64?  Float64?        Integer? 
-─────┼─────────────────────────────────────────────────────────────────────────────────────
-   1 │ AAPL    2022-03-01   163.2    164.695    166.6     161.97         missing  83474425
-   2 │ AAPL    2022-02-28   165.12   163.06     165.42    162.43         missing  95056629
+
+load(ds)[1:2] # types are persisted
+# 2-element Vector{AssetPrice}:
+ AssetPrice("AAPL", Date("2022-03-01"), 163.2, 164.695, 166.6, 161.97, missing, 83474425)
+ AssetPrice("AAPL", Date("2022-02-28"), 165.12, 163.06, 165.42, 162.43, missing, 95056629)
 
 show_stats(ds) = @chain load(ds) begin  
-  groupby(_, :symbol) 
-  combine(_, :date => maximum, :date => minimum, :symbol => length => :nrows)
- show
+  Stonks.groupby(_, [:symbol]) 
+  Stonks.aggregate(_, [
+    :date => maximum => :date_max,
+    :date => minimum => :date_min,
+    :symbol => length => :count
+  ])
 end
 
 show_stats(ds)
-2×4 DataFrame
- Row │ symbol  date_maximum  date_minimum  nrows 
-     │ String  Date          Date          Int64 
-─────┼───────────────────────────────────────────
-   1 │ AAPL    2022-03-01    2022-02-28        2
-   2 │ MSFT    2022-03-01    2022-02-28        2
+NamedTuple{(:symbol, :date_max, :date_min, :symbols), Tuple{String, Date, Date, Int64}}[
+  (symbol = "AAPL", date_max = Date("2022-03-01"), date_min = Date("2022-02-28"), count = 2),
+  (symbol = "MSFT", date_max = Date("2022-03-01"), date_min = Date("2022-02-28"), count = 2)
+]
 
 # to is optional, defaults to latest workday. here, we need it for reproductible results.
 update(ds; to=d_end)
 show_stats(ds) 
 # d_end (2022-03-06) is a Sunday, so the latest available data is from a Friday (2022-03-04).
-2×4 DataFrame
- Row │ symbol  date_maximum  date_minimum  nrows 
-     │ String  Date          Date          Int64 
-─────┼───────────────────────────────────────────
-   1 │ AAPL    2022-03-04    2022-02-28        6
-   2 │ MSFT    2022-03-04    2022-02-28        6
+NamedTuple{(:symbol, :date_max, :date_min, :symbols), Tuple{String, Date, Date, Int64}}[
+  (symbol = "AAPL", date_max = Date("2022-03-04"), date_min = Date("2022-03-02"), count = 3),
+  (symbol = "MSFT", date_max = Date("2022-03-04"), date_min = Date("2022-03-02"), count = 3)
+]
 
 d_start = d_end - Day(7)
 # we add 2 new stocks to our store.
 update(ds, [("IBM", d_start, d_end), ("AMD", d_start, d_end)], to=d_end)
 show_stats(ds)
-4×4 DataFrame
- Row │ symbol  date_maximum  date_minimum  nrows 
-     │ String  Date          Date          Int64 
-─────┼───────────────────────────────────────────
-   1 │ AAPL    2022-03-04    2022-02-28        5
-   2 │ AMD     2022-03-04    2022-02-28        5
-   3 │ IBM     2022-03-04    2022-02-28        5
-   4 │ MSFT    2022-03-04    2022-02-28        5
+NamedTuple{(:symbol, :date_max, :date_min, :symbols), Tuple{String, Date, Date, Int64}}[
+  (symbol = "AAPL", date_max = Date("2022-03-04"), date_min = Date("2022-03-02"), count = 3), 
+  (symbol = "IBM", date_max = Date("2022-03-04"), date_min = Date("2022-02-28"), count = 5), 
+  (symbol = "MSFT", date_max = Date("2022-03-04"), date_min = Date("2022-03-02"), count = 3),
+  (symbol = "AMD", date_max = Date("2022-03-04"), date_min = Date("2022-02-28"), count = 5)
+]
 # update(ds, ["IBM", "AMD"]) - will include data since earliest available
 # update(ds, vcat(symbols, ["IBM", "AMD"])) - will also update the existing symbols, 
-#  if there is new data
+# if there is new data
 ```

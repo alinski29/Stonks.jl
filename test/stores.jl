@@ -1,15 +1,14 @@
 using Chain
-using DataFrames
 using Test
 
-using Stonks: SchemaValidationError, to_dataframe
+using Stonks: SchemaValidationError
 using Stonks.Stores: FileStore, load, save
 using Stonks.Stores:
   generate_partition_pairs,
   filter_files,
   list_nested_files,
   list_partition_nesting,
-  validate_schema
+  init
 using Stonks.Models: AssetPrice, AssetInfo
 
 include("test_utils.jl")
@@ -17,15 +16,10 @@ include("test_utils.jl")
 @testset "Store functionality" begin
   symbols = ["AAPL", "MSFT"]
   dest = joinpath(@__DIR__, "data/test_stonks")
-  prices = to_dataframe(test_price_data())
-  info = to_dataframe(test_info_data())
+  prices = test_price_data()
+  info = test_info_data()
   ds = FileStore{AssetPrice}(; path=dest, ids=["symbol"])
   dsp = FileStore{AssetPrice}(; path=dest, ids=["symbol"], partitions=["symbol"])
-
-  @testset "Schema validation" begin
-    @test validate_schema(AssetPrice, prices)
-    @test isa(validate_schema(AssetInfo, prices), SchemaValidationError)
-  end
 
   @testset "Store writes - valid schema with no partitions" begin
     save(ds, prices)
@@ -39,10 +33,6 @@ include("test_utils.jl")
     @test readdir(dest) == map(s -> "symbol=$s", symbols)
     @test minimum(map(s -> filesize("$dest/symbol=$s/data.csv"), symbols)) > 0
     rm(dest; recursive=true, force=true)
-  end
-
-  @testset "Store writes - invalid schema" begin
-    @test isa(save(dsp, info), SchemaValidationError)
   end
 
   @testset "Store kwargs constructors" begin 
@@ -81,46 +71,41 @@ include("test_utils.jl")
   @testset "Partition pairs" begin
     partitions = generate_partition_pairs(prices, dsp.partitions)
     @test length(partitions) == 2
-    @test sort(map(x -> x.key, partitions)) == map(s -> "symbol=$s", symbols)
+    @test sort(map(p -> p.key, partitions)) == map(s -> "symbol=$s", symbols)
   end
 
   @testset "Store read" begin
     save(dsp, prices)
     data = load(dsp)
     @test readdir(dest) == map(s -> "symbol=$s", symbols)
-    @test nrow(data) == nrow(prices)
-    get_type_param(::Vector{S}) where {S} = S
-    df_types = [(name=col, type=get_type_param(data[:, col])) for col in names(data)]
-    @test map(x -> x.name, df_types) == [String(x) for x in fieldnames(AssetPrice)]
-    @test validate_schema(AssetPrice, data) == true
+    @test length(data) == length(prices)
+    @test isa(data, Vector{AssetPrice})
     rm(dsp.path; recursive=true, force=true)
   end
 
   @testset "Initialize a datastore" begin
     isdir(dest) && rm(dest; recursive=true, force=true)
     ds = FileStore{AssetPrice}(; path=dest, ids=["symbol"])
-    df = load(ds)
-    @test nrow(df) == 0
-    @test validate_schema(AssetPrice, df)
+    data = load(ds)
+    @test isempty(data)
+    @test isa(data, Vector{AssetPrice})
     rm(dest; recursive=true, force=true)
   end
 
   @testset "Initialize a datastore with 1 partition" begin
     ds = FileStore{AssetPrice}(; path=dest, ids=["symbol"], partitions=["symbol"])
-    df = load(ds)
-    @test nrow(df) == 0
-    @test validate_schema(AssetPrice, df)
+    data = load(ds)
+    @test isempty(data)
+    @test isa(data, Vector{AssetPrice})
     @test readdir("$dest/symbol=__init__") == ["data.csv"]
     rm(dest; recursive=true, force=true)
   end
 
   @testset "Initialize a datastore with multiple partitions" begin
-    ds = FileStore{AssetPrice}(;
-      path=dest, ids=["symbol"], partitions=["symbol", "date"]
-    )
-    df = load(ds)
-    @test nrow(df) == 0
-    @test validate_schema(AssetPrice, df)
+    ds = FileStore{AssetPrice}(; path=dest, ids=["symbol"], partitions=["symbol", "date"])
+    data = load(ds)
+    @test isempty(data)
+    @test isa(data, Vector{AssetPrice})
     @test list_partition_nesting(ds.path) == ds.partitions
     @test readdir("$dest/symbol=__init__/date=__init__") == ["data.csv"]
     rm(dest; recursive=true, force=true)
@@ -129,7 +114,7 @@ include("test_utils.jl")
   @testset "Filter files with a datastore with one partition" begin
     ds = FileStore{AssetPrice}(; path=dest, ids=["symbol"], partitions=["symbol"])
     ref_date, symb = (last_workday(), ["AAPL", "MSFT", "IBM", "GOOG"])
-    prices = to_dataframe(fake_price_data(7, ref_date, symb))
+    prices = fake_price_data(7, ref_date, symb)
     save(ds, prices)
     all_files = list_nested_files(ds.path)
     p_files = filter_files(ds, Dict("symbol" => symbols[1:2]))
@@ -142,35 +127,40 @@ include("test_utils.jl")
   end
 
   @testset "Filter files with a datastore with multiple partitions" begin
-    ds = FileStore{AssetPrice}(;
-      path=dest, ids=["symbol"], partitions=["symbol", "date"]
-    )
+    ds = FileStore{AssetPrice}(;path=dest, ids=["symbol"], partitions=["symbol", "date"])
+
     ref_date, symb = (last_workday(), ["AAPL", "MSFT", "IBM", "GOOG"])
-    prices = to_dataframe(fake_price_data(7, ref_date, symb))
+    prices = fake_price_data(7, ref_date, symb)
     save(ds, prices)
+    
     all_files = list_nested_files(ds.path)
     p_files = @chain begin
       map(i -> Dates.format(ref_date - Day(i), "Y-mm-dd"), 1:3)
       filter_files(ds, Dict("symbol" => symbols[1:2], "date" => _))
     end
+
     @test length(p_files) < length(all_files)
     @test all(map(x -> !contains(x, "symbol=GOOG"), p_files))
 
     symbols_new = vcat(symb[1:2], ["FOO", "BAR"])
     files_new = filter_files(ds, Dict("symbol" => symbols_new))
-    @test length(files_new) < length(all_files) && length(files_new) > length(p_files)
+    @test length(files_new) < length(all_files) && length(files_new) == length(p_files)
+    
     rm(dest; recursive=true, force=true)
   end
 
   @testset "Load a datastore using partition pruning" begin
     ds = FileStore{AssetPrice}(; path=dest, ids=["symbol"], partitions=["symbol"])
     ref_date, symb = (last_workday(), ["AAPL", "MSFT", "IBM", "GOOG"])
-    prices = to_dataframe(fake_price_data(7, ref_date, symb))
+    prices = fake_price_data(7, ref_date, symb)
     save(ds, prices)
-    df = load(ds, Dict("symbol" => ["AAPL", "MSFT"]))
-    @test sort(unique(df[:, :symbol])) == ["AAPL", "MSFT"]
+    
+    data = load(ds, Dict("symbol" => ["AAPL", "MSFT"]))
+    @test sort(unique(map(x -> x.symbol, data))) == ["AAPL", "MSFT"]
+
     data = load(ds, Dict("foo" => ["BAR", "BAZ"]))
     @test typeof(data) <: Exception
+
     rm(dest; recursive=true, force=true)
   end
 

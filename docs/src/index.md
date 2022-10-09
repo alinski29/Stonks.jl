@@ -24,7 +24,7 @@ That problem is solved by [`FileStore`](@ref), which can work with any file form
 - Designed to work with several APIs in an agnostic way, where several APIs are capable of returning the same data.
 - Comes with a pre-defined data model (types), but you're free to [design your own types](advanced_usage.html#Create-API-resources-for-your-custom-models).
 - Store and update data locally with ease using the [`FileStore`](basic_usage.html#persisting-data), which can work with [any file format](advanced_usage.html#Plug-in-any-data-format). Supports data partitioning, writes are atomic, schema validation on read and write. Incrementally update everything in your datastore with just one function.
-- [DataFrames integration](basic_usage.html#DataFrames-integration)
+- [Tables.j; integration](basic_usage.html#Tablesjl-integration)
 - Batching of multiple stock tickers if the API resource allows it, thus minimizing the number of requests.
 - Asynchronous request processing. Multiple requests will processed asynchronously and multi-threaded, thus minimizing the network wait time.
 - Silent by design. The main exposed functions for fetching and saving data don't throw an error, making your program crash. Instead, it will return the error with a descriptive message of what went wrong. 

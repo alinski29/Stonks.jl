@@ -2,7 +2,6 @@ using Dates
 using JSON3
 using Test
 
-using Stonks: to_dataframe
 using Stonks.Models: ExchangeRate, AssetInfo
 using Stonks.Parsers: tryparse_js, js_to_dict, apply_filters, snake_case, JSONParser
 
