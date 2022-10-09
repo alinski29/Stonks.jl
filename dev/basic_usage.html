@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Basic usage · Stonks.jl</title><script data-outdated-warner src="assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="index.html"><img src="assets/logo.jpg" alt="Stonks.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="index.html">Stonks.jl</a></span></div><form class="docs-search" action="search.html"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="index.html">Home</a></li><li><span class="tocitem">User guide</span><ul><li class="is-active"><a class="tocitem" href="basic_usage.html">Basic usage</a><ul class="internal"><li><a class="tocitem" href="#Installation"><span>Installation</span></a></li><li><a class="tocitem" href="#Client-setup"><span>Client setup</span></a></li><li><a class="tocitem" href="#API-Summary"><span>API Summary</span></a></li><li><a class="tocitem" href="#Get-price-time-series"><span>Get price time series</span></a></li><li><a class="tocitem" href="#Get-asset-information"><span>Get asset information</span></a></li><li><a class="tocitem" href="#Get-exchange-rates"><span>Get exchange rates</span></a></li><li><a class="tocitem" href="#Get-financial-statements"><span>Get financial statements</span></a></li><li><a class="tocitem" href="#DataFrames-integration"><span>DataFrames integration</span></a></li><li><a class="tocitem" href="#Persisting-data"><span>Persisting data</span></a></li></ul></li><li><a class="tocitem" href="advanced_usage.html">Advanced usage</a></li></ul></li><li><span class="tocitem">API</span><ul><li><a class="tocitem" href="api_types.html">Types</a></li><li><a class="tocitem" href="api_functions.html">Functions</a></li></ul></li><li><a class="tocitem" href="contributing.html">Contributing</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">User guide</a></li><li class="is-active"><a href="basic_usage.html">Basic usage</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="basic_usage.html">Basic usage</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/alinski29/Stonks.jl/blob/main/docs/src/basic_usage.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Basic-usage"><a class="docs-heading-anchor" href="#Basic-usage">Basic usage</a><a id="Basic-usage-1"></a><a class="docs-heading-anchor-permalink" href="#Basic-usage" title="Permalink"></a></h1><hr/><h2 id="Installation"><a class="docs-heading-anchor" href="#Installation">Installation</a><a id="Installation-1"></a><a class="docs-heading-anchor-permalink" href="#Installation" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Pkg
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Basic usage · Stonks.jl</title><script data-outdated-warner src="assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="index.html"><img src="assets/logo.jpg" alt="Stonks.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="index.html">Stonks.jl</a></span></div><form class="docs-search" action="search.html"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="index.html">Home</a></li><li><span class="tocitem">User guide</span><ul><li class="is-active"><a class="tocitem" href="basic_usage.html">Basic usage</a><ul class="internal"><li><a class="tocitem" href="#Installation"><span>Installation</span></a></li><li><a class="tocitem" href="#Client-setup"><span>Client setup</span></a></li><li><a class="tocitem" href="#API-Summary"><span>API Summary</span></a></li><li><a class="tocitem" href="#Get-price-time-series"><span>Get price time series</span></a></li><li><a class="tocitem" href="#Get-asset-information"><span>Get asset information</span></a></li><li><a class="tocitem" href="#Get-exchange-rates"><span>Get exchange rates</span></a></li><li><a class="tocitem" href="#Get-financial-statements"><span>Get financial statements</span></a></li><li><a class="tocitem" href="#Tables.j;-integration"><span>Tables.j; integration</span></a></li><li><a class="tocitem" href="#Persisting-data"><span>Persisting data</span></a></li></ul></li><li><a class="tocitem" href="advanced_usage.html">Advanced usage</a></li></ul></li><li><span class="tocitem">API</span><ul><li><a class="tocitem" href="api_types.html">Types</a></li><li><a class="tocitem" href="api_functions.html">Functions</a></li></ul></li><li><a class="tocitem" href="contributing.html">Contributing</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">User guide</a></li><li class="is-active"><a href="basic_usage.html">Basic usage</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="basic_usage.html">Basic usage</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/alinski29/Stonks.jl/blob/main/docs/src/basic_usage.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Basic-usage"><a class="docs-heading-anchor" href="#Basic-usage">Basic usage</a><a id="Basic-usage-1"></a><a class="docs-heading-anchor-permalink" href="#Basic-usage" title="Permalink"></a></h1><hr/><h2 id="Installation"><a class="docs-heading-anchor" href="#Installation">Installation</a><a id="Installation-1"></a><a class="docs-heading-anchor-permalink" href="#Installation" title="Permalink"></a></h2><pre><code class="language-julia hljs">using Pkg
 Pkg.add(&quot;Stonks&quot;)</code></pre><p>If for some reason, the package is not available within the Julia Pkg ecosystem, you can install it from Github</p><pre><code class="language-julia hljs">using Pkg
 Pkg.dev(&quot;https://github.com/alinski29/Stonks.jl&quot;)</code></pre><p>Throughout the rest of the tutorial we will assume that you have installed the Stonks.jl package and have already typed <code>using Stonks</code> which loads the package.</p><hr/><h2 id="Client-setup"><a class="docs-heading-anchor" href="#Client-setup">Client setup</a><a id="Client-setup-1"></a><a class="docs-heading-anchor-permalink" href="#Client-setup" title="Permalink"></a></h2><p>For retrieving data from the web, you&#39;ll need an instance of <a href="api_types.html#Stonks.APIClients.APIClient"><code>Stonks.APIClient</code></a>, which holds all relevant information for requesting the data. There are currently two data providers supported:</p><ul><li><a href="https://www.yahoofinanceapi.com">Yahoo Finance</a></li><li><a href="https://www.alphavantage.co">Alphavantage</a></li></ul><p>For any provider, you need to sign up on the website and obtain a token.  Then, you can load a client using one of the following functions.</p><pre><code class="language-julia hljs">client = YahooClient(&quot;&lt;my_token&gt;&quot;)
 # or client = AlphavantageJSONClient(&quot;&lt;my_token&gt;&quot;)</code></pre><hr/><h3 id="Client-resolution-fron-ENV-variables"><a class="docs-heading-anchor" href="#Client-resolution-fron-ENV-variables">Client resolution fron ENV variables</a><a id="Client-resolution-fron-ENV-variables-1"></a><a class="docs-heading-anchor-permalink" href="#Client-resolution-fron-ENV-variables" title="Permalink"></a></h3><p>You can omit the <code>client</code> parameter in all functions IF you set one of the environment variables:</p><ul><li>For Alphavantage: <code>ALPHAVANTAGE_TOKEN</code> =&gt; will build an <code>APIClient</code> using <a href="api_functions.html#Stonks.APIClients.AlphavantageJSONClient"><code>AlphavantageJSONClient</code></a></li><li>For Yahoo Finance: <code>YAHOOFINANCE_TOKEN</code> =&gt; will build an <code>APIClient</code> using <a href="api_functions.html#Stonks.APIClients.YahooClient"><code>YahooClient</code></a></li></ul><p>In your terminal, type:</p><pre><code class="language-bash hljs">export ALPHAVANTAGE_TOKEN=&#39;MY_TOKEN&#39;
@@ -115,14 +115,14 @@ julia&gt; ref_date = Date(&quot;2022-02-18&quot;) # just for reproducible result
 
 # &#39;to&#39; can be ommited, defaults to current day.
 julia&gt; get_price(&quot;AAPL&quot;, client; from=ref_date-Day(1), to=ref_date)
-2-element Vector{AssetPrice}:
+# 2-element Vector{AssetPrice}:
  AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-18&quot;), 167.3, 169.82, 170.5413, 166.19, missing, 82772674)
  AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-17&quot;), 168.88, 171.03, 171.91, 168.47, missing, 69589344)
  # you can omit the client if you have the correct environment variables set
 julia&gt; length(ENV[&quot;ALPHAVANTAGE_TOKEN&quot;]) # ENV[&quot;YAHOOFINANCE_TOKEN&quot;] works as well
 16
 julia&gt; prices = get_price([&quot;AAPL&quot;, &quot;MSFT&quot;]; from=ref_date-Day(2), to=ref_date) 
-6-element Vector{AssetPrice}:
+# 6-element Vector{AssetPrice}:
  AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-18&quot;), 167.3, 169.82, 170.5413, 166.19, missing, 82772674)
  AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-17&quot;), 168.88, 171.03, 171.91, 168.47, missing, 69589344)
  AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-16&quot;), 172.55, 171.85, 173.34, 170.05, missing, 61177398)
@@ -134,22 +134,22 @@ julia&gt; prices = get_price([
   (&quot;AAPL&quot;, Date(&quot;2022-02-15&quot;), Date(&quot;2022-02-16&quot;)),
   (&quot;MSFT&quot;, Date(&quot;2022-02-14&quot;), Date(&quot;2022-02-15&quot;)),
 ])
-4-element Vector{AssetPrice}:
+# 4-element Vector{AssetPrice}:
  AssetPrice(&quot;MSFT&quot;, Date(&quot;2022-02-15&quot;), 300.47, 300.008, 300.8, 297.02, missing, 27379488)
  AssetPrice(&quot;MSFT&quot;, Date(&quot;2022-02-14&quot;), 295.0, 293.77, 296.76, 291.35, missing, 36359487)
  AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-16&quot;), 172.55, 171.85, 173.34, 170.05, missing, 61177398)
  AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-15&quot;), 172.79, 170.97, 172.95, 170.25, missing, 64286320)</code></pre><hr/><h2 id="Get-asset-information"><a class="docs-heading-anchor" href="#Get-asset-information">Get asset information</a><a id="Get-asset-information-1"></a><a class="docs-heading-anchor-permalink" href="#Get-asset-information" title="Permalink"></a></h2><pre><code class="language-julia hljs">julia&gt; get_info(&quot;AAPL&quot;)
-1-element Vector{AssetInfo}:
+# 1-element Vector{AssetInfo}:
  AssetInfo(&quot;AAPL&quot;, &quot;USD&quot;, &quot;Apple Inc&quot;, &quot;Common Stock&quot;, &quot;NASDAQ&quot;, &quot;USA&quot;, &quot;Electronic Computers&quot;, &quot;Technology&quot;, missing, missing)
 
 julia&gt; get_info([&quot;AAPL&quot;, &quot;MSFT&quot;])
-2-element Vector{AssetInfo}:
+# 2-element Vector{AssetInfo}:
  AssetInfo(&quot;MSFT&quot;, &quot;USD&quot;, &quot;Microsoft Corporation&quot;, &quot;Common Stock&quot;, &quot;NASDAQ&quot;, &quot;USA&quot;, &quot;Services-Prepackaged Software&quot;, &quot;Technology&quot;, missing, missing)
  AssetInfo(&quot;AAPL&quot;, &quot;USD&quot;, &quot;Apple Inc&quot;, &quot;Common Stock&quot;, &quot;NASDAQ&quot;, &quot;USA&quot;, &quot;Electronic Computers&quot;, &quot;Technology&quot;, missing, missing)</code></pre><hr/><h2 id="Get-exchange-rates"><a class="docs-heading-anchor" href="#Get-exchange-rates">Get exchange rates</a><a id="Get-exchange-rates-1"></a><a class="docs-heading-anchor-permalink" href="#Get-exchange-rates" title="Permalink"></a></h2><pre><code class="language-julia hljs"># Same API as get_price. the symbol needs to be a currency pair like $base/$quote,
 # each consisting of exactly 3 characters.
 julia&gt; ref_date = Date(&quot;2022-02-18&quot;)
 julia&gt; get_exchange_rate(&quot;EUR/USD&quot;, from=ref_date-Day(1), to=ref_date)
-3-element Vector{ExchangeRate}:
+# 3-element Vector{ExchangeRate}:
  ExchangeRate(&quot;EUR&quot;, &quot;USD&quot;, Date(&quot;2022-02-18&quot;), 1.13203)
  ExchangeRate(&quot;EUR&quot;, &quot;USD&quot;, Date(&quot;2022-02-17&quot;), 1.13592)
 julia&gt; get_exchange_rate([&quot;EUR/USD&quot;, &quot;USD/CAD&quot;], from=ref_date-Day(1), to=ref_date)
@@ -163,7 +163,7 @@ julia&gt;get_exchange_rate([
   (&quot;EUR/USD&quot;, Date(&quot;2022-02-15&quot;), Date(&quot;2022-02-16&quot;)),
   (&quot;USD/CAD&quot;, Date(&quot;2022-02-14&quot;), Date(&quot;2022-02-15&quot;)),
 ])
-4-element Vector{ExchangeRate}:
+# 4-element Vector{ExchangeRate}:
 ...</code></pre><hr/><h2 id="Get-financial-statements"><a class="docs-heading-anchor" href="#Get-financial-statements">Get financial statements</a><a id="Get-financial-statements-1"></a><a class="docs-heading-anchor-permalink" href="#Get-financial-statements" title="Permalink"></a></h2><pre><code class="language-julia hljs">symbol, from_date = &quot;AAPL&quot;, Date(&quot;2020-01-01&quot;)
 financials = Dict()
 financials[:balance_sheet] = get_balance_sheet(symbol; from=from_date)
@@ -172,42 +172,44 @@ financials[:cashflow_statement] = get_cashflow_statement(symbol; from=from_date)
 financials[:earnings] = get_earnings(symbol; from=from_date)
 
 julia&gt; map(x -&gt; (x.date, x.total_revenue, x.net_income), financials[:income_statement])
-10-element Vector{Tuple{Date, Int64, Int64}}:
+# 10-element Vector{Tuple{Date, Int64, Int64}}:
  (Date(&quot;2021-09-30&quot;), 363172000000, 94680000000)
  (Date(&quot;2020-09-30&quot;), 271642000000, 57411000000)
  (Date(&quot;2021-12-31&quot;), 123251000000, 34630000000)
 
-julia&gt; financials[:balance_sheet] |&gt; to_dataframe |&gt; df -&gt; df[1:3, 1:7]
-3×7 DataFrame
- Row │ symbol  frequency  date        currency  total_assets  total_liabilities  total_shareholder_equity 
-     │ String  String     Date        String?   Int64         Int64              Int64                    
-─────┼────────────────────────────────────────────────────────────────────────────────────────────────────
-   1 │ AAPL    yearly     2021-09-30  USD       351002000000       287912000000               63090000000
-   2 │ AAPL    yearly     2020-09-30  USD       323888000000       258549000000               65339000000
-   3 │ AAPL    quarterly  2021-12-31  USD       381191000000       309259000000               71932000000
+julia&gt; financials[:balance_sheet][1:2]
+# 6-element Vector{BalanceSheet}:
+ BalanceSheet(&quot;AAPL&quot;, &quot;yearly&quot;, Date(&quot;2021-09-25&quot;), &quot;USD&quot;, 351002000000, 287912000000, 63090000000, 34940000000, 51506000000, 6580000000, 27699000000, 14111000000, 134836000000, 49527000000, missing, 127877000000, missing, missing, 54763000000, missing, missing, 53577000000, 125481000000, missing, missing, missing, 109106000000, missing, missing, missing, 0, 5562000000, 57365000000, missing)
+ BalanceSheet(&quot;AAPL&quot;, &quot;yearly&quot;, Date(&quot;2020-09-26&quot;), &quot;USD&quot;, 323888000000, 258549000000, 65339000000, 38016000000, 37445000000, 4061000000, 52927000000, 11264000000, 143713000000, 45336000000, missing, 100887000000, missing, missing, 42296000000, missing, missing, 47867000000, 105392000000, missing, missing, missing, 98667000000, missing, missing, missing, 0, 14966000000, 50779000000, missing)
 
-julia&gt; financials[:earnings] |&gt;
-   to_dataframe |&gt;
-   df -&gt; filter(x -&gt; x.frequency == &quot;quarterly&quot;, df) |&gt; 
-   df -&gt; df[1:3, :]
-3×6 DataFrame
- Row │ symbol  frequency  date        currency  actual   estimate 
-     │ String  String     Date        String?   Float16  Float16? 
-─────┼────────────────────────────────────────────────────────────
-   1 │ AAPL    quarterly  2021-12-31  missing      2.1      1.89
-   2 │ AAPL    quarterly  2021-09-30  missing      1.24     1.238
-   3 │ AAPL    quarterly  2021-06-30  missing      1.3      1.015
-</code></pre><hr/><h2 id="DataFrames-integration"><a class="docs-heading-anchor" href="#DataFrames-integration">DataFrames integration</a><a id="DataFrames-integration-1"></a><a class="docs-heading-anchor-permalink" href="#DataFrames-integration" title="Permalink"></a></h2><p>The types of the <code>DataFrame</code> will match the types of any type model, <code>T&lt;:AbstractStonksRecord</code>. Currently only tested with flat data types.</p><pre><code class="language-julia hljs">julia&gt; data
-4-element Vector{AssetPrice}:
+julia&gt; financials[:earnings] |&gt; data -&gt; filter(x -&gt; x.frequency == &quot;quarterly&quot;, data)
+# 4-element Vector{Earnings}:
+ Earnings(&quot;AAPL&quot;, &quot;quarterly&quot;, Date(&quot;2021-09-30&quot;), &quot;USD&quot;, Float16(1.24), Float16(1.24))
+ Earnings(&quot;AAPL&quot;, &quot;quarterly&quot;, Date(&quot;2021-12-31&quot;), &quot;USD&quot;, Float16(2.1), Float16(1.89))
+ Earnings(&quot;AAPL&quot;, &quot;quarterly&quot;, Date(&quot;2022-03-31&quot;), &quot;USD&quot;, Float16(1.52), Float16(1.43))
+ Earnings(&quot;AAPL&quot;, &quot;quarterly&quot;, Date(&quot;2022-06-30&quot;), &quot;USD&quot;, Float16(1.2), Float16(1.16))
+
+
+symbol, from_date = &quot;AAPL&quot;, Date(&quot;2020-01-01&quot;)
+financials = Dict()
+financials[:balance_sheet] = get_balance_sheet(symbol; from=from_date)
+financials[:income_statement] = get_income_statement(symbol; from=from_date)
+financials[:cashflow_statement] = get_cashflow_statement(symbol; from=from_date)
+financials[:earnings] = get_earnings(symbol; from=from_date)</code></pre><hr/><h2 id="Tables.j;-integration"><a class="docs-heading-anchor" href="#Tables.j;-integration">Tables.j; integration</a><a id="Tables.j;-integration-1"></a><a class="docs-heading-anchor-permalink" href="#Tables.j;-integration" title="Permalink"></a></h2><p>All types inheriting from <code>AbstractStonksRecord</code> can be converted to a Tables.jl interface of named tuples, using <code>to_table</code>. Types from the original model are persisted. Currently only tested with flat data types.</p><pre><code class="language-julia hljs">julia&gt; data
+# 4-element Vector{AssetPrice}:
  AssetPrice(&quot;MSFT&quot;, Date(&quot;2022-02-23&quot;), 280.27, 290.18, 291.7, 280.1, missing, 37811167)
  AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-23&quot;), 160.07, 165.54, 166.15, 159.75, missing, 90009247)
-julia&gt; data |&gt; to_dataframe
-4x8 DataFrame
- Row │ symbol  date        close    open      high      low       close_adjusted  volume   
-     │ String  Date        Float64  Float64?  Float64?  Float64?  Float64?        Int64?   
-─────┼─────────────────────────────────────────────────────────────────────────────────────
-   1 │ MSFT    2022-02-23   280.27    290.18    291.7     280.1          missing  37811167
-   3 │ AAPL    2022-02-23   160.07    165.54    166.15    159.75         missing  90009247</code></pre><hr/><h2 id="Persisting-data"><a class="docs-heading-anchor" href="#Persisting-data">Persisting data</a><a id="Persisting-data-1"></a><a class="docs-heading-anchor-permalink" href="#Persisting-data" title="Permalink"></a></h2><p>Using a <a href="api_types.html#Stonks.Stores.FileStore"><code>FileStore</code></a>, you can easily persist and incrementaly update data having at least one identifier and one time dimension. Default file format is CSV, but you can plug in any format you wish. See <a href="advanced_usage.html#create-api-resources-for-your-custom-models">example for custom file formats</a>.</p><pre><code class="language-julia hljs">using Chain, Dates, DataFrames
+julia&gt; data |&gt; to_table
+(
+  symbol = [&quot;MSFT&quot;, &quot;MSFT&quot;, &quot;AAPL&quot;, &quot;AAPL&quot;], 
+  date = [Date(&quot;2022-02-23&quot;), Date(&quot;2022-02-22&quot;), Date(&quot;2022-02-23&quot;), Date(&quot;2022-02-22&quot;)],
+  close = [280.27, 287.72, 160.07, 164.32], 
+  open = Union{Missing, Float64}[290.18, 285.0, 165.54, 164.98], 
+  high = Union{Missing, Float64}[291.7, 291.54, 166.15, 166.69], 
+  low = Union{Missing, Float64}[280.1, 284.5, 159.75, 162.15], 
+  close_adjusted = Union{Missing, Float64}[missing, missing, missing, missing], 
+  volume = Union{Missing, Integer}[37811167, 41569319, 90009247, 90457637]
+)</code></pre><hr/><h2 id="Persisting-data"><a class="docs-heading-anchor" href="#Persisting-data">Persisting data</a><a id="Persisting-data-1"></a><a class="docs-heading-anchor-permalink" href="#Persisting-data" title="Permalink"></a></h2><p>Using a <a href="api_types.html#Stonks.Stores.FileStore"><code>FileStore</code></a>, you can easily persist and incrementaly update data having at least one identifier and one time dimension. Default file format is CSV, but you can plug in any format you wish. See <a href="advanced_usage.html#create-api-resources-for-your-custom-models">example for custom file formats</a>.</p><pre><code class="language-julia hljs">using Chain, Dates
 using Stonks
 
 dest = joinpath(@__DIR__, &quot;data/prices&quot;)
@@ -221,52 +223,46 @@ data = get_price(symbols; from=d_end-Day(7), to=d_end-Day(5))
 save(ds, data)
 println(readdir(dest))
 [&quot;symbol=AAPL&quot;, &quot;symbol=MSFT&quot;] #data stored in partitions
-df = load(ds)
-show(df[1:2, :]) # types are persisted
-2×8 DataFrame
- Row │ symbol  date        close    open      high      low       close_adjusted  volume   
-     │ String  Date        Float64  Float64?  Float64?  Float64?  Float64?        Integer? 
-─────┼─────────────────────────────────────────────────────────────────────────────────────
-   1 │ AAPL    2022-03-01   163.2    164.695    166.6     161.97         missing  83474425
-   2 │ AAPL    2022-02-28   165.12   163.06     165.42    162.43         missing  95056629
+
+load(ds)[1:2] # types are persisted
+# 2-element Vector{AssetPrice}:
+ AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-03-01&quot;), 163.2, 164.695, 166.6, 161.97, missing, 83474425)
+ AssetPrice(&quot;AAPL&quot;, Date(&quot;2022-02-28&quot;), 165.12, 163.06, 165.42, 162.43, missing, 95056629)
 
 show_stats(ds) = @chain load(ds) begin  
-  groupby(_, :symbol) 
-  combine(_, :date =&gt; maximum, :date =&gt; minimum, :symbol =&gt; length =&gt; :nrows)
- show
+  Stonks.groupby(_, [:symbol]) 
+  Stonks.aggregate(_, [
+    :date =&gt; maximum =&gt; :date_max,
+    :date =&gt; minimum =&gt; :date_min,
+    :symbol =&gt; length =&gt; :count
+  ])
 end
 
 show_stats(ds)
-2×4 DataFrame
- Row │ symbol  date_maximum  date_minimum  nrows 
-     │ String  Date          Date          Int64 
-─────┼───────────────────────────────────────────
-   1 │ AAPL    2022-03-01    2022-02-28        2
-   2 │ MSFT    2022-03-01    2022-02-28        2
+NamedTuple{(:symbol, :date_max, :date_min, :symbols), Tuple{String, Date, Date, Int64}}[
+  (symbol = &quot;AAPL&quot;, date_max = Date(&quot;2022-03-01&quot;), date_min = Date(&quot;2022-02-28&quot;), count = 2),
+  (symbol = &quot;MSFT&quot;, date_max = Date(&quot;2022-03-01&quot;), date_min = Date(&quot;2022-02-28&quot;), count = 2)
+]
 
 # to is optional, defaults to latest workday. here, we need it for reproductible results.
 update(ds; to=d_end)
 show_stats(ds) 
 # d_end (2022-03-06) is a Sunday, so the latest available data is from a Friday (2022-03-04).
-2×4 DataFrame
- Row │ symbol  date_maximum  date_minimum  nrows 
-     │ String  Date          Date          Int64 
-─────┼───────────────────────────────────────────
-   1 │ AAPL    2022-03-04    2022-02-28        6
-   2 │ MSFT    2022-03-04    2022-02-28        6
+NamedTuple{(:symbol, :date_max, :date_min, :symbols), Tuple{String, Date, Date, Int64}}[
+  (symbol = &quot;AAPL&quot;, date_max = Date(&quot;2022-03-04&quot;), date_min = Date(&quot;2022-03-02&quot;), count = 3),
+  (symbol = &quot;MSFT&quot;, date_max = Date(&quot;2022-03-04&quot;), date_min = Date(&quot;2022-03-02&quot;), count = 3)
+]
 
 d_start = d_end - Day(7)
 # we add 2 new stocks to our store.
 update(ds, [(&quot;IBM&quot;, d_start, d_end), (&quot;AMD&quot;, d_start, d_end)], to=d_end)
 show_stats(ds)
-4×4 DataFrame
- Row │ symbol  date_maximum  date_minimum  nrows 
-     │ String  Date          Date          Int64 
-─────┼───────────────────────────────────────────
-   1 │ AAPL    2022-03-04    2022-02-28        5
-   2 │ AMD     2022-03-04    2022-02-28        5
-   3 │ IBM     2022-03-04    2022-02-28        5
-   4 │ MSFT    2022-03-04    2022-02-28        5
+NamedTuple{(:symbol, :date_max, :date_min, :symbols), Tuple{String, Date, Date, Int64}}[
+  (symbol = &quot;AAPL&quot;, date_max = Date(&quot;2022-03-04&quot;), date_min = Date(&quot;2022-03-02&quot;), count = 3), 
+  (symbol = &quot;IBM&quot;, date_max = Date(&quot;2022-03-04&quot;), date_min = Date(&quot;2022-02-28&quot;), count = 5), 
+  (symbol = &quot;MSFT&quot;, date_max = Date(&quot;2022-03-04&quot;), date_min = Date(&quot;2022-03-02&quot;), count = 3),
+  (symbol = &quot;AMD&quot;, date_max = Date(&quot;2022-03-04&quot;), date_min = Date(&quot;2022-02-28&quot;), count = 5)
+]
 # update(ds, [&quot;IBM&quot;, &quot;AMD&quot;]) - will include data since earliest available
 # update(ds, vcat(symbols, [&quot;IBM&quot;, &quot;AMD&quot;])) - will also update the existing symbols, 
-#  if there is new data</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="index.html">« Home</a><a class="docs-footer-nextpage" href="advanced_usage.html">Advanced usage »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.23 on <span class="colophon-date" title="Sunday 25 September 2022 16:09">Sunday 25 September 2022</span>. Using Julia version 1.8.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+# if there is new data</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="index.html">« Home</a><a class="docs-footer-nextpage" href="advanced_usage.html">Advanced usage »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.23 on <span class="colophon-date" title="Sunday 9 October 2022 13:05">Sunday 9 October 2022</span>. Using Julia version 1.8.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
