@@ -1,10 +1,8 @@
-using DataFrames
-
 """
 Holds information about a single write
 """
 struct WriteOperation
-  data::AbstractDataFrame
+  data::Vector{T} where {T<:AbstractStonksRecord}
   format::String
   key::String
   filename::String
@@ -14,8 +12,8 @@ struct WriteOperation
 end
 
 """
-Write a DataFrame to a path using a user-provided function 
-  - writer(data::DataFrame, path::String)
+Write a Vector{<:AbstractStonksRecord} to a path using a user-provided function 
+  - writer(data::Vector{<:AbstractStonksRecord}, path::String)
 """
 function write(op::WriteOperation, path::String, writer::Function)
   dir = "$path/$(op.key)"
@@ -60,7 +58,7 @@ function execute(tr::WriteTransaction, writer::Function)
   end
   try
     commit(tr)
-    #@debug "Transaction at '$(tr.dest)' with $(length(tr.ops)) atomic operations executed sucesfully."
+    # @debug "Transaction at '$(tr.dest)' with $(length(tr.ops)) atomic operations executed sucesfully."
     return (true, nothing)
   catch err
     rollback(bkps)
@@ -92,9 +90,6 @@ function write_tmp(tr::WriteTransaction, writer::Function)
     msg = "At least one write failed. Can't commit transaction."
     @warn msg
     return (false, ErrorException(msg))
-    # for write in tmp_writes
-    #   !isnothing(write.error) && return (false, ErrorException(msg))
-    # end
   end
 end
 

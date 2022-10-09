@@ -2,9 +2,9 @@ module Stores
 
 using CSV
 using Chain
-using DataFrames
 
 using Stonks.Models: AbstractStonksRecord, AssetInfo, AssetPrice, ExchangeRate
+using Stonks: to_table
 
 export AbstractStore, FileStore, load, save, update
 
@@ -13,8 +13,14 @@ Abstract type to be subtyped by all types of Stores, like `FileStore`. `Database
 """
 abstract type AbstractStore{T <: AbstractStonksRecord} end
 
-writer_csv(df::AbstractDataFrame, path::String) = CSV.write(path, df)
-reader_csv(path::String) = DataFrame(CSV.File(path))
+function writer_csv(data::Vector{T}, path::String) where {T<:AbstractStonksRecord} 
+  isempty(data) ? CSV.write(path, to_table(data)) : CSV.write(path, data)
+end
+
+function reader_csv(path::String, ::Type{T}) where {T<:AbstractStonksRecord} 
+  apply_schema(CSV.File(path), T)
+end 
+
 ensure_path(path::String) = isabspath(path) ? path : joinpath(@__DIR__, path)
 
 """
@@ -28,8 +34,8 @@ Stores all information needed for data storage and retrieval.
 - `format::String`: file format. all files will have the ending like "data.{format}". default = "csv"
 - `partitions::AbstractVector{AbstractString}`: columns used for data partitioning. columns have to be members of T
 - `time_colum::Union{AbstractString, Missing}`: column representing time dimension. Can be skipped for `AssetPrice` and `ExchangeRate`.
-- `reader::Function`: reader(path::String) -> DataFrame
-- `writer::Function`: writer(df::AbstractDataFrame, path::String) -> DataFrame
+- `reader::Function`: reader(path::String) -> Vector{AbstractStonksRecord}
+- `writer::Function`: writer(data::Vector{<:AbstractStonksRecord}, path::String)
 
 ### Constructors
 ```julia
@@ -44,8 +50,8 @@ FileStore{<:AbstractStonksRecord}(;
 )
 
 # where,
-reader_csv(path::String) = DataFrame(CSV.File(path))
-writer_csv(df::AbstractDataFrame, path::String) = CSV.write(path, df)
+reader_csv(path::String) = apply_schema(CSV.File(path), T<:AbstractStonksRecord)
+writer_csv(data::Vector{<:AbstractStonksRecord}, path::String) = CSV.write(path, data)
 ```
 
 ### Examples 
@@ -56,9 +62,9 @@ FileStore{AssetInfo}(; path=dest, ids=["symbol"])
 FileStore{AssetPrice}(; path=dest, ids=["symbol"], time_column="date")
 FileStore{AssetPrice}(; path=dest, ids=[:symbol], partitions=[:symbol], time_column ="date")
 
-using Arrow, DataFrames
-read = read_arrow(path::String) = Arrow.Table(path) |> DataFrame
-write = write_arrow(df::AbstractDataFrame, path::String) = open(path, "w") do io Arrow.write(io, df) end
+using Arrow
+read = read_arrow(path::String) = Arrow.Table(path)
+write = write_arrow(data, path::String) = open(path, "w") do io Arrow.write(io, data) end
 FileStore{ExchangeRate}(; path=dest, ids=[:base, :target], time_column="date", reader=read, writer=write)
 ```
 """
@@ -107,17 +113,6 @@ function infer_time_column(::Type{T})::Union{String,Missing} where {T<:AbstractS
   end
   return missing
 end
-
-# function infer_ids(::Type{T}) where {T<:AbstractStonksRecord}
-#   T_fields = [String(x) for x in fieldnames(T)]
-#   if T === AssetPrice || T === AssetInfo
-#     "symbol" in T_fields && return ["symbol"]
-#   end
-#   if T === ExchangeRate
-#     "base" in T_fields && return ["base", "target"]
-#   end
-#   return missing
-# end
 
 function check_type_membership(
   ::Type{T}, fields::Vector{String}

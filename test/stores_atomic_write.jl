@@ -1,9 +1,9 @@
 using CSV
-using DataFrames
 using Test
 
+using Stonks: AbstractStonksRecord
 using Stonks.Stores: WriteOperation, WriteTransaction, list_partition_nesting
-using Stonks.Stores: backup, cleanup, commit, execute, rollback, write, write_tmp
+using Stonks.Stores: backup, cleanup, commit, execute, rollback, write, write_tmp, writer_csv
 
 include("test_utils.jl")
 
@@ -12,11 +12,9 @@ include("test_utils.jl")
   data = fake_stock_data(7, last_workday(), symbols)
   dest = joinpath(@__DIR__, "data/test_stonks")
   tr = @chain symbols begin
-    map(s -> WriteOperation(filter(:symbol => ==(s), data), "csv", "symbol=$s"), _)
+    map(s -> WriteOperation(filter(x -> x.symbol == s, data), "csv", "symbol=$s"), _)
     WriteTransaction(_, "csv", dest)
   end
-  writer_csv(df::AbstractDataFrame, path::String) = CSV.write(path, df)
-  get_type_param(::Vector{S}) where {S} = S
 
   @testset "Write using a WriteOperation" begin
     path = joinpath(@__DIR__, "data/test_stonks")
@@ -66,4 +64,5 @@ include("test_utils.jl")
     @test isdir("$dest/.tmp") == false
     rm(dest; recursive=true, force=true)
   end
+
 end

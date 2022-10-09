@@ -1,18 +1,16 @@
 using Chain
 using Dates
-using DataFrames
 using Logging
 
 using Stonks: AbstractStonksRecord, Symbols, UpdatableSymbol
-using Stonks:
-  construct_updatable_symbols, create_typed_dataframe, last_workday, get_data, to_dataframe
+using Stonks: construct_updatable_symbols,last_workday, get_data
 using Stonks.APIClients: APIClient, APIResource, get_resource
 using Stonks.Stores: FileStore
 
 """
-    load(ds, [partitions]) -> Union{DataFrame, Exception}
+    load(ds, [partitions]) -> Union{Vector{<:AbstractStonksRecord}, Exception}
 
-Read data from an `FileStore` instance into a DataFrame. If there is no data at `ds.path`, a file with 0 records and the correct types with be created. 
+Read data from an `FileStore` instance into a Vector{:<AbstractStonksRecord}. If there is no data at `ds.path`, a file with 0 records and the correct types with be created. 
 
 ### Arguments
 - `ds::FileStore{<:AbstractStonksRecord}`: a `FileStore` instance
@@ -22,19 +20,17 @@ Read data from an `FileStore` instance into a DataFrame. If there is no data at 
 ```julia
 dest = joinpath(@__DIR__, "data/prices")
 ds = FileStore{AssetPrice}(; path=dest, ids=[:symbol], partitions=[:symbol], time_column="date")
-df = load(ds)
-show(df[1:2, :]) # types are persisted
-2×8 DataFrame
- Row │ symbol  date        close    open      high      low       close_adjusted  volume   
-     │ String  Date        Float64  Float64?  Float64?  Float64?  Float64?        Integer? 
-─────┼─────────────────────────────────────────────────────────────────────────────────────
-   1 │ AAPL    2022-03-01   163.2    164.695    166.6     161.97         missing  83474425
-   2 │ AAPL    2022-02-28   165.12   163.06     165.42    162.43         missing  95056629
+data = load(ds)
+2-element Vector{AssetPrice}:
+ AssetPrice("AAPL", Date("2022-03-01"), 163.2, 164.695, 166.6, 161.97, missing, 83474425)
+ AssetPrice("AAPL", Date("2022-02-28"), 165.12, 163.06, 165.42, 162.43, missing, 95056629)
 ```
 """
 function load(
-  ds::FileStore{T}, partitions::Union{Dict{String,Vector{String}},Missing}=missing
-)::Union{DataFrame,Exception} where {T<:AbstractStonksRecord}
+  ds::FileStore{T},
+  partitions::Union{Dict{String,Vector{String}},Missing}=missing
+)::Union{Vector{T},Exception} where {T<:AbstractStonksRecord}
+
   !isdir(ds.path) && init(ds)
   all_files = list_nested_files(ds.path)
   p_files = !ismissing(partitions) ? filter_files(ds, partitions) : []
@@ -44,39 +40,40 @@ function load(
   if isempty(all_files)
     return ErrorException("No files found at dir '$(ds.path)'")
   end
-  files = String[] 
-  if !ismissing(partitions) && !isempty(ds.partitions) 
+
+  files = String[]
+  if !ismissing(partitions) && !isempty(ds.partitions)
     if typeof(p_files) <: Exception
       return p_files
     elseif isempty(intersect(all_files, p_files))
-      return create_typed_dataframe(T)
+      return T[]
     else
       @info "partition filter will be applied: $partitions"
       append!(files, p_files)
     end
-  else 
+  else
     append!(files, all_files)
   end
+
   try
     # non-partitioned dataset
     if length(files) == 1
-      data = ds.reader(first(files))
-      return apply_schema(T, data)
+      return ds.reader(first(files), T)
     end
     # partitioned dataset
     frames = Channel(length(files))
     @sync for file in files
       Threads.@spawn begin
-        maybe_df = ds.reader(file)
-        isa(maybe_df, DataFrame) && push!(frames, maybe_df)
+        push!(frames, ds.reader(file, T))
       end
     end
     close(frames)
-    data = vcat(frames...)
-    return apply_schema(T, data)
+    return vcat(frames...)
+    # return data
   catch err
     return err
   end
+
 end
 
 """
@@ -87,7 +84,7 @@ In case of a `FileStore` with partitions, the partition values where `data` has 
 
 ### Arguments
 - `ds::FileStore`
-- `data::Union{AbstractDataFrame, Vector{<:AbstractStonksRecord}}`
+- `data::Vector{<:AbstractStonksRecord}`
 
 ### Examples
 ```julia-repl
@@ -104,29 +101,21 @@ julia> readdir(ds.path)
  "symbol=TSLA"
 ```
 """
-function save(
-  ds::FileStore, data::Union{AbstractDataFrame,Vector{T}}
-) where {T<:AbstractStonksRecord}
-  df = typeof(data) <: AbstractDataFrame ? data : to_dataframe(data)
-  get_type_param(::FileStore{S}) where {S} = S
-  valid_schema = validate_schema(get_type_param(ds), df)
-  if isa(valid_schema, SchemaValidationError)
-    return valid_schema
-  end
+function save(ds::FileStore{T}, data::Vector{T}) where {T<:AbstractStonksRecord}
   if isempty(ds.partitions)
-    tr = WriteTransaction([WriteOperation(df, ds.format)], ds.format, ds.path)
+    tr = WriteTransaction([WriteOperation(data, ds.format)], ds.format, ds.path)
     status, err = execute(tr, ds.writer)
     return status ? nothing : err
   end
-  partitions = generate_partition_pairs(df, ds.partitions)
+  partitions = generate_partition_pairs(data, ds.partitions)
   if isa(partitions, ErrorException)
     return partitions
   end
-  tr = @chain partitions begin
+  trs = @chain partitions begin
     map(p -> WriteOperation(p.data, ds.format, p.key), _)
     WriteTransaction(_, ds.format, ds.path)
   end
-  status, err = execute(tr, ds.writer)
+  status, err = execute(trs, ds.writer)
   return status ? nothing : err
 end
 
@@ -156,31 +145,24 @@ If `symbols` are provided, only the symbols will be updated.
 ```julia-repl
 julia> Dates.today()
 Date("2022-02-04")
-julia> @chain load(ds) to_dataframe groupby(_, :symbol) combine(_, :date => maximum) show
-2×2 DataFrame
- Row │ symbol  date_maximum 
-     │ String  Date         
-─────┼──────────────────────
-   1 │ MSFT    2022-03-02
-   2 │ AAPL    2022-03-02
+julia> @chain load(ds) Stonks.groupby(prices, [:symbol]) Stonks.aggregate(_, [:date => maximum => :date_max])
+2-element Vector{NamedTuple{(:symbol, :date_max), Tuple{String, Date}}}:
+ (symbol = "AAPL", date_max = Date("2022-03-02"))
+ (symbol = "MSFT", date_max = Date("2022-03-02"))
+
 julia> update(ds) 
-julia> @chain load(ds) groupby(_, :symbol) combine(_, :date => maximum) show
-2×2 DataFrame
- Row │ symbol  date_maximum 
-     │ String  Date         
-─────┼──────────────────────
-   1 │ AAPL    2022-03-04
-   2 │ MSFT    2022-03-04
+julia>  @chain load(ds) Stonks.groupby(prices, [:symbol]) Stonks.aggregate(_, [:date => maximum => :date_max])
+2-element Vector{NamedTuple{(:symbol, :date_max), Tuple{String, Date}}}:
+ (symbol = "AAPL", date_max = Date("2022-03-04"))
+ (symbol = "MSFT", date_max = Date("2022-03-04"))
+
 julia> update(ds, ["IBM", "AMD"])
-julia> @chain load(ds) groupby(_, :symbol) combine(_, :date => maximum) show
-4x2 DataFrame
- Row │ symbol  date_maximum 
-     │ String  Date         
-─────┼──────────────────────
-   1 │ AAPL    2022-03-04
-   2 │ MSFT    2022-03-04
-   3 │ IBM     2022-03-04
-   3 │ AMD     2022-03-04
+julia>  @chain load(ds) Stonks.groupby(prices, [:symbol]) Stonks.aggregate(_, [:date => maximum => :date_max])
+4-element Vector{NamedTuple{(:symbol, :date_max), Tuple{String, Date}}}:
+ (symbol = "AAPL", date_max = Date("2022-03-04"))
+ (symbol = "MSFT", date_max = Date("2022-03-04"))
+ (symbol = "IBM", date_max = Date("2022-03-04"))
+ (symbol = "AMD", date_max = Date("2022-03-04"))
 ```
 """
 function update(
@@ -191,8 +173,7 @@ function update(
   to::Date=last_workday(),
   force::Bool=false,
 )::Union{FileStore{T},Exception} where {T<:AbstractStonksRecord}
-  # Must implement for partitioned data as well
-  df = (
+  data = (
     if !isnothing(symbols) && length(ds.ids) == 1
       tickers = construct_updatable_symbols(symbols)
       partitions = Dict(first(ds.ids) => map(t -> t.ticker, tickers))
@@ -201,11 +182,13 @@ function update(
       load(ds)
     end
   )
-  if typeof(df) <: Exception
-    return df
+
+  if typeof(data) <: Exception
+    return data
   end
-  if nrow(df) == 0 && isnothing(symbols)
-    return ErrorException("Can't update an empty dataframe without any `symbols` parameter")
+  
+  if isempty(data) && isnothing(symbols)
+    return ErrorException("Can't update an empty dataset without any `symbols` parameter")
   end
   if ismissing(ds.time_column) && isnothing(symbols) && !force
     @warn "Can't incrementally update a Store without a time_column and no symbols. If you wish to overwrite all data, use force=true keyword argument."
@@ -214,8 +197,7 @@ function update(
   if ismissing(ds.time_column) && isnothing(symbols) && force
     @warn "Got force=true. This will fetch and overwrite all data"
   end
-  #ref_date = !ismissing(to) ? to : last_workday()
-  candidates = find_update_candidates(df, symbols; ids=ds.ids, time_column=ds.time_column, ref_date=to)
+  candidates = find_update_candidates(data, symbols; ids=ds.ids, time_column=ds.time_column, ref_date=to)
   if isempty(candidates)
     @info "No update candidates found, datastore already up to date"
     return ds
@@ -229,10 +211,13 @@ function update(
   if typeof(updates) <: Exception
     return updates
   end
-  new_df = force ? to_dataframe(updates) : vcat(df, to_dataframe(updates))
-  try_save = save(ds, new_df)
+  new_data = force ? updates : vcat(data, updates)
+  
+  try_save = save(ds, new_data)
   if typeof(try_save) <: Exception
     return try_save
   end
+
   return ds
+
 end
