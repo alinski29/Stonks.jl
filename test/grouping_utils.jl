@@ -32,7 +32,7 @@ include("test_utils.jl")
     ]
     
     res = Stonks.aggregate(groups, reducers)
-    @test res ==  [
+    @test sort(res) ==  [
       (symbol = "AAPL", date_max = Date("2022-02-18"), date_min = Date("2022-02-17"), close_min = 155.00, close_max = 160.00),
       (symbol = "MSFT", date_max = Date("2022-02-17"), date_min = Date("2022-02-16"), close_min = 200.00, close_max = 210.00)
     ]

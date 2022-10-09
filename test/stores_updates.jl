@@ -24,7 +24,7 @@ include("test_utils.jl")
     ref_date = last_workday() - Day(7)
     prices = fake_price_data(7, ref_date, symbols)
     upd_smb = get_symbols(prices, map(Symbol, ds.ids); time_column=ds.time_column)
-    @test upd_smb == map(x -> (x, ref_date + Day(1), last_workday()), symbols)
+    @test sort(upd_smb) == map(x -> (x, ref_date + Day(1), last_workday()), symbols)
   end
 
   @testset "Update candidates, updates available" begin
