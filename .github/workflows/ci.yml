@@ -11,12 +11,10 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - 1.0
           - 1 # automatically expands to the latest stable 1.x release of Julia
         os:
           - ubuntu-latest
         arch:
-          - x64
           - x86
         include:
         #   # test macOS and Windows with latest Julia only
@@ -26,16 +24,13 @@ jobs:
           #  - os: windows-latest
           #    arch: x64
           #    version: 1
-        #   - os: windows-latest
-        #     arch: x86
-        #     version: 1
     steps:
-      - uses: actions/checkout@v2
-      - uses: julia-actions/setup-julia@v1
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      - uses: actions/cache@v1
+      - uses: actions/cache@v4
         env:
           cache-name: cache-artifacts
         with:
@@ -48,6 +43,6 @@ jobs:
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v1
+      - uses: codecov/codecov-action@v5
         with:
           file: lcov.info
