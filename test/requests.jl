@@ -197,6 +197,6 @@ include("test_utils.jl")
     @test conv_fn(today - Dates.Day(180)) == "1y"
     @test conv_fn(today - Dates.Day(364)) == "1y"
     @test conv_fn(today - Dates.Day(365)) == "5y"
-    @test conv_fn(today - Dates.Day(5000)) == "5y"
+    @test conv_fn(today - Dates.Day(5000)) == "max"
   end
 end
