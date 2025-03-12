@@ -414,7 +414,7 @@ function parse_price_record(js_value::JSONContent)::Union{Vector{AssetPrice},Not
       symbol=ticker,
       date=Date(unix2datetime(js_value["timestamp"][i])),
       close=Float64(js_value["close"][i]),
-    ) for i in 1:nrows
+    ) for i in 1:nrows if js_value["close"][i] !== nothing
   ]
 end
 

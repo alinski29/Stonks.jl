@@ -113,7 +113,7 @@ function resolve_request_parameters(
     ticker = first(tickers)
     if !ismissing(ticker.fx_pair) && !haskey(resource.query_params, resource.symbol_key)
       base, target = ticker.fx_pair
-      kwargs_to_add[:base] = base 
+      kwargs_to_add[:base] = base
       kwargs_to_add[:target] = target
     end
   end
@@ -130,7 +130,7 @@ function resolve_request_parameters(
     headers=resource.headers,
     query=join(["$k=$v" for (k, v) in query_params], "&"),
     from=from,
-    to=to,
+    to=to
   )
 end
 
@@ -266,7 +266,7 @@ function convert_date_to_range_expr(end_date::Date)
   in(days_delta, 89:179) && return "6mo"
   in(days_delta, 180:364) && return "1y"
   in(days_delta, 365:1820) && return "5y"
-  return "5y"
+  return "max"
 end
 
 """
